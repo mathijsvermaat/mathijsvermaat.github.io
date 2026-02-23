@@ -33,7 +33,6 @@ A generic blocking page for all restricted applications and services.
 **Features:**
 - Generic access denied message suitable for all applications
 - Explanation of organizational policy compliance
-- Highlighted approved resource (GitHub Copilot)
 - Professional, reusable design
 - Responsive layout for all devices
 - IT administrator contact guidance
