@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Access Restricted</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .blocked-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #e74c3c;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .app-name {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .message {
+            color: #555;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .reason {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 30px;
+            text-align: left;
+            border-radius: 4px;
+        }
+        
+        .reason-title {
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 8px;
+        }
+        
+        .reason-text {
+            color: #856404;
+            font-size: 14px;
+        }
+        
+        .alternatives {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        
+        .alternatives h2 {
+            color: #2c3e50;
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .alternative-item {
+            background: #f8f9fa;
+            border: 2px solid #27ae60;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        
+        .alternative-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        
+        .alternative-content {
+            text-align: left;
+            flex: 1;
+        }
+        
+        .alternative-name {
+            font-weight: 600;
+            color: #27ae60;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .alternative-description {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .alternative-link {
+            display: inline-block;
+            background: #27ae60;
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        
+        .alternative-link:hover {
+            background: #229954;
+        }
+        
+        .footer {
+            color: #7f8c8d;
+            font-size: 13px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .app-name {
+                font-size: 20px;
+            }
+            
+            .blocked-icon {
+                font-size: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="blocked-icon">🚫</div>
+        
+        <h1>Access Restricted</h1>
+        <div class="app-name">Gemini</div>
+        
+        <div class="message">
+            <p>This application is not allowed in your environment.</p>
+        </div>
+        
+        <div class="reason">
+            <div class="reason-title">⚠️ Why is this blocked?</div>
+            <div class="reason-text">
+                Gemini and other non-approved generative AI tools are restricted to ensure compliance with organizational policies and data security standards.
+            </div>
+        </div>
+        
+        <div class="alternatives">
+            <h2>✅ Approved Alternative</h2>
+            <div class="alternative-item">
+                <div class="alternative-icon">💼</div>
+                <div class="alternative-content">
+                    <div class="alternative-name">Microsoft Copilot</div>
+                    <div class="alternative-description">
+                        Your approved generative AI assistant. Use Copilot for code generation, explanations, and development support.
+                    </div>
+                    <a href="https://copilot.microsoft.com" class="alternative-link" target="_blank">Access Copilot →</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>If you believe this is an error or need additional approval, contact your IT administrator.</p>
+        </div>
+    </div>
+</body>
+</html>
