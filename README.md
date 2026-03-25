@@ -39,3 +39,24 @@ A generic blocking page for all restricted applications and services.
 
 **Usage:**
 Configure your web filtering or proxy system to serve `blocked.html` as the default response when users attempt to access any restricted application. This is the recommended page to use as a general-purpose blocking page.
+
+### Sentinel Maturity Assessment Checklist (`sentinel-maturity-assessment.html`)
+
+An interactive assessment checklist for the [Sentinel Maturity Model](https://github.com/mathijsvermaat/Sentinel-Maturity). Used during customer engagements to document data connector onboarding, retention configuration, and detection readiness across all tiers.
+
+**Purpose:** Provide an audit trail of what was checked and configured during a Sentinel deployment assessment, with rationale and comments.
+
+**Features:**
+- Checkboxes per connector, table, retention setting, and validation step
+- Comment field per connector section for rationale and notes
+- Assessor name, customer name, date, and workspace metadata
+- Real-time progress tracking (overall and per connector)
+- Collapsible sections per tier and connector
+- **Export to PDF** via browser print
+- **Export to Excel** via SheetJS (structured spreadsheet with all check items and comments)
+- **Save/Load progress** to JSON (resume later or share between assessors)
+- Tier 1 fully built, Tier 2/3 prepared for future content
+- No backend or server required — fully client-side
+
+**Usage:**
+Navigate to `https://mathijsvermaat.github.io/sentinel-maturity-assessment.html` or open the file locally. Fill in the assessment metadata, work through each connector's checklist, add comments, and export the results.
