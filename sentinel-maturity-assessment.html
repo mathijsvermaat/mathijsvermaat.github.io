@@ -195,7 +195,7 @@
     .connector-section.collapsed .connector-chevron { transform: rotate(-90deg); }
     .connector-section.collapsed .connector-body { display: none; }
 
-    .free-badge {
+    .cost-badge {
       display: inline-block;
       padding: 2px 8px;
       border-radius: 10px;
@@ -203,9 +203,9 @@
       font-weight: 600;
     }
 
-    .free-badge.free { background: #e6f4ea; color: var(--success); }
-    .free-badge.partial { background: #fff8e1; color: #8a6d00; }
-    .free-badge.paid { background: #fce4ec; color: #c62828; }
+    .cost-badge.free { background: #e6f4ea; color: var(--success); }
+    .cost-badge.benefit { background: #fff8e1; color: #8a6d00; }
+    .cost-badge.paid { background: #fce4ec; color: #c62828; }
 
     .connector-body { padding: 0 24px 20px; }
 
@@ -228,14 +228,6 @@
       padding: 6px 0;
     }
 
-    .check-item input[type="checkbox"] {
-      margin-top: 3px;
-      width: 16px;
-      height: 16px;
-      accent-color: var(--primary);
-      flex-shrink: 0;
-    }
-
     .check-item label {
       font-size: 0.9rem;
       cursor: pointer;
@@ -248,7 +240,7 @@
       margin-top: 2px;
     }
 
-    .check-item select {
+    .status-select {
       padding: 4px 8px;
       border: 1px solid var(--border);
       border-radius: 4px;
@@ -256,7 +248,13 @@
       font-family: inherit;
       background: var(--white);
       flex-shrink: 0;
+      min-width: 140px;
+      cursor: pointer;
     }
+
+    .status-select.status-configured { background: #e6f4ea; border-color: var(--success); color: var(--success); }
+    .status-select.status-not-configured { background: #fce4ec; border-color: var(--danger); color: var(--danger); }
+    .status-select.status-na { background: var(--secondary); border-color: var(--border); color: var(--text-light); }
 
     .section-comment {
       margin-top: 16px;
@@ -416,281 +414,11 @@
     </div>
     <div class="tier-body" id="tier-1-body">
 
-      <!-- Microsoft Defender XDR -->
-      <div class="connector-section" id="conn-xdr">
-        <div class="connector-header" onclick="toggleConnector('conn-xdr')">
-          <h3>Microsoft Defender XDR</h3>
-          <span class="free-badge free">Free (E5 Analytics)</span>
-          <span class="connector-progress" id="conn-xdr-progress">0/0</span>
-          <span class="connector-chevron">▼</span>
-        </div>
-        <div class="connector-body">
-
-          <div class="check-group">
-            <div class="check-group-title">Connector Setup</div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-c1" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Connector enabled in Sentinel">
-              <label for="xdr-c1">Connector enabled in Sentinel<div class="check-detail">Data connectors → Microsoft Defender XDR → Connect</div></label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-c2" data-tier="1" data-connector="Microsoft Defender XDR" data-item="M365 E5 / E5 Security license confirmed">
-              <label for="xdr-c2">M365 E5 / E5 Security license confirmed<div class="check-detail">Required for free Analytics-tier ingestion grant</div></label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-c3" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Incident creation rules configured">
-              <label for="xdr-c3">Incident creation rules configured<div class="check-detail">Automatically create Sentinel incidents from Defender XDR alerts</div></label>
-            </div>
-          </div>
-
-          <div class="check-group">
-            <div class="check-group-title">Tables — Endpoint (MDE)</div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t1" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceInfo table enabled">
-              <label for="xdr-t1">DeviceInfo</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t2" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceNetworkInfo table enabled">
-              <label for="xdr-t2">DeviceNetworkInfo</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t3" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceProcessEvents table enabled">
-              <label for="xdr-t3">DeviceProcessEvents</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t4" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceNetworkEvents table enabled">
-              <label for="xdr-t4">DeviceNetworkEvents</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t5" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceFileEvents table enabled">
-              <label for="xdr-t5">DeviceFileEvents</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t6" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceRegistryEvents table enabled">
-              <label for="xdr-t6">DeviceRegistryEvents</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t7" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceLogonEvents table enabled">
-              <label for="xdr-t7">DeviceLogonEvents</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t8" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceImageLoadEvents table enabled">
-              <label for="xdr-t8">DeviceImageLoadEvents</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t9" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceEvents table enabled">
-              <label for="xdr-t9">DeviceEvents</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t10" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceFileCertificateInfo table enabled">
-              <label for="xdr-t10">DeviceFileCertificateInfo</label>
-            </div>
-          </div>
-
-          <div class="check-group">
-            <div class="check-group-title">Tables — Alerts</div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t11" data-tier="1" data-connector="Microsoft Defender XDR" data-item="AlertInfo table enabled">
-              <label for="xdr-t11">AlertInfo</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t12" data-tier="1" data-connector="Microsoft Defender XDR" data-item="AlertEvidence table enabled">
-              <label for="xdr-t12">AlertEvidence</label>
-            </div>
-          </div>
-
-          <div class="check-group">
-            <div class="check-group-title">Tables — Email (MDO)</div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t13" data-tier="1" data-connector="Microsoft Defender XDR" data-item="EmailEvents table enabled">
-              <label for="xdr-t13">EmailEvents</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t14" data-tier="1" data-connector="Microsoft Defender XDR" data-item="EmailUrlInfo table enabled">
-              <label for="xdr-t14">EmailUrlInfo</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t15" data-tier="1" data-connector="Microsoft Defender XDR" data-item="EmailAttachmentInfo table enabled">
-              <label for="xdr-t15">EmailAttachmentInfo</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t16" data-tier="1" data-connector="Microsoft Defender XDR" data-item="EmailPostDeliveryEvents table enabled">
-              <label for="xdr-t16">EmailPostDeliveryEvents</label>
-            </div>
-          </div>
-
-          <div class="check-group">
-            <div class="check-group-title">Tables — Identity (MDI)</div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t17" data-tier="1" data-connector="Microsoft Defender XDR" data-item="IdentityLogonEvents table enabled">
-              <label for="xdr-t17">IdentityLogonEvents</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t18" data-tier="1" data-connector="Microsoft Defender XDR" data-item="IdentityQueryEvents table enabled">
-              <label for="xdr-t18">IdentityQueryEvents</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t19" data-tier="1" data-connector="Microsoft Defender XDR" data-item="IdentityDirectoryEvents table enabled">
-              <label for="xdr-t19">IdentityDirectoryEvents</label>
-            </div>
-          </div>
-
-          <div class="check-group">
-            <div class="check-group-title">Tables — Cloud Apps (MDA)</div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t20" data-tier="1" data-connector="Microsoft Defender XDR" data-item="CloudAppEvents table enabled">
-              <label for="xdr-t20">CloudAppEvents</label>
-            </div>
-          </div>
-
-          <div class="check-group">
-            <div class="check-group-title">Tables — Other</div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-t21" data-tier="1" data-connector="Microsoft Defender XDR" data-item="UrlClickEvents table enabled">
-              <label for="xdr-t21">UrlClickEvents</label>
-            </div>
-          </div>
-
-          <div class="check-group">
-            <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-r1" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Analytics retention set to 90 days">
-              <label for="xdr-r1">Analytics retention set to 90 days</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-r2" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Lake retention set to 365 days">
-              <label for="xdr-r2">Lake retention set to 365 days<div class="check-detail">Note: Lake retention incurs cost — E5 grant covers Analytics only</div></label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-r3" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Data Lake cost estimated">
-              <label for="xdr-r3">Data Lake cost estimated<div class="check-detail">Use Workspace Usage Report or XDR Ingestion Calculator</div></label>
-            </div>
-          </div>
-
-          <div class="check-group">
-            <div class="check-group-title">Validation</div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-v1" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Ingestion volumes validated in Workspace Usage Report">
-              <label for="xdr-v1">Ingestion volumes validated in Workspace Usage Report</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="xdr-v2" data-tier="1" data-connector="Microsoft Defender XDR" data-item="E5 data grant active — no unexpected billing">
-              <label for="xdr-v2">E5 data grant active — no unexpected billing</label>
-            </div>
-          </div>
-
-          <div class="section-comment">
-            <label for="xdr-comment">Comments / Rationale — Microsoft Defender XDR</label>
-            <textarea id="xdr-comment" data-connector="Microsoft Defender XDR" placeholder="e.g. Customer deferred Lake retention for DeviceFileEvents due to budget. Revisit Q3 2026."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- Microsoft Entra ID -->
-      <div class="connector-section" id="conn-entra">
-        <div class="connector-header" onclick="toggleConnector('conn-entra')">
-          <h3>Microsoft Entra ID</h3>
-          <span class="free-badge free">Free Data Source</span>
-          <span class="connector-progress" id="conn-entra-progress">0/0</span>
-          <span class="connector-chevron">▼</span>
-        </div>
-        <div class="connector-body">
-
-          <div class="check-group">
-            <div class="check-group-title">Connector Setup</div>
-            <div class="check-item">
-              <input type="checkbox" id="entra-c1" data-tier="1" data-connector="Microsoft Entra ID" data-item="Connector enabled in Sentinel">
-              <label for="entra-c1">Connector enabled in Sentinel<div class="check-detail">Data connectors → Microsoft Entra ID → Connect</div></label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="entra-c2" data-tier="1" data-connector="Microsoft Entra ID" data-item="Entra ID P2 license confirmed (for risk tables)">
-              <label for="entra-c2">Entra ID P2 license confirmed<div class="check-detail">Required for AADRiskyUsers and AADUserRiskEvents (included in E5)</div></label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="entra-c3" data-tier="1" data-connector="Microsoft Entra ID" data-item="All sign-in log types enabled">
-              <label for="entra-c3">All sign-in log types enabled<div class="check-detail">Non-interactive and service principal logs are often overlooked</div></label>
-            </div>
-          </div>
-
-          <div class="check-group">
-            <div class="check-group-title">Tables — Authentication</div>
-            <div class="check-item">
-              <input type="checkbox" id="entra-t1" data-tier="1" data-connector="Microsoft Entra ID" data-item="SigninLogs table enabled">
-              <label for="entra-t1">SigninLogs</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="entra-t2" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADNonInteractiveUserSignInLogs table enabled">
-              <label for="entra-t2">AADNonInteractiveUserSignInLogs</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="entra-t3" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADServicePrincipalSignInLogs table enabled">
-              <label for="entra-t3">AADServicePrincipalSignInLogs</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="entra-t4" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADManagedIdentitySignInLogs table enabled">
-              <label for="entra-t4">AADManagedIdentitySignInLogs</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="entra-t5" data-tier="1" data-connector="Microsoft Entra ID" data-item="ADFSSignInLogs table enabled">
-              <label for="entra-t5">ADFSSignInLogs</label>
-            </div>
-          </div>
-
-          <div class="check-group">
-            <div class="check-group-title">Tables — Directory and Audit</div>
-            <div class="check-item">
-              <input type="checkbox" id="entra-t6" data-tier="1" data-connector="Microsoft Entra ID" data-item="AuditLogs table enabled">
-              <label for="entra-t6">AuditLogs</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="entra-t7" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADProvisioningLogs table enabled">
-              <label for="entra-t7">AADProvisioningLogs</label>
-            </div>
-          </div>
-
-          <div class="check-group">
-            <div class="check-group-title">Tables — Risk (Entra ID P2)</div>
-            <div class="check-item">
-              <input type="checkbox" id="entra-t8" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADRiskyUsers table enabled">
-              <label for="entra-t8">AADRiskyUsers</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="entra-t9" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADUserRiskEvents table enabled">
-              <label for="entra-t9">AADUserRiskEvents</label>
-            </div>
-          </div>
-
-          <div class="check-group">
-            <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <input type="checkbox" id="entra-r1" data-tier="1" data-connector="Microsoft Entra ID" data-item="Analytics retention set to 90 days">
-              <label for="entra-r1">Analytics retention set to 90 days</label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="entra-r2" data-tier="1" data-connector="Microsoft Entra ID" data-item="Lake retention set to 365 days">
-              <label for="entra-r2">Lake retention set to 365 days</label>
-            </div>
-          </div>
-
-          <div class="check-group">
-            <div class="check-group-title">Validation</div>
-            <div class="check-item">
-              <input type="checkbox" id="entra-v1" data-tier="1" data-connector="Microsoft Entra ID" data-item="Ingestion volumes validated in Workspace Usage Report">
-              <label for="entra-v1">Ingestion volumes validated in Workspace Usage Report</label>
-            </div>
-          </div>
-
-          <div class="section-comment">
-            <label for="entra-comment">Comments / Rationale — Microsoft Entra ID</label>
-            <textarea id="entra-comment" data-connector="Microsoft Entra ID" placeholder="e.g. ADFSSignInLogs not applicable — customer is cloud-only with no ADFS."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- Office 365 -->
+      <!-- ===== FREE: Office 365 ===== -->
       <div class="connector-section" id="conn-o365">
         <div class="connector-header" onclick="toggleConnector('conn-o365')">
           <h3>Office 365</h3>
-          <span class="free-badge free">Free Data Source</span>
+          <span class="cost-badge free">Free Data Source</span>
           <span class="connector-progress" id="conn-o365-progress">0/0</span>
           <span class="connector-chevron">▼</span>
         </div>
@@ -699,15 +427,21 @@
           <div class="check-group">
             <div class="check-group-title">Connector Setup</div>
             <div class="check-item">
-              <input type="checkbox" id="o365-c1" data-tier="1" data-connector="Office 365" data-item="Connector enabled in Sentinel">
+              <select class="status-select" id="o365-c1" data-tier="1" data-connector="Office 365" data-item="Connector enabled in Sentinel" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="o365-c1">Connector enabled in Sentinel<div class="check-detail">Data connectors → Office 365 → Connect</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="o365-c2" data-tier="1" data-connector="Office 365" data-item="Unified Audit Log enabled in M365">
+              <select class="status-select" id="o365-c2" data-tier="1" data-connector="Office 365" data-item="Unified Audit Log enabled in M365" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="o365-c2">Unified Audit Log enabled in M365<div class="check-detail">Verify with Get-AdminAuditLogConfig in Exchange Online PowerShell</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="o365-c3" data-tier="1" data-connector="Office 365" data-item="E5 Audit Premium enabled (if applicable)">
+              <select class="status-select" id="o365-c3" data-tier="1" data-connector="Office 365" data-item="E5 Audit Premium enabled (if applicable)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="o365-c3">E5 Audit Premium enabled (if applicable)<div class="check-detail">Enables MailItemsAccessed and Send events for BEC investigation</div></label>
             </div>
           </div>
@@ -715,15 +449,21 @@
           <div class="check-group">
             <div class="check-group-title">Workloads Enabled</div>
             <div class="check-item">
-              <input type="checkbox" id="o365-t1" data-tier="1" data-connector="Office 365" data-item="Exchange workload enabled">
+              <select class="status-select" id="o365-t1" data-tier="1" data-connector="Office 365" data-item="Exchange workload enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="o365-t1">OfficeActivity — Exchange<div class="check-detail">Mailbox access, inbox rules, delegate permissions</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="o365-t2" data-tier="1" data-connector="Office 365" data-item="SharePoint workload enabled">
+              <select class="status-select" id="o365-t2" data-tier="1" data-connector="Office 365" data-item="SharePoint workload enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="o365-t2">OfficeActivity — SharePoint<div class="check-detail">File access, sharing, permission changes</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="o365-t3" data-tier="1" data-connector="Office 365" data-item="Teams workload enabled">
+              <select class="status-select" id="o365-t3" data-tier="1" data-connector="Office 365" data-item="Teams workload enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="o365-t3">OfficeActivity — Teams<div class="check-detail">Teams membership changes, channel operations</div></label>
             </div>
           </div>
@@ -731,11 +471,15 @@
           <div class="check-group">
             <div class="check-group-title">Retention</div>
             <div class="check-item">
-              <input type="checkbox" id="o365-r1" data-tier="1" data-connector="Office 365" data-item="Analytics retention set to 90 days">
+              <select class="status-select" id="o365-r1" data-tier="1" data-connector="Office 365" data-item="Analytics retention set to 90 days" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="o365-r1">Analytics retention set to 90 days</label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="o365-r2" data-tier="1" data-connector="Office 365" data-item="Lake retention set to 365 days">
+              <select class="status-select" id="o365-r2" data-tier="1" data-connector="Office 365" data-item="Lake retention set to 365 days" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="o365-r2">Lake retention set to 365 days</label>
             </div>
           </div>
@@ -743,7 +487,9 @@
           <div class="check-group">
             <div class="check-group-title">Validation</div>
             <div class="check-item">
-              <input type="checkbox" id="o365-v1" data-tier="1" data-connector="Office 365" data-item="Ingestion volumes validated in Workspace Usage Report">
+              <select class="status-select" id="o365-v1" data-tier="1" data-connector="Office 365" data-item="Ingestion volumes validated in Workspace Usage Report" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="o365-v1">Ingestion volumes validated in Workspace Usage Report</label>
             </div>
           </div>
@@ -755,11 +501,11 @@
         </div>
       </div>
 
-      <!-- Azure Activity Logs -->
+      <!-- ===== FREE: Azure Activity Logs ===== -->
       <div class="connector-section" id="conn-azactivity">
         <div class="connector-header" onclick="toggleConnector('conn-azactivity')">
           <h3>Azure Activity Logs</h3>
-          <span class="free-badge free">Free Data Source</span>
+          <span class="cost-badge free">Free Data Source</span>
           <span class="connector-progress" id="conn-azactivity-progress">0/0</span>
           <span class="connector-chevron">▼</span>
         </div>
@@ -768,15 +514,21 @@
           <div class="check-group">
             <div class="check-group-title">Connector Setup</div>
             <div class="check-item">
-              <input type="checkbox" id="azact-c1" data-tier="1" data-connector="Azure Activity Logs" data-item="Connector enabled in Sentinel">
+              <select class="status-select" id="azact-c1" data-tier="1" data-connector="Azure Activity Logs" data-item="Connector enabled in Sentinel" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="azact-c1">Connector enabled in Sentinel<div class="check-detail">Data connectors → Azure Activity → Connect</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="azact-c2" data-tier="1" data-connector="Azure Activity Logs" data-item="All Azure subscriptions connected">
+              <select class="status-select" id="azact-c2" data-tier="1" data-connector="Azure Activity Logs" data-item="All Azure subscriptions connected" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="azact-c2">All Azure subscriptions connected<div class="check-detail">Each subscription needs its own diagnostic setting</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="azact-c3" data-tier="1" data-connector="Azure Activity Logs" data-item="Azure Policy enforcing diagnostic settings (recommended)">
+              <select class="status-select" id="azact-c3" data-tier="1" data-connector="Azure Activity Logs" data-item="Azure Policy enforcing diagnostic settings (recommended)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="azact-c3">Azure Policy enforcing diagnostic settings<div class="check-detail">Use deployIfNotExists policy for automatic coverage of new subscriptions</div></label>
             </div>
           </div>
@@ -784,31 +536,45 @@
           <div class="check-group">
             <div class="check-group-title">Log Categories Enabled</div>
             <div class="check-item">
-              <input type="checkbox" id="azact-t1" data-tier="1" data-connector="Azure Activity Logs" data-item="Administrative category enabled">
+              <select class="status-select" id="azact-t1" data-tier="1" data-connector="Azure Activity Logs" data-item="Administrative category enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="azact-t1">Administrative<div class="check-detail">Critical — all resource create/update/delete operations</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="azact-t2" data-tier="1" data-connector="Azure Activity Logs" data-item="Security category enabled">
+              <select class="status-select" id="azact-t2" data-tier="1" data-connector="Azure Activity Logs" data-item="Security category enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="azact-t2">Security<div class="check-detail">High priority — Defender for Cloud alerts and recommendations</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="azact-t3" data-tier="1" data-connector="Azure Activity Logs" data-item="Policy category enabled">
+              <select class="status-select" id="azact-t3" data-tier="1" data-connector="Azure Activity Logs" data-item="Policy category enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="azact-t3">Policy<div class="check-detail">High priority — Azure Policy compliance evaluations</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="azact-t4" data-tier="1" data-connector="Azure Activity Logs" data-item="ServiceHealth category enabled">
+              <select class="status-select" id="azact-t4" data-tier="1" data-connector="Azure Activity Logs" data-item="ServiceHealth category enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="azact-t4">ServiceHealth<div class="check-detail">Medium — service health incidents and maintenance</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="azact-t5" data-tier="1" data-connector="Azure Activity Logs" data-item="Alert category enabled">
+              <select class="status-select" id="azact-t5" data-tier="1" data-connector="Azure Activity Logs" data-item="Alert category enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="azact-t5">Alert<div class="check-detail">Medium — Azure Monitor alert activations</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="azact-t6" data-tier="1" data-connector="Azure Activity Logs" data-item="Autoscale category enabled">
+              <select class="status-select" id="azact-t6" data-tier="1" data-connector="Azure Activity Logs" data-item="Autoscale category enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="azact-t6">Autoscale<div class="check-detail">Low — autoscale engine operations</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="azact-t7" data-tier="1" data-connector="Azure Activity Logs" data-item="ResourceHealth category enabled">
+              <select class="status-select" id="azact-t7" data-tier="1" data-connector="Azure Activity Logs" data-item="ResourceHealth category enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="azact-t7">ResourceHealth<div class="check-detail">Low — resource health status changes</div></label>
             </div>
           </div>
@@ -816,11 +582,15 @@
           <div class="check-group">
             <div class="check-group-title">Retention</div>
             <div class="check-item">
-              <input type="checkbox" id="azact-r1" data-tier="1" data-connector="Azure Activity Logs" data-item="Analytics retention set to 90 days">
+              <select class="status-select" id="azact-r1" data-tier="1" data-connector="Azure Activity Logs" data-item="Analytics retention set to 90 days" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="azact-r1">Analytics retention set to 90 days</label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="azact-r2" data-tier="1" data-connector="Azure Activity Logs" data-item="Lake retention set to 365 days">
+              <select class="status-select" id="azact-r2" data-tier="1" data-connector="Azure Activity Logs" data-item="Lake retention set to 365 days" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="azact-r2">Lake retention set to 365 days</label>
             </div>
           </div>
@@ -828,7 +598,9 @@
           <div class="check-group">
             <div class="check-group-title">Validation</div>
             <div class="check-item">
-              <input type="checkbox" id="azact-v1" data-tier="1" data-connector="Azure Activity Logs" data-item="Ingestion volumes validated in Workspace Usage Report">
+              <select class="status-select" id="azact-v1" data-tier="1" data-connector="Azure Activity Logs" data-item="Ingestion volumes validated in Workspace Usage Report" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="azact-v1">Ingestion volumes validated in Workspace Usage Report</label>
             </div>
           </div>
@@ -840,11 +612,369 @@
         </div>
       </div>
 
-      <!-- Windows Security Events -->
+      <!-- ===== INGESTION BENEFIT: Microsoft Defender XDR ===== -->
+      <div class="connector-section" id="conn-xdr">
+        <div class="connector-header" onclick="toggleConnector('conn-xdr')">
+          <h3>Microsoft Defender XDR</h3>
+          <span class="cost-badge benefit">Ingestion Benefit (E5)</span>
+          <span class="connector-progress" id="conn-xdr-progress">0/0</span>
+          <span class="connector-chevron">▼</span>
+        </div>
+        <div class="connector-body">
+
+          <div class="check-group">
+            <div class="check-group-title">Connector Setup</div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-c1" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Connector enabled in Sentinel" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-c1">Connector enabled in Sentinel<div class="check-detail">Data connectors → Microsoft Defender XDR → Connect</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-c2" data-tier="1" data-connector="Microsoft Defender XDR" data-item="M365 E5 / E5 Security license confirmed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-c2">M365 E5 / E5 Security license confirmed<div class="check-detail">Required for Analytics-tier ingestion benefit</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-c3" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Incident creation rules configured" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-c3">Incident creation rules configured<div class="check-detail">Automatically create Sentinel incidents from Defender XDR alerts</div></label>
+            </div>
+          </div>
+
+          <div class="check-group">
+            <div class="check-group-title">Tables — Endpoint (MDE)</div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t1" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceInfo table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t1">DeviceInfo</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t2" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceNetworkInfo table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t2">DeviceNetworkInfo</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t3" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceProcessEvents table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t3">DeviceProcessEvents</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t4" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceNetworkEvents table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t4">DeviceNetworkEvents</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t5" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceFileEvents table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t5">DeviceFileEvents</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t6" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceRegistryEvents table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t6">DeviceRegistryEvents</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t7" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceLogonEvents table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t7">DeviceLogonEvents</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t8" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceImageLoadEvents table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t8">DeviceImageLoadEvents</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t9" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceEvents table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t9">DeviceEvents</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t10" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceFileCertificateInfo table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t10">DeviceFileCertificateInfo</label>
+            </div>
+          </div>
+
+          <div class="check-group">
+            <div class="check-group-title">Tables — Alerts</div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t11" data-tier="1" data-connector="Microsoft Defender XDR" data-item="AlertInfo table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t11">AlertInfo</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t12" data-tier="1" data-connector="Microsoft Defender XDR" data-item="AlertEvidence table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t12">AlertEvidence</label>
+            </div>
+          </div>
+
+          <div class="check-group">
+            <div class="check-group-title">Tables — Email (MDO)</div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t13" data-tier="1" data-connector="Microsoft Defender XDR" data-item="EmailEvents table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t13">EmailEvents</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t14" data-tier="1" data-connector="Microsoft Defender XDR" data-item="EmailUrlInfo table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t14">EmailUrlInfo</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t15" data-tier="1" data-connector="Microsoft Defender XDR" data-item="EmailAttachmentInfo table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t15">EmailAttachmentInfo</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t16" data-tier="1" data-connector="Microsoft Defender XDR" data-item="EmailPostDeliveryEvents table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t16">EmailPostDeliveryEvents</label>
+            </div>
+          </div>
+
+          <div class="check-group">
+            <div class="check-group-title">Tables — Identity (MDI)</div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t17" data-tier="1" data-connector="Microsoft Defender XDR" data-item="IdentityLogonEvents table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t17">IdentityLogonEvents</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t18" data-tier="1" data-connector="Microsoft Defender XDR" data-item="IdentityQueryEvents table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t18">IdentityQueryEvents</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t19" data-tier="1" data-connector="Microsoft Defender XDR" data-item="IdentityDirectoryEvents table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t19">IdentityDirectoryEvents</label>
+            </div>
+          </div>
+
+          <div class="check-group">
+            <div class="check-group-title">Tables — Cloud Apps (MDA)</div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t20" data-tier="1" data-connector="Microsoft Defender XDR" data-item="CloudAppEvents table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t20">CloudAppEvents</label>
+            </div>
+          </div>
+
+          <div class="check-group">
+            <div class="check-group-title">Tables — Other</div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-t21" data-tier="1" data-connector="Microsoft Defender XDR" data-item="UrlClickEvents table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-t21">UrlClickEvents</label>
+            </div>
+          </div>
+
+          <div class="check-group">
+            <div class="check-group-title">Retention</div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-r1" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Analytics retention set to 90 days" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-r1">Analytics retention set to 90 days</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-r2" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Lake retention set to 365 days" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-r2">Lake retention set to 365 days<div class="check-detail">Note: Lake retention incurs cost — E5 grant covers Analytics only</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-r3" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Data Lake cost estimated" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-r3">Data Lake cost estimated<div class="check-detail">Use Workspace Usage Report or XDR Ingestion Calculator</div></label>
+            </div>
+          </div>
+
+          <div class="check-group">
+            <div class="check-group-title">Validation</div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-v1" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Ingestion volumes validated in Workspace Usage Report" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-v1">Ingestion volumes validated in Workspace Usage Report</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="xdr-v2" data-tier="1" data-connector="Microsoft Defender XDR" data-item="E5 data grant active — no unexpected billing" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="xdr-v2">E5 data grant active — no unexpected billing</label>
+            </div>
+          </div>
+
+          <div class="section-comment">
+            <label for="xdr-comment">Comments / Rationale — Microsoft Defender XDR</label>
+            <textarea id="xdr-comment" data-connector="Microsoft Defender XDR" placeholder="e.g. Customer deferred Lake retention for DeviceFileEvents due to budget. Revisit Q3 2026."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== INGESTION BENEFIT: Microsoft Entra ID ===== -->
+      <div class="connector-section" id="conn-entra">
+        <div class="connector-header" onclick="toggleConnector('conn-entra')">
+          <h3>Microsoft Entra ID</h3>
+          <span class="cost-badge benefit">Ingestion Benefit (E5)</span>
+          <span class="connector-progress" id="conn-entra-progress">0/0</span>
+          <span class="connector-chevron">▼</span>
+        </div>
+        <div class="connector-body">
+
+          <div class="check-group">
+            <div class="check-group-title">Connector Setup</div>
+            <div class="check-item">
+              <select class="status-select" id="entra-c1" data-tier="1" data-connector="Microsoft Entra ID" data-item="Connector enabled in Sentinel" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-c1">Connector enabled in Sentinel<div class="check-detail">Data connectors → Microsoft Entra ID → Connect</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="entra-c2" data-tier="1" data-connector="Microsoft Entra ID" data-item="Entra ID P2 license confirmed (for risk tables)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-c2">Entra ID P2 license confirmed<div class="check-detail">Required for AADRiskyUsers and AADUserRiskEvents (included in E5)</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="entra-c3" data-tier="1" data-connector="Microsoft Entra ID" data-item="All sign-in log types enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-c3">All sign-in log types enabled<div class="check-detail">Non-interactive and service principal logs are often overlooked</div></label>
+            </div>
+          </div>
+
+          <div class="check-group">
+            <div class="check-group-title">Tables — Authentication</div>
+            <div class="check-item">
+              <select class="status-select" id="entra-t1" data-tier="1" data-connector="Microsoft Entra ID" data-item="SigninLogs table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-t1">SigninLogs</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="entra-t2" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADNonInteractiveUserSignInLogs table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-t2">AADNonInteractiveUserSignInLogs</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="entra-t3" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADServicePrincipalSignInLogs table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-t3">AADServicePrincipalSignInLogs</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="entra-t4" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADManagedIdentitySignInLogs table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-t4">AADManagedIdentitySignInLogs</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="entra-t5" data-tier="1" data-connector="Microsoft Entra ID" data-item="ADFSSignInLogs table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-t5">ADFSSignInLogs</label>
+            </div>
+          </div>
+
+          <div class="check-group">
+            <div class="check-group-title">Tables — Directory and Audit</div>
+            <div class="check-item">
+              <select class="status-select" id="entra-t6" data-tier="1" data-connector="Microsoft Entra ID" data-item="AuditLogs table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-t6">AuditLogs</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="entra-t7" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADProvisioningLogs table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-t7">AADProvisioningLogs</label>
+            </div>
+          </div>
+
+          <div class="check-group">
+            <div class="check-group-title">Tables — Risk (Entra ID P2)</div>
+            <div class="check-item">
+              <select class="status-select" id="entra-t8" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADRiskyUsers table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-t8">AADRiskyUsers</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="entra-t9" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADUserRiskEvents table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-t9">AADUserRiskEvents</label>
+            </div>
+          </div>
+
+          <div class="check-group">
+            <div class="check-group-title">Retention</div>
+            <div class="check-item">
+              <select class="status-select" id="entra-r1" data-tier="1" data-connector="Microsoft Entra ID" data-item="Analytics retention set to 90 days" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-r1">Analytics retention set to 90 days</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="entra-r2" data-tier="1" data-connector="Microsoft Entra ID" data-item="Lake retention set to 365 days" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-r2">Lake retention set to 365 days</label>
+            </div>
+          </div>
+
+          <div class="check-group">
+            <div class="check-group-title">Validation</div>
+            <div class="check-item">
+              <select class="status-select" id="entra-v1" data-tier="1" data-connector="Microsoft Entra ID" data-item="Ingestion volumes validated in Workspace Usage Report" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-v1">Ingestion volumes validated in Workspace Usage Report</label>
+            </div>
+          </div>
+
+          <div class="section-comment">
+            <label for="entra-comment">Comments / Rationale — Microsoft Entra ID</label>
+            <textarea id="entra-comment" data-connector="Microsoft Entra ID" placeholder="e.g. ADFSSignInLogs not applicable — customer is cloud-only with no ADFS."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== INGESTION BENEFIT: Windows Security Events ===== -->
       <div class="connector-section" id="conn-winsec">
         <div class="connector-header" onclick="toggleConnector('conn-winsec')">
           <h3>Windows Security Events</h3>
-          <span class="free-badge partial">500 MB/day P2</span>
+          <span class="cost-badge benefit">Ingestion Benefit (P2)</span>
           <span class="connector-progress" id="conn-winsec-progress">0/0</span>
           <span class="connector-chevron">▼</span>
         </div>
@@ -853,19 +983,27 @@
           <div class="check-group">
             <div class="check-group-title">Connector Setup</div>
             <div class="check-item">
-              <input type="checkbox" id="winsec-c1" data-tier="1" data-connector="Windows Security Events" data-item="Connector enabled in Sentinel (via AMA)">
+              <select class="status-select" id="winsec-c1" data-tier="1" data-connector="Windows Security Events" data-item="Connector enabled in Sentinel (via AMA)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="winsec-c1">Connector enabled in Sentinel via AMA<div class="check-detail">Windows Security Events via AMA — not legacy MMA</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="winsec-c2" data-tier="1" data-connector="Windows Security Events" data-item="AMA deployed on all target servers">
+              <select class="status-select" id="winsec-c2" data-tier="1" data-connector="Windows Security Events" data-item="AMA deployed on all target servers" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="winsec-c2">AMA deployed on all target Windows servers<div class="check-detail">Via Azure Policy, Azure Arc, or manual installation</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="winsec-c3" data-tier="1" data-connector="Windows Security Events" data-item="Data Collection Rules (DCRs) configured and associated">
+              <select class="status-select" id="winsec-c3" data-tier="1" data-connector="Windows Security Events" data-item="Data Collection Rules (DCRs) configured and associated" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="winsec-c3">Data Collection Rules (DCRs) configured and associated<div class="check-detail">Each server must be associated with a DCR for SecurityEvent collection</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="winsec-c4" data-tier="1" data-connector="Windows Security Events" data-item="Defender for Servers P2 licence confirmed (for ingestion benefit)">
+              <select class="status-select" id="winsec-c4" data-tier="1" data-connector="Windows Security Events" data-item="Defender for Servers P2 licence confirmed (for ingestion benefit)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="winsec-c4">Defender for Servers P2 licence confirmed<div class="check-detail">Provides 500 MB/day per server free ingestion (combined across all security data types)</div></label>
             </div>
           </div>
@@ -874,7 +1012,7 @@
             <div class="check-group-title">DCR Preset Configuration</div>
             <div class="check-item">
               <label for="winsec-preset" style="margin-right: 12px;">Selected DCR preset:</label>
-              <select id="winsec-preset" data-tier="1" data-connector="Windows Security Events" data-item="DCR preset selection">
+              <select class="status-select" id="winsec-preset" data-tier="1" data-connector="Windows Security Events" data-item="DCR preset selection" onchange="onStatusChange(this)">
                 <option value="">— Select —</option>
                 <option value="Minimal">Minimal (~50–150 MB/day)</option>
                 <option value="Common">Common (~150–400 MB/day) — Recommended</option>
@@ -883,7 +1021,9 @@
               </select>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="winsec-dc1" data-tier="1" data-connector="Windows Security Events" data-item="Domain controllers set to All Events or Custom">
+              <select class="status-select" id="winsec-dc1" data-tier="1" data-connector="Windows Security Events" data-item="Domain controllers set to All Events or Custom" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="winsec-dc1">Domain controllers set to All Events or Custom<div class="check-detail">DCs require higher tier for Kerberos, AD object, and trust events</div></label>
             </div>
           </div>
@@ -891,11 +1031,15 @@
           <div class="check-group">
             <div class="check-group-title">Audit Policy (GPO)</div>
             <div class="check-item">
-              <input type="checkbox" id="winsec-gpo1" data-tier="1" data-connector="Windows Security Events" data-item="GPO: Include command line in process creation events enabled">
+              <select class="status-select" id="winsec-gpo1" data-tier="1" data-connector="Windows Security Events" data-item="GPO: Include command line in process creation events enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="winsec-gpo1">"Include command line in process creation events" GPO enabled<div class="check-detail">Critical for 4688 process creation forensics — without this, command lines are empty</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="winsec-gpo2" data-tier="1" data-connector="Windows Security Events" data-item="Audit policy matches selected DCR tier">
+              <select class="status-select" id="winsec-gpo2" data-tier="1" data-connector="Windows Security Events" data-item="Audit policy matches selected DCR tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="winsec-gpo2">Audit policy configured to match DCR tier<div class="check-detail">Account Logon, Account Management, Logon/Logoff, Detailed Tracking, Policy Change, System</div></label>
             </div>
           </div>
@@ -903,11 +1047,15 @@
           <div class="check-group">
             <div class="check-group-title">Retention</div>
             <div class="check-item">
-              <input type="checkbox" id="winsec-r1" data-tier="1" data-connector="Windows Security Events" data-item="Analytics retention set to 90 days">
+              <select class="status-select" id="winsec-r1" data-tier="1" data-connector="Windows Security Events" data-item="Analytics retention set to 90 days" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="winsec-r1">Analytics retention set to 90 days</label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="winsec-r2" data-tier="1" data-connector="Windows Security Events" data-item="Lake retention set to 365 days">
+              <select class="status-select" id="winsec-r2" data-tier="1" data-connector="Windows Security Events" data-item="Lake retention set to 365 days" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="winsec-r2">Lake retention set to 365 days</label>
             </div>
           </div>
@@ -915,15 +1063,21 @@
           <div class="check-group">
             <div class="check-group-title">Validation</div>
             <div class="check-item">
-              <input type="checkbox" id="winsec-v1" data-tier="1" data-connector="Windows Security Events" data-item="Ingestion volumes validated in Workspace Usage Report">
+              <select class="status-select" id="winsec-v1" data-tier="1" data-connector="Windows Security Events" data-item="Ingestion volumes validated in Workspace Usage Report" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="winsec-v1">Ingestion volumes validated in Workspace Usage Report</label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="winsec-v2" data-tier="1" data-connector="Windows Security Events" data-item="AMA coverage validated in Defender AMA Coverage workbook">
+              <select class="status-select" id="winsec-v2" data-tier="1" data-connector="Windows Security Events" data-item="AMA coverage validated in Defender AMA Coverage workbook" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="winsec-v2">AMA coverage validated in Defender AMA Coverage workbook</label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="winsec-v3" data-tier="1" data-connector="Windows Security Events" data-item="P2 ingestion benefit within budget (500 MB/day/server)">
+              <select class="status-select" id="winsec-v3" data-tier="1" data-connector="Windows Security Events" data-item="P2 ingestion benefit within budget (500 MB/day/server)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="winsec-v3">P2 ingestion benefit within budget<div class="check-detail">Compare actual ingestion vs. (server count × 500 MB/day)</div></label>
             </div>
           </div>
@@ -935,11 +1089,11 @@
         </div>
       </div>
 
-      <!-- Syslog for Linux -->
+      <!-- ===== PAID: Syslog for Linux ===== -->
       <div class="connector-section" id="conn-syslog">
         <div class="connector-header" onclick="toggleConnector('conn-syslog')">
           <h3>Syslog for Linux</h3>
-          <span class="free-badge partial">500 MB/day P2</span>
+          <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-syslog-progress">0/0</span>
           <span class="connector-chevron">▼</span>
         </div>
@@ -948,51 +1102,67 @@
           <div class="check-group">
             <div class="check-group-title">Connector Setup</div>
             <div class="check-item">
-              <input type="checkbox" id="syslog-c1" data-tier="1" data-connector="Syslog for Linux" data-item="Connector enabled in Sentinel (via AMA)">
+              <select class="status-select" id="syslog-c1" data-tier="1" data-connector="Syslog for Linux" data-item="Connector enabled in Sentinel (via AMA)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="syslog-c1">Connector enabled in Sentinel via AMA<div class="check-detail">Syslog via AMA — not legacy agents</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="syslog-c2" data-tier="1" data-connector="Syslog for Linux" data-item="AMA deployed on all target Linux servers">
+              <select class="status-select" id="syslog-c2" data-tier="1" data-connector="Syslog for Linux" data-item="AMA deployed on all target Linux servers" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="syslog-c2">AMA deployed on all target Linux servers</label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="syslog-c3" data-tier="1" data-connector="Syslog for Linux" data-item="Data Collection Rules (DCRs) configured and associated">
+              <select class="status-select" id="syslog-c3" data-tier="1" data-connector="Syslog for Linux" data-item="Data Collection Rules (DCRs) configured and associated" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="syslog-c3">Data Collection Rules (DCRs) configured and associated<div class="check-detail">DCR must specify which facilities and severity levels to collect</div></label>
-            </div>
-            <div class="check-item">
-              <input type="checkbox" id="syslog-c4" data-tier="1" data-connector="Syslog for Linux" data-item="Defender for Servers P2 licence confirmed (for ingestion benefit)">
-              <label for="syslog-c4">Defender for Servers P2 licence confirmed<div class="check-detail">500 MB/day per server — combined with SecurityEvent allowance</div></label>
             </div>
           </div>
 
           <div class="check-group">
             <div class="check-group-title">Syslog Facilities Configured in DCR</div>
             <div class="check-item">
-              <input type="checkbox" id="syslog-f1" data-tier="1" data-connector="Syslog for Linux" data-item="auth facility enabled (Info and above)">
+              <select class="status-select" id="syslog-f1" data-tier="1" data-connector="Syslog for Linux" data-item="auth facility enabled (Info and above)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="syslog-f1">auth — Info and above<div class="check-detail">SSH logons, su, sudo, PAM events</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="syslog-f2" data-tier="1" data-connector="Syslog for Linux" data-item="authpriv facility enabled (Info and above)">
+              <select class="status-select" id="syslog-f2" data-tier="1" data-connector="Syslog for Linux" data-item="authpriv facility enabled (Info and above)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="syslog-f2">authpriv — Info and above<div class="check-detail">Private authentication messages, SSH key events</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="syslog-f3" data-tier="1" data-connector="Syslog for Linux" data-item="kern facility enabled (Warning and above)">
+              <select class="status-select" id="syslog-f3" data-tier="1" data-connector="Syslog for Linux" data-item="kern facility enabled (Warning and above)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="syslog-f3">kern — Warning and above<div class="check-detail">Kernel messages, module loading, iptables/nftables</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="syslog-f4" data-tier="1" data-connector="Syslog for Linux" data-item="daemon facility enabled (Info and above)">
+              <select class="status-select" id="syslog-f4" data-tier="1" data-connector="Syslog for Linux" data-item="daemon facility enabled (Info and above)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="syslog-f4">daemon — Info and above<div class="check-detail">System daemon messages (sshd, cron, systemd)</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="syslog-f5" data-tier="1" data-connector="Syslog for Linux" data-item="cron facility enabled (Info and above)">
+              <select class="status-select" id="syslog-f5" data-tier="1" data-connector="Syslog for Linux" data-item="cron facility enabled (Info and above)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="syslog-f5">cron — Info and above<div class="check-detail">Cron job execution — persistence detection</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="syslog-f6" data-tier="1" data-connector="Syslog for Linux" data-item="syslog facility enabled (Info and above)">
+              <select class="status-select" id="syslog-f6" data-tier="1" data-connector="Syslog for Linux" data-item="syslog facility enabled (Info and above)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="syslog-f6">syslog — Info and above<div class="check-detail">General system messages catch-all</div></label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="syslog-f7" data-tier="1" data-connector="Syslog for Linux" data-item="local0-local7 facilities configured (if applicable)">
+              <select class="status-select" id="syslog-f7" data-tier="1" data-connector="Syslog for Linux" data-item="local0-local7 facilities configured (if applicable)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="syslog-f7">local0–local7 — as needed<div class="check-detail">Custom applications, network appliances — configure per environment</div></label>
             </div>
           </div>
@@ -1000,11 +1170,15 @@
           <div class="check-group">
             <div class="check-group-title">Retention</div>
             <div class="check-item">
-              <input type="checkbox" id="syslog-r1" data-tier="1" data-connector="Syslog for Linux" data-item="Analytics retention set to 90 days">
+              <select class="status-select" id="syslog-r1" data-tier="1" data-connector="Syslog for Linux" data-item="Analytics retention set to 90 days" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="syslog-r1">Analytics retention set to 90 days</label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="syslog-r2" data-tier="1" data-connector="Syslog for Linux" data-item="Lake retention set to 365 days">
+              <select class="status-select" id="syslog-r2" data-tier="1" data-connector="Syslog for Linux" data-item="Lake retention set to 365 days" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="syslog-r2">Lake retention set to 365 days</label>
             </div>
           </div>
@@ -1012,11 +1186,15 @@
           <div class="check-group">
             <div class="check-group-title">Validation</div>
             <div class="check-item">
-              <input type="checkbox" id="syslog-v1" data-tier="1" data-connector="Syslog for Linux" data-item="Ingestion volumes validated in Workspace Usage Report">
+              <select class="status-select" id="syslog-v1" data-tier="1" data-connector="Syslog for Linux" data-item="Ingestion volumes validated in Workspace Usage Report" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="syslog-v1">Ingestion volumes validated in Workspace Usage Report</label>
             </div>
             <div class="check-item">
-              <input type="checkbox" id="syslog-v2" data-tier="1" data-connector="Syslog for Linux" data-item="AMA coverage validated in Defender AMA Coverage workbook">
+              <select class="status-select" id="syslog-v2" data-tier="1" data-connector="Syslog for Linux" data-item="AMA coverage validated in Defender AMA Coverage workbook" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
               <label for="syslog-v2">AMA coverage validated in Defender AMA Coverage workbook</label>
             </div>
           </div>
@@ -1082,52 +1260,65 @@ function toggleConnector(id) {
   document.getElementById(id).classList.toggle('collapsed');
 }
 
+// ===================== STATUS SELECT STYLING =====================
+function onStatusChange(sel) {
+  sel.classList.remove('status-configured', 'status-not-configured', 'status-na');
+  if (sel.value === 'Configured') sel.classList.add('status-configured');
+  else if (sel.value === 'Not configured') sel.classList.add('status-not-configured');
+  else if (sel.value === 'N/A') sel.classList.add('status-na');
+  updateProgress();
+}
+
 // ===================== PROGRESS TRACKING =====================
 function updateProgress() {
-  const allCheckboxes = document.querySelectorAll('input[type="checkbox"][data-tier]');
-  const checkedAll = document.querySelectorAll('input[type="checkbox"][data-tier]:checked');
+  const allSelects = document.querySelectorAll('select.status-select[data-tier]');
+  let totalItems = 0;
+  let assessedItems = 0;
+
+  allSelects.forEach(sel => {
+    totalItems++;
+    if (sel.value !== '') assessedItems++;
+  });
 
   // Overall
-  const pct = allCheckboxes.length ? Math.round((checkedAll.length / allCheckboxes.length) * 100) : 0;
+  const pct = totalItems ? Math.round((assessedItems / totalItems) * 100) : 0;
   document.getElementById('overall-bar').style.width = pct + '%';
   document.getElementById('overall-percent').textContent = pct + '%';
 
   // Per tier
   for (const tier of ['1', '2', '3']) {
-    const tierAll = document.querySelectorAll(`input[type="checkbox"][data-tier="${tier}"]`);
-    const tierChecked = document.querySelectorAll(`input[type="checkbox"][data-tier="${tier}"]:checked`);
+    const tierAll = document.querySelectorAll(`select.status-select[data-tier="${tier}"]`);
+    let tierAssessed = 0;
+    tierAll.forEach(sel => { if (sel.value !== '') tierAssessed++; });
     const el = document.getElementById(`tier-${tier}-progress`);
     if (el && tierAll.length > 0) {
-      el.textContent = `${tierChecked.length} / ${tierAll.length}`;
+      el.textContent = `${tierAssessed} / ${tierAll.length}`;
     }
   }
 
   // Per connector
-  const connectors = ['conn-xdr', 'conn-entra', 'conn-o365', 'conn-azactivity', 'conn-winsec', 'conn-syslog'];
+  const connectors = ['conn-o365', 'conn-azactivity', 'conn-xdr', 'conn-entra', 'conn-winsec', 'conn-syslog'];
   for (const conn of connectors) {
     const section = document.getElementById(conn);
     if (!section) continue;
-    const cbs = section.querySelectorAll('input[type="checkbox"][data-tier]');
-    const checked = section.querySelectorAll('input[type="checkbox"][data-tier]:checked');
+    const sels = section.querySelectorAll('select.status-select[data-tier]');
+    let assessed = 0;
+    sels.forEach(sel => { if (sel.value !== '') assessed++; });
     const el = document.getElementById(conn + '-progress');
-    if (el) el.textContent = `${checked.length}/${cbs.length}`;
+    if (el) el.textContent = `${assessed}/${sels.length}`;
   }
 }
 
 // Attach listeners
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('assessment-date').valueAsDate = new Date();
-
-  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-    cb.addEventListener('change', updateProgress);
-  });
   updateProgress();
 });
 
 // ===================== SAVE / LOAD JSON =====================
 function gatherState() {
   const state = {
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     meta: {
       customer: document.getElementById('customer-name').value,
@@ -1135,16 +1326,11 @@ function gatherState() {
       date: document.getElementById('assessment-date').value,
       workspace: document.getElementById('sentinel-workspace').value,
     },
-    checkboxes: {},
     selects: {},
     comments: {},
   };
 
-  document.querySelectorAll('input[type="checkbox"][data-tier]').forEach(cb => {
-    state.checkboxes[cb.id] = cb.checked;
-  });
-
-  document.querySelectorAll('select[data-tier]').forEach(sel => {
+  document.querySelectorAll('select.status-select[data-tier]').forEach(sel => {
     state.selects[sel.id] = sel.value;
   });
 
@@ -1163,17 +1349,24 @@ function applyState(state) {
     document.getElementById('sentinel-workspace').value = state.meta.workspace || '';
   }
 
+  // Support loading v1 (checkbox) files — map checked → Configured, unchecked → Not configured
   if (state.checkboxes) {
     for (const [id, checked] of Object.entries(state.checkboxes)) {
       const el = document.getElementById(id);
-      if (el) el.checked = checked;
+      if (el && el.tagName === 'SELECT') {
+        el.value = checked ? 'Configured' : 'Not configured';
+        onStatusChange(el);
+      }
     }
   }
 
   if (state.selects) {
     for (const [id, value] of Object.entries(state.selects)) {
       const el = document.getElementById(id);
-      if (el) el.value = value;
+      if (el) {
+        el.value = value;
+        if (el.classList.contains('status-select')) onStatusChange(el);
+      }
     }
   }
 
@@ -1241,27 +1434,18 @@ function exportToExcel() {
   rows.push([]);
   rows.push(['Tier', 'Connector', 'Category', 'Check Item', 'Status', 'Comment']);
 
-  // Collect all check items with context
-  document.querySelectorAll('input[type="checkbox"][data-tier]').forEach(cb => {
-    const tier = 'Tier ' + cb.dataset.tier;
-    const connector = cb.dataset.connector;
-    const item = cb.dataset.item;
-    const status = cb.checked ? 'Done' : 'Not done';
-
-    // Find the parent check-group-title
-    const group = cb.closest('.check-group');
-    const category = group ? (group.querySelector('.check-group-title')?.textContent || '') : '';
-
-    rows.push([tier, connector, category, item, status, '']);
-  });
-
-  // Add selects (e.g. DCR preset)
-  document.querySelectorAll('select[data-tier]').forEach(sel => {
+  // Collect all status selects with context
+  document.querySelectorAll('select.status-select[data-tier]').forEach(sel => {
     const tier = 'Tier ' + sel.dataset.tier;
     const connector = sel.dataset.connector;
     const item = sel.dataset.item;
-    const value = sel.value || '(not selected)';
-    rows.push([tier, connector, 'Configuration', item + ': ' + value, value ? 'Selected' : 'Not selected', '']);
+    const status = sel.value || 'Not assessed';
+
+    // Find the parent check-group-title
+    const group = sel.closest('.check-group');
+    const category = group ? (group.querySelector('.check-group-title')?.textContent || '') : '';
+
+    rows.push([tier, connector, category, item, status, '']);
   });
 
   // Add comments
@@ -1270,7 +1454,6 @@ function exportToExcel() {
   document.querySelectorAll('textarea[data-connector]').forEach(ta => {
     if (ta.value.trim()) {
       const connector = ta.dataset.connector;
-      // Determine tier from closest tier section
       const tierSection = ta.closest('.tier-section');
       const tier = tierSection ? tierSection.id.replace('tier-', 'Tier ') : '';
       rows.push([tier, connector, ta.value.trim()]);
@@ -1287,7 +1470,7 @@ function exportToExcel() {
     { wch: 28 }, // Connector
     { wch: 25 }, // Category
     { wch: 55 }, // Check Item
-    { wch: 12 }, // Status
+    { wch: 16 }, // Status
     { wch: 40 }, // Comment
   ];
 
