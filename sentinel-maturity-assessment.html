@@ -254,7 +254,86 @@
 
     .status-select.status-configured { background: #e6f4ea; border-color: var(--success); color: var(--success); }
     .status-select.status-not-configured { background: #fce4ec; border-color: var(--danger); color: var(--danger); }
+    .status-select.status-to-be-added { background: #fff8e1; border-color: var(--warning); color: #8a6d00; }
     .status-select.status-na { background: var(--secondary); border-color: var(--border); color: var(--text-light); }
+
+    .retention-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 8px;
+    }
+
+    .retention-period-select {
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-family: inherit;
+      background: var(--white);
+      cursor: pointer;
+    }
+
+    .custom-retention-input {
+      width: 90px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-family: inherit;
+    }
+
+    .todo-summary {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .todo-summary h2 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: #8a6d00;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .todo-summary .todo-count {
+      background: var(--warning);
+      color: var(--white);
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .todo-summary .todo-empty {
+      color: var(--text-light);
+      font-size: 0.9rem;
+      font-style: italic;
+    }
+
+    .todo-connector-group { margin-bottom: 12px; }
+
+    .todo-connector-group h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .todo-connector-group ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .todo-connector-group li {
+      font-size: 0.85rem;
+      color: var(--text);
+      padding: 2px 0;
+    }
 
     .section-comment {
       margin-top: 16px;
@@ -342,6 +421,8 @@
       .meta-section, .tier-header, .tier-body, .overall-progress { box-shadow: none; break-inside: avoid; }
       .connector-section { break-inside: avoid; }
       textarea { border: 1px solid #ccc !important; }
+      .todo-summary { break-inside: avoid; box-shadow: none; }
+      .retention-inline { display: inline-flex !important; }
     }
   </style>
 </head>
@@ -402,6 +483,12 @@
       </div>
     </div>
     <span class="percent" id="overall-percent">0%</span>
+  </div>
+
+  <!-- To Do Summary — items marked "To be added" -->
+  <div class="todo-summary" id="todo-summary" style="display: none;">
+    <h2>📋 To Do — Items to be Added <span class="todo-count" id="todo-count">0</span></h2>
+    <div id="todo-list"></div>
   </div>
 
   <!-- ==================== TIER 1 ==================== -->
@@ -471,16 +558,16 @@
           <div class="check-group">
             <div class="check-group-title">Retention</div>
             <div class="check-item">
-              <select class="status-select" id="o365-r1" data-tier="1" data-connector="Office 365" data-item="Analytics retention set to 90 days" onchange="onStatusChange(this)">
+              <select class="status-select" id="o365-r1" data-tier="1" data-connector="Office 365" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="o365-r1">Analytics retention set to 90 days</label>
+              <label for="o365-r1">Analytics retention</label>
             </div>
             <div class="check-item">
-              <select class="status-select" id="o365-r2" data-tier="1" data-connector="Office 365" data-item="Lake retention set to 365 days" onchange="onStatusChange(this)">
+              <select class="status-select" id="o365-r2" data-tier="1" data-connector="Office 365" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="o365-r2">Lake retention set to 365 days</label>
+              <label for="o365-r2">Lake retention</label>
             </div>
           </div>
 
@@ -582,16 +669,16 @@
           <div class="check-group">
             <div class="check-group-title">Retention</div>
             <div class="check-item">
-              <select class="status-select" id="azact-r1" data-tier="1" data-connector="Azure Activity Logs" data-item="Analytics retention set to 90 days" onchange="onStatusChange(this)">
+              <select class="status-select" id="azact-r1" data-tier="1" data-connector="Azure Activity Logs" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="azact-r1">Analytics retention set to 90 days</label>
+              <label for="azact-r1">Analytics retention</label>
             </div>
             <div class="check-item">
-              <select class="status-select" id="azact-r2" data-tier="1" data-connector="Azure Activity Logs" data-item="Lake retention set to 365 days" onchange="onStatusChange(this)">
+              <select class="status-select" id="azact-r2" data-tier="1" data-connector="Azure Activity Logs" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="azact-r2">Lake retention set to 365 days</label>
+              <label for="azact-r2">Lake retention</label>
             </div>
           </div>
 
@@ -797,16 +884,16 @@
           <div class="check-group">
             <div class="check-group-title">Retention</div>
             <div class="check-item">
-              <select class="status-select" id="xdr-r1" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Analytics retention set to 90 days" onchange="onStatusChange(this)">
+              <select class="status-select" id="xdr-r1" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="xdr-r1">Analytics retention set to 90 days</label>
+              <label for="xdr-r1">Analytics retention</label>
             </div>
             <div class="check-item">
-              <select class="status-select" id="xdr-r2" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Lake retention set to 365 days" onchange="onStatusChange(this)">
+              <select class="status-select" id="xdr-r2" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="xdr-r2">Lake retention set to 365 days<div class="check-detail">Note: Lake retention incurs cost — E5 grant covers Analytics only</div></label>
+              <label for="xdr-r2">Lake retention<div class="check-detail">Note: Lake retention incurs cost — E5 grant covers Analytics only</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="xdr-r3" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Data Lake cost estimated" onchange="onStatusChange(this)">
@@ -940,16 +1027,16 @@
           <div class="check-group">
             <div class="check-group-title">Retention</div>
             <div class="check-item">
-              <select class="status-select" id="entra-r1" data-tier="1" data-connector="Microsoft Entra ID" data-item="Analytics retention set to 90 days" onchange="onStatusChange(this)">
+              <select class="status-select" id="entra-r1" data-tier="1" data-connector="Microsoft Entra ID" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="entra-r1">Analytics retention set to 90 days</label>
+              <label for="entra-r1">Analytics retention</label>
             </div>
             <div class="check-item">
-              <select class="status-select" id="entra-r2" data-tier="1" data-connector="Microsoft Entra ID" data-item="Lake retention set to 365 days" onchange="onStatusChange(this)">
+              <select class="status-select" id="entra-r2" data-tier="1" data-connector="Microsoft Entra ID" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="entra-r2">Lake retention set to 365 days</label>
+              <label for="entra-r2">Lake retention</label>
             </div>
           </div>
 
@@ -1047,16 +1134,16 @@
           <div class="check-group">
             <div class="check-group-title">Retention</div>
             <div class="check-item">
-              <select class="status-select" id="winsec-r1" data-tier="1" data-connector="Windows Security Events" data-item="Analytics retention set to 90 days" onchange="onStatusChange(this)">
+              <select class="status-select" id="winsec-r1" data-tier="1" data-connector="Windows Security Events" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="winsec-r1">Analytics retention set to 90 days</label>
+              <label for="winsec-r1">Analytics retention</label>
             </div>
             <div class="check-item">
-              <select class="status-select" id="winsec-r2" data-tier="1" data-connector="Windows Security Events" data-item="Lake retention set to 365 days" onchange="onStatusChange(this)">
+              <select class="status-select" id="winsec-r2" data-tier="1" data-connector="Windows Security Events" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="winsec-r2">Lake retention set to 365 days</label>
+              <label for="winsec-r2">Lake retention</label>
             </div>
           </div>
 
@@ -1170,16 +1257,16 @@
           <div class="check-group">
             <div class="check-group-title">Retention</div>
             <div class="check-item">
-              <select class="status-select" id="syslog-r1" data-tier="1" data-connector="Syslog for Linux" data-item="Analytics retention set to 90 days" onchange="onStatusChange(this)">
+              <select class="status-select" id="syslog-r1" data-tier="1" data-connector="Syslog for Linux" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="syslog-r1">Analytics retention set to 90 days</label>
+              <label for="syslog-r1">Analytics retention</label>
             </div>
             <div class="check-item">
-              <select class="status-select" id="syslog-r2" data-tier="1" data-connector="Syslog for Linux" data-item="Lake retention set to 365 days" onchange="onStatusChange(this)">
+              <select class="status-select" id="syslog-r2" data-tier="1" data-connector="Syslog for Linux" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="syslog-r2">Lake retention set to 365 days</label>
+              <label for="syslog-r2">Lake retention</label>
             </div>
           </div>
 
@@ -1262,11 +1349,19 @@ function toggleConnector(id) {
 
 // ===================== STATUS SELECT STYLING =====================
 function onStatusChange(sel) {
-  sel.classList.remove('status-configured', 'status-not-configured', 'status-na');
+  sel.classList.remove('status-configured', 'status-not-configured', 'status-na', 'status-to-be-added');
   if (sel.value === 'Configured') sel.classList.add('status-configured');
   else if (sel.value === 'Not configured') sel.classList.add('status-not-configured');
+  else if (sel.value === 'To be added') sel.classList.add('status-to-be-added');
   else if (sel.value === 'N/A') sel.classList.add('status-na');
+
+  // Handle retention dropdown visibility
+  if (sel.dataset.retention === 'true') {
+    handleRetentionDropdown(sel);
+  }
+
   updateProgress();
+  updateTodoSummary();
 }
 
 // ===================== PROGRESS TRACKING =====================
@@ -1309,16 +1404,136 @@ function updateProgress() {
   }
 }
 
+// ===================== RETENTION DROPDOWN =====================
+function handleRetentionDropdown(sel) {
+  const checkItem = sel.closest('.check-item');
+  let container = checkItem.querySelector('.retention-inline');
+
+  if (sel.value === 'Configured') {
+    if (!container) {
+      container = document.createElement('span');
+      container.className = 'retention-inline';
+
+      const periodSelect = document.createElement('select');
+      periodSelect.className = 'retention-period-select';
+      periodSelect.id = sel.id + '-retention';
+      periodSelect.innerHTML =
+        '<option value="">— Select period —</option>' +
+        '<option value="60 days">60 days</option>' +
+        '<option value="90 days">90 days</option>' +
+        '<option value="180 days">180 days</option>' +
+        '<option value="270 days">270 days</option>' +
+        '<option value="365 days">365 days</option>' +
+        '<option value="2 years">2 years</option>' +
+        '<option value="3 years">3 years</option>' +
+        '<option value="4 years">4 years</option>' +
+        '<option value="5 years">5 years</option>' +
+        '<option value="6 years">6 years</option>' +
+        '<option value="7 years">7 years</option>' +
+        '<option value="8 years">8 years</option>' +
+        '<option value="9 years">9 years</option>' +
+        '<option value="10 years">10 years</option>' +
+        '<option value="11 years">11 years</option>' +
+        '<option value="12 years">12 years</option>' +
+        '<option value="Custom">Custom</option>';
+
+      periodSelect.onchange = function() {
+        let customInput = container.querySelector('.custom-retention-input');
+        if (this.value === 'Custom') {
+          if (!customInput) {
+            customInput = document.createElement('input');
+            customInput.type = 'text';
+            customInput.className = 'custom-retention-input';
+            customInput.id = sel.id + '-custom';
+            customInput.placeholder = 'e.g. 18 months';
+            container.appendChild(customInput);
+          }
+        } else if (customInput) {
+          customInput.remove();
+        }
+      };
+
+      container.appendChild(periodSelect);
+      checkItem.appendChild(container);
+    }
+  } else {
+    if (container) container.remove();
+  }
+}
+
+// ===================== TO DO SUMMARY =====================
+function updateTodoSummary() {
+  const container = document.getElementById('todo-list');
+  const summaryDiv = document.getElementById('todo-summary');
+  const countBadge = document.getElementById('todo-count');
+
+  const allSelects = document.querySelectorAll('select.status-select[data-tier]');
+  const todoItems = [];
+  allSelects.forEach(sel => {
+    if (sel.value === 'To be added') {
+      todoItems.push({
+        connector: sel.dataset.connector,
+        item: sel.dataset.item,
+        tier: sel.dataset.tier
+      });
+    }
+  });
+
+  countBadge.textContent = todoItems.length;
+
+  if (todoItems.length === 0) {
+    summaryDiv.style.display = 'none';
+    return;
+  }
+
+  summaryDiv.style.display = 'block';
+  container.innerHTML = '';
+
+  // Group by connector (preserving order)
+  const grouped = new Map();
+  todoItems.forEach(item => {
+    if (!grouped.has(item.connector)) grouped.set(item.connector, []);
+    grouped.get(item.connector).push(item.item);
+  });
+
+  for (const [connector, items] of grouped) {
+    const group = document.createElement('div');
+    group.className = 'todo-connector-group';
+    const h3 = document.createElement('h3');
+    h3.textContent = connector;
+    group.appendChild(h3);
+    const ul = document.createElement('ul');
+    items.forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = item;
+      ul.appendChild(li);
+    });
+    group.appendChild(ul);
+    container.appendChild(group);
+  }
+}
+
 // Attach listeners
 document.addEventListener('DOMContentLoaded', () => {
+  // Inject "To be added" option into all standard status selects
+  document.querySelectorAll('select.status-select').forEach(sel => {
+    const naOption = sel.querySelector('option[value="N/A"]');
+    if (!naOption) return; // Skip non-standard selects (e.g. DCR preset)
+    const tbdOption = document.createElement('option');
+    tbdOption.value = 'To be added';
+    tbdOption.textContent = 'To be added';
+    sel.insertBefore(tbdOption, naOption);
+  });
+
   document.getElementById('assessment-date').valueAsDate = new Date();
   updateProgress();
+  updateTodoSummary();
 });
 
 // ===================== SAVE / LOAD JSON =====================
 function gatherState() {
   const state = {
-    version: 2,
+    version: 3,
     exportedAt: new Date().toISOString(),
     meta: {
       customer: document.getElementById('customer-name').value,
@@ -1328,6 +1543,7 @@ function gatherState() {
     },
     selects: {},
     comments: {},
+    retentionValues: {},
   };
 
   document.querySelectorAll('select.status-select[data-tier]').forEach(sel => {
@@ -1336,6 +1552,14 @@ function gatherState() {
 
   document.querySelectorAll('textarea[data-connector]').forEach(ta => {
     state.comments[ta.id] = ta.value;
+  });
+
+  // Save retention period selections and custom values
+  document.querySelectorAll('.retention-period-select').forEach(sel => {
+    if (sel.value) state.retentionValues[sel.id] = sel.value;
+  });
+  document.querySelectorAll('.custom-retention-input').forEach(inp => {
+    if (inp.value.trim()) state.retentionValues[inp.id] = inp.value.trim();
   });
 
   return state;
@@ -1377,7 +1601,27 @@ function applyState(state) {
     }
   }
 
+  // Restore retention period selections (dropdowns were created by onStatusChange above)
+  if (state.retentionValues) {
+    // First pass: set period selects (may trigger custom input creation)
+    for (const [id, value] of Object.entries(state.retentionValues)) {
+      if (id.endsWith('-custom')) continue;
+      const el = document.getElementById(id);
+      if (el) {
+        el.value = value;
+        if (el.onchange) el.onchange();
+      }
+    }
+    // Second pass: set custom input values
+    for (const [id, value] of Object.entries(state.retentionValues)) {
+      if (!id.endsWith('-custom')) continue;
+      const el = document.getElementById(id);
+      if (el) el.value = value;
+    }
+  }
+
   updateProgress();
+  updateTodoSummary();
 }
 
 function saveToJSON() {
@@ -1439,7 +1683,17 @@ function exportToExcel() {
     const tier = 'Tier ' + sel.dataset.tier;
     const connector = sel.dataset.connector;
     const item = sel.dataset.item;
-    const status = sel.value || 'Not assessed';
+    let status = sel.value || 'Not assessed';
+
+    // Append retention period to status if configured
+    if (sel.dataset.retention === 'true' && sel.value === 'Configured') {
+      const retSel = document.getElementById(sel.id + '-retention');
+      if (retSel && retSel.value) {
+        const customInp = document.getElementById(sel.id + '-custom');
+        const retVal = retSel.value === 'Custom' && customInp ? customInp.value : retSel.value;
+        if (retVal) status += ' (' + retVal + ')';
+      }
+    }
 
     // Find the parent check-group-title
     const group = sel.closest('.check-group');
@@ -1457,6 +1711,25 @@ function exportToExcel() {
       const tierSection = ta.closest('.tier-section');
       const tier = tierSection ? tierSection.id.replace('tier-', 'Tier ') : '';
       rows.push([tier, connector, ta.value.trim()]);
+    }
+  });
+
+  // Add To Do items
+  let hasTodos = false;
+  document.querySelectorAll('select.status-select[data-tier]').forEach(sel => {
+    if (sel.value === 'To be added') {
+      if (!hasTodos) {
+        rows.push([]);
+        rows.push(['TO DO — Items to be Added']);
+        rows.push(['Tier', 'Connector', 'Category', 'Check Item']);
+        hasTodos = true;
+      }
+      const tier = 'Tier ' + sel.dataset.tier;
+      const connector = sel.dataset.connector;
+      const item = sel.dataset.item;
+      const group = sel.closest('.check-group');
+      const category = group ? (group.querySelector('.check-group-title')?.textContent || '') : '';
+      rows.push([tier, connector, category, item]);
     }
   });
 
