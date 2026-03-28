@@ -353,6 +353,45 @@
       font-family: inherit;
     }
 
+    .gbday-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: 8px;
+    }
+
+    .gbday-input {
+      width: 80px;
+      padding: 4px 8px;
+      border: 1px solid var(--warning);
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-family: inherit;
+      background: #fff8e1;
+    }
+
+    .gbday-label {
+      font-size: 0.75rem;
+      color: #8a6d00;
+      white-space: nowrap;
+    }
+
+    .todo-total {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 2px solid var(--warning);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #8a6d00;
+    }
+
+    .todo-gbday {
+      color: var(--text-light);
+      font-size: 0.8rem;
+      font-weight: 400;
+      margin-left: 6px;
+    }
+
     .todo-summary {
       background: var(--white);
       border-radius: var(--radius);
@@ -2464,8 +2503,44 @@ function onStatusChange(sel) {
     handleRetentionDropdown(sel);
   }
 
+  // Handle GB/day input for "To be added"
+  handleGbdayInput(sel);
+
   updateProgress();
   updateTodoSummary();
+}
+
+// ===================== GB/DAY INPUT FOR "TO BE ADDED" =====================
+function handleGbdayInput(sel) {
+  const checkItem = sel.closest('.check-item');
+  if (!checkItem) return;
+  let container = checkItem.querySelector('.gbday-inline');
+
+  if (sel.value === 'To be added') {
+    if (!container) {
+      container = document.createElement('span');
+      container.className = 'gbday-inline';
+
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.className = 'gbday-input';
+      input.id = sel.id + '-gbday';
+      input.placeholder = '0';
+      input.min = '0';
+      input.step = '0.1';
+      input.addEventListener('input', () => updateTodoSummary());
+
+      const label = document.createElement('span');
+      label.className = 'gbday-label';
+      label.textContent = 'GB/day';
+
+      container.appendChild(input);
+      container.appendChild(label);
+      checkItem.appendChild(container);
+    }
+  } else {
+    if (container) container.remove();
+  }
 }
 
 // ===================== PROGRESS TRACKING =====================
@@ -2618,7 +2693,8 @@ function updateTodoSummary() {
       todoItems.push({
         connector: sel.dataset.connector,
         item: sel.dataset.item,
-        tier: sel.dataset.tier
+        tier: sel.dataset.tier,
+        selectId: sel.id
       });
     }
   });
@@ -2637,8 +2713,10 @@ function updateTodoSummary() {
   const grouped = new Map();
   todoItems.forEach(item => {
     if (!grouped.has(item.connector)) grouped.set(item.connector, []);
-    grouped.get(item.connector).push(item.item);
+    grouped.get(item.connector).push(item);
   });
+
+  let totalGbday = 0;
 
   for (const [connector, items] of grouped) {
     const group = document.createElement('div');
@@ -2649,12 +2727,27 @@ function updateTodoSummary() {
     const ul = document.createElement('ul');
     items.forEach(item => {
       const li = document.createElement('li');
-      li.textContent = item;
+      li.textContent = item.item;
+      const gbInput = document.getElementById(item.selectId + '-gbday');
+      if (gbInput && gbInput.value) {
+        const val = parseFloat(gbInput.value) || 0;
+        totalGbday += val;
+        const badge = document.createElement('span');
+        badge.className = 'todo-gbday';
+        badge.textContent = `(${val} GB/day)`;
+        li.appendChild(badge);
+      }
       ul.appendChild(li);
     });
     group.appendChild(ul);
     container.appendChild(group);
   }
+
+  // Total GB/day at the bottom
+  const totalDiv = document.createElement('div');
+  totalDiv.className = 'todo-total';
+  totalDiv.textContent = `Estimated total ingest: ${totalGbday.toFixed(1)} GB/day`;
+  container.appendChild(totalDiv);
 }
 
 // ===================== THIRD-PARTY DYNAMIC CONNECTORS =====================
@@ -2896,6 +2989,7 @@ function gatherState() {
     selects: {},
     comments: {},
     retentionValues: {},
+    gbdayValues: {},
     thirdPartyConnectors: [],
     thirdPartyTIConnectors: [],
   };
@@ -2914,6 +3008,11 @@ function gatherState() {
   });
   document.querySelectorAll('.custom-retention-input').forEach(inp => {
     if (inp.value.trim()) state.retentionValues[inp.id] = inp.value.trim();
+  });
+
+  // Save GB/day estimates for "To be added" items
+  document.querySelectorAll('.gbday-input').forEach(inp => {
+    if (inp.value) state.gbdayValues[inp.id] = inp.value;
   });
 
   // Save third-party dynamic connectors
@@ -2993,6 +3092,14 @@ function applyState(state) {
     // Second pass: set custom input values
     for (const [id, value] of Object.entries(state.retentionValues)) {
       if (!id.endsWith('-custom')) continue;
+      const el = document.getElementById(id);
+      if (el) el.value = value;
+    }
+  }
+
+  // Restore GB/day estimates (gbday inputs were created by onStatusChange above)
+  if (state.gbdayValues) {
+    for (const [id, value] of Object.entries(state.gbdayValues)) {
       const el = document.getElementById(id);
       if (el) el.value = value;
     }
