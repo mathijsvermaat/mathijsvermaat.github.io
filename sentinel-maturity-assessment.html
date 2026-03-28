@@ -2165,10 +2165,10 @@
       <!-- ~~~~~ SUBSECTION: Detection Enrichment ~~~~~ -->
       <div class="subsection-header">Detection Enrichment</div>
 
-      <!-- ===== Threat Intelligence ===== -->
+      <!-- ===== Microsoft Defender TI ===== -->
       <div class="connector-section collapsed" id="conn-ti">
         <div class="connector-header" onclick="toggleConnector('conn-ti')">
-          <h3>Threat Intelligence Platforms</h3>
+          <h3>Microsoft Defender Threat Intelligence</h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-ti-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -2177,22 +2177,22 @@
           <div class="check-group">
             <div class="check-group-title">Connector Setup</div>
             <div class="check-item">
-              <select class="status-select" id="ti-c1" data-tier="2" data-connector="Threat Intelligence" data-item="TI connector enabled in Sentinel" onchange="onStatusChange(this)">
+              <select class="status-select" id="ti-c1" data-tier="2" data-connector="Microsoft Defender TI" data-item="Connector enabled in Sentinel" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="ti-c1">TI connector enabled in Sentinel</label>
+              <label for="ti-c1">Connector enabled in Sentinel</label>
             </div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Content Hub</div>
             <div class="check-item">
-              <select class="status-select" id="ti-ch1" data-tier="2" data-connector="Threat Intelligence" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
+              <select class="status-select" id="ti-ch1" data-tier="2" data-connector="Microsoft Defender TI" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="ti-ch1">Analytic rules deployed</label>
             </div>
             <div class="check-item">
-              <select class="status-select" id="ti-ch2" data-tier="2" data-connector="Threat Intelligence" data-item="Workbooks deployed" onchange="onStatusChange(this)">
+              <select class="status-select" id="ti-ch2" data-tier="2" data-connector="Microsoft Defender TI" data-item="Workbooks deployed" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="ti-ch2">Workbooks deployed</label>
@@ -2201,13 +2201,13 @@
           <div class="check-group">
             <div class="check-group-title">Retention</div>
             <div class="check-item">
-              <select class="status-select" id="ti-r1" data-tier="2" data-connector="Threat Intelligence" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
+              <select class="status-select" id="ti-r1" data-tier="2" data-connector="Microsoft Defender TI" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="ti-r1">Analytics retention</label>
             </div>
             <div class="check-item">
-              <select class="status-select" id="ti-r2" data-tier="2" data-connector="Threat Intelligence" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
+              <select class="status-select" id="ti-r2" data-tier="2" data-connector="Microsoft Defender TI" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="ti-r2">Lake retention</label>
@@ -2216,15 +2216,39 @@
           <div class="check-group">
             <div class="check-group-title">Validation</div>
             <div class="check-item">
-              <select class="status-select" id="ti-v1" data-tier="2" data-connector="Threat Intelligence" data-item="Ingestion volumes validated in Workspace Usage Report" onchange="onStatusChange(this)">
+              <select class="status-select" id="ti-v1" data-tier="2" data-connector="Microsoft Defender TI" data-item="Ingestion volumes validated in Workspace Usage Report" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="ti-v1">Ingestion volumes validated in Workspace Usage Report</label>
             </div>
           </div>
           <div class="section-comment">
-            <label for="ti-comment">Comments / Rationale — Threat Intelligence</label>
-            <textarea id="ti-comment" data-connector="Threat Intelligence" placeholder="e.g. MDTI + TAXII (AlienVault OTX) connected. Expiry set to 30 days."></textarea>
+            <label for="ti-comment">Comments / Rationale — Microsoft Defender TI</label>
+            <textarea id="ti-comment" data-connector="Microsoft Defender TI" placeholder="e.g. MDTI connected. IOC matching rules enabled."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Third-Party Threat Intelligence (dynamic) ===== -->
+      <div class="connector-section collapsed" id="conn-thirdpartyti">
+        <div class="connector-header" onclick="toggleConnector('conn-thirdpartyti')">
+          <h3>Third-Party Threat Intelligence</h3>
+          <span class="cost-badge paid">Paid</span>
+          <span class="connector-progress" id="conn-thirdpartyti-progress">0/0</span>
+          <span class="connector-chevron">▼</span>
+        </div>
+        <div class="connector-body">
+          <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 12px;">
+            Add each third-party TI provider individually. Common providers: TAXII feeds, AlienVault OTX, Anomali, Recorded Future.
+          </p>
+          <div id="thirdpartyti-connectors"></div>
+          <div class="add-connector-bar">
+            <input type="text" id="thirdpartyti-name-input" placeholder="TI provider name — e.g. AlienVault OTX, Recorded Future, Anomali" onkeydown="if(event.key==='Enter')addThirdPartyTIConnector()">
+            <button class="btn-icon" onclick="addThirdPartyTIConnector()" title="Add TI connector">+</button>
+          </div>
+          <div class="section-comment" style="margin-top: 12px;">
+            <label for="thirdpartyti-comment">Comments / Rationale — Third-Party Threat Intelligence</label>
+            <textarea id="thirdpartyti-comment" data-connector="Third-Party Threat Intelligence" placeholder="e.g. TAXII feed from AlienVault OTX. Expiry set to 30 days."></textarea>
           </div>
         </div>
       </div>
@@ -2475,7 +2499,7 @@ function updateProgress() {
   const connectors = [
     'conn-o365', 'conn-azactivity', 'conn-xdr', 'conn-entra', 'conn-winsec', 'conn-syslog',
     'conn-dfc', 'conn-azfw', 'conn-waf', 'conn-vnet', 'conn-gsa', 'conn-dns', 'conn-thirdparty',
-    'conn-purview', 'conn-akv', 'conn-copilot', 'conn-intune', 'conn-ti', 'conn-aws', 'conn-gcp'
+    'conn-purview', 'conn-akv', 'conn-copilot', 'conn-intune', 'conn-ti', 'conn-thirdpartyti', 'conn-aws', 'conn-gcp'
   ];
   for (const conn of connectors) {
     const section = document.getElementById(conn);
@@ -2489,6 +2513,15 @@ function updateProgress() {
 
   // Dynamic third-party connectors
   document.querySelectorAll('#thirdparty-connectors > .connector-section').forEach(section => {
+    const sels = section.querySelectorAll('select.status-select[data-tier]');
+    let assessed = 0;
+    sels.forEach(sel => { if (sel.value !== '') assessed++; });
+    const el = document.getElementById(section.id + '-progress');
+    if (el) el.textContent = `${assessed}/${sels.length}`;
+  });
+
+  // Dynamic third-party TI connectors
+  document.querySelectorAll('#thirdpartyti-connectors > .connector-section').forEach(section => {
     const sels = section.querySelectorAll('select.status-select[data-tier]');
     let assessed = 0;
     sels.forEach(sel => { if (sel.value !== '') assessed++; });
@@ -2728,6 +2761,110 @@ function removeThirdPartyConnector(id) {
   updateTodoSummary();
 }
 
+// ===================== THIRD-PARTY TI DYNAMIC CONNECTORS =====================
+let thirdPartyTICounter = 0;
+
+function addThirdPartyTIConnector(name) {
+  const input = document.getElementById('thirdpartyti-name-input');
+  const connectorName = name || (input ? input.value.trim() : '');
+  if (!connectorName) return;
+  if (input) input.value = '';
+
+  thirdPartyTICounter++;
+  const idx = thirdPartyTICounter;
+  const prefix = 'tti' + idx;
+  const safeName = connectorName.replace(/[^a-zA-Z0-9 ]/g, '');
+
+  const section = document.createElement('div');
+  section.className = 'connector-section';
+  section.id = 'conn-tti-' + idx;
+  section.dataset.tpName = connectorName;
+
+  const optionsHtml =
+    '<option value="">— Not assessed —</option>' +
+    '<option value="Configured">Configured</option>' +
+    '<option value="Not configured">Not configured</option>' +
+    '<option value="To be added">To be added</option>' +
+    '<option value="N/A">N/A</option>';
+
+  section.innerHTML = `
+    <div class="connector-header" onclick="toggleConnector('conn-tti-${idx}')">
+      <h3>${connectorName}</h3>
+      <span class="cost-badge paid">Paid</span>
+      <span class="connector-progress" id="conn-tti-${idx}-progress">0/0</span>
+      <span class="connector-chevron">▼</span>
+    </div>
+    <div class="connector-body">
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
+        <button class="btn-remove" onclick="removeThirdPartyTIConnector('conn-tti-${idx}')">✕ Remove</button>
+      </div>
+      <div class="check-group">
+        <div class="check-group-title">Connector Setup</div>
+        <div class="check-item">
+          <select class="status-select" id="${prefix}-c1" data-tier="2" data-connector="${safeName}" data-item="Connector enabled in Sentinel" onchange="onStatusChange(this)">
+            ${optionsHtml}
+          </select>
+          <label for="${prefix}-c1">Connector enabled in Sentinel</label>
+        </div>
+      </div>
+      <div class="check-group">
+        <div class="check-group-title">Content Hub</div>
+        <div class="check-item">
+          <select class="status-select" id="${prefix}-ch1" data-tier="2" data-connector="${safeName}" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
+            ${optionsHtml}
+          </select>
+          <label for="${prefix}-ch1">Analytic rules deployed</label>
+        </div>
+        <div class="check-item">
+          <select class="status-select" id="${prefix}-ch2" data-tier="2" data-connector="${safeName}" data-item="Workbooks deployed" onchange="onStatusChange(this)">
+            ${optionsHtml}
+          </select>
+          <label for="${prefix}-ch2">Workbooks deployed</label>
+        </div>
+      </div>
+      <div class="check-group">
+        <div class="check-group-title">Retention</div>
+        <div class="check-item">
+          <select class="status-select" id="${prefix}-r1" data-tier="2" data-connector="${safeName}" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
+            ${optionsHtml}
+          </select>
+          <label for="${prefix}-r1">Analytics retention</label>
+        </div>
+        <div class="check-item">
+          <select class="status-select" id="${prefix}-r2" data-tier="2" data-connector="${safeName}" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
+            ${optionsHtml}
+          </select>
+          <label for="${prefix}-r2">Lake retention</label>
+        </div>
+      </div>
+      <div class="check-group">
+        <div class="check-group-title">Validation</div>
+        <div class="check-item">
+          <select class="status-select" id="${prefix}-v1" data-tier="2" data-connector="${safeName}" data-item="Ingestion volumes validated in Workspace Usage Report" onchange="onStatusChange(this)">
+            ${optionsHtml}
+          </select>
+          <label for="${prefix}-v1">Ingestion volumes validated in Workspace Usage Report</label>
+        </div>
+      </div>
+      <div class="section-comment">
+        <label for="${prefix}-comment">Comments / Rationale — ${connectorName}</label>
+        <textarea id="${prefix}-comment" data-connector="${safeName}" placeholder="e.g. Notes about this TI provider's configuration..."></textarea>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('thirdpartyti-connectors').appendChild(section);
+  updateProgress();
+  updateTodoSummary();
+}
+
+function removeThirdPartyTIConnector(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+  updateProgress();
+  updateTodoSummary();
+}
+
 // Attach listeners
 document.addEventListener('DOMContentLoaded', () => {
   // Inject "To be added" option into all standard status selects
@@ -2760,6 +2897,7 @@ function gatherState() {
     comments: {},
     retentionValues: {},
     thirdPartyConnectors: [],
+    thirdPartyTIConnectors: [],
   };
 
   document.querySelectorAll('select.status-select[data-tier]').forEach(sel => {
@@ -2783,6 +2921,11 @@ function gatherState() {
     state.thirdPartyConnectors.push(section.dataset.tpName);
   });
 
+  // Save third-party TI dynamic connectors
+  document.querySelectorAll('#thirdpartyti-connectors > .connector-section').forEach(section => {
+    state.thirdPartyTIConnectors.push(section.dataset.tpName);
+  });
+
   return state;
 }
 
@@ -2796,10 +2939,16 @@ function applyState(state) {
 
   // Restore third-party dynamic connectors (must be created before restoring their selects)
   if (state.thirdPartyConnectors) {
-    // Clear existing dynamic connectors
     document.getElementById('thirdparty-connectors').innerHTML = '';
     thirdPartyCounter = 0;
     state.thirdPartyConnectors.forEach(name => addThirdPartyConnector(name));
+  }
+
+  // Restore third-party TI dynamic connectors
+  if (state.thirdPartyTIConnectors) {
+    document.getElementById('thirdpartyti-connectors').innerHTML = '';
+    thirdPartyTICounter = 0;
+    state.thirdPartyTIConnectors.forEach(name => addThirdPartyTIConnector(name));
   }
 
   // Support loading v1 (checkbox) files — map checked → Configured, unchecked → Not configured
