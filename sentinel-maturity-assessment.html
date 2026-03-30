@@ -250,6 +250,7 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
+    .subsection-description { padding: 4px 24px 8px; background: var(--secondary); font-size: 0.8rem; color: var(--text-light); font-weight: 400; text-transform: none; letter-spacing: 0; }
 
     .add-connector-bar {
       display: flex;
@@ -1477,6 +1478,7 @@
 
       <!-- ~~~~~ SUBSECTION: Cloud Security Posture ~~~~~ -->
       <div class="subsection-header">Cloud Security Posture</div>
+      <div class="subsection-description">Alerts and recommendations from cloud workload protection — detects threats against infrastructure, identifies misconfigurations, and tracks compliance posture across cloud resources.</div>
 
       <!-- ===== Defender for Cloud ===== -->
       <div class="connector-section collapsed" id="conn-dfc">
@@ -1569,412 +1571,141 @@
         </div>
       </div>
 
-      <!-- ~~~~~ SUBSECTION: Network Visibility ~~~~~ -->
-      <div class="subsection-header">Network Visibility</div>
-
-      <!-- ===== Azure Firewall ===== -->
-      <div class="connector-section collapsed" id="conn-azfw">
-        <div class="connector-header" onclick="toggleConnector('conn-azfw')">
-          <h3>Azure Firewall</h3>
-          <span class="cost-badge paid">Paid</span>
-          <span class="connector-progress" id="conn-azfw-progress">0/0</span>
-          <span class="connector-chevron">▼</span>
-        </div>
-        <div class="connector-body">
-          <div class="check-group">
-            <div class="check-group-title">Connector Setup</div>
-            <div class="check-item">
-              <select class="status-select" id="azfw-c1" data-tier="2" data-connector="Azure Firewall" data-item="Diagnostic settings configured (resource-specific mode)" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azfw-c1">Diagnostic settings configured (resource-specific mode)<div class="check-detail">Must use resource-specific tables, not legacy AzureDiagnostics</div></label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Tables</div>
-            <div class="check-item">
-              <select class="status-select" id="azfw-t1" data-tier="2" data-connector="Azure Firewall" data-item="AZFWNetworkRule table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azfw-t1">AZFWNetworkRule</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="azfw-t2" data-tier="2" data-connector="Azure Firewall" data-item="AZFWApplicationRule table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azfw-t2">AZFWApplicationRule</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="azfw-t3" data-tier="2" data-connector="Azure Firewall" data-item="AZFWThreatIntel table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azfw-t3">AZFWThreatIntel</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="azfw-t4" data-tier="2" data-connector="Azure Firewall" data-item="AZFWDnsQuery table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azfw-t4">AZFWDnsQuery<div class="check-detail">High-volume — consider Data Lake tier</div></label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="azfw-t5" data-tier="2" data-connector="Azure Firewall" data-item="AZFWIdpsSignature table enabled (Premium)" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azfw-t5">AZFWIdpsSignature<div class="check-detail">Requires Azure Firewall Premium</div></label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="azfw-t6" data-tier="2" data-connector="Azure Firewall" data-item="AZFWNatRule table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azfw-t6">AZFWNatRule</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Content Hub</div>
-            <div class="check-item">
-              <select class="status-select" id="azfw-ch1" data-tier="2" data-connector="Azure Firewall" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azfw-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="azfw-ch2" data-tier="2" data-connector="Azure Firewall" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azfw-ch2">Workbooks deployed</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="azfw-r1" data-tier="2" data-connector="Azure Firewall" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azfw-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="azfw-r2" data-tier="2" data-connector="Azure Firewall" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azfw-r2">Lake retention</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Validation</div>
-            <div class="check-item">
-              <select class="status-select" id="azfw-v1" data-tier="2" data-connector="Azure Firewall" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azfw-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
-            </div>
-          </div>
-          <div class="section-comment">
-            <label for="azfw-comment">Comments / Rationale — Azure Firewall</label>
-            <textarea id="azfw-comment" data-connector="Azure Firewall" placeholder="e.g. 2 firewall instances (hub WestEurope + NorthEurope). IDPS enabled on Premium SKU."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- ===== Azure WAF ===== -->
-      <div class="connector-section collapsed" id="conn-waf">
-        <div class="connector-header" onclick="toggleConnector('conn-waf')">
-          <h3>Azure WAF (Application Gateway / Front Door)</h3>
-          <span class="cost-badge paid">Paid</span>
-          <span class="connector-progress" id="conn-waf-progress">0/0</span>
-          <span class="connector-chevron">▼</span>
-        </div>
-        <div class="connector-body">
-          <div class="check-group">
-            <div class="check-group-title">Connector Setup</div>
-            <div class="check-item">
-              <select class="status-select" id="waf-c1" data-tier="2" data-connector="Azure WAF" data-item="Diagnostic settings configured on Application Gateway" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="waf-c1">Diagnostic settings on Application Gateway<div class="check-detail">WAF v2 required; use resource-specific tables where available</div></label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="waf-c2" data-tier="2" data-connector="Azure WAF" data-item="Diagnostic settings configured on Front Door" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="waf-c2">Diagnostic settings on Front Door<div class="check-detail">If using Azure Front Door with WAF policy</div></label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Content Hub</div>
-            <div class="check-item">
-              <select class="status-select" id="waf-ch1" data-tier="2" data-connector="Azure WAF" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="waf-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="waf-ch2" data-tier="2" data-connector="Azure WAF" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="waf-ch2">Workbooks deployed</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="waf-r1" data-tier="2" data-connector="Azure WAF" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="waf-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="waf-r2" data-tier="2" data-connector="Azure WAF" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="waf-r2">Lake retention</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Validation</div>
-            <div class="check-item">
-              <select class="status-select" id="waf-v1" data-tier="2" data-connector="Azure WAF" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="waf-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
-            </div>
-          </div>
-          <div class="section-comment">
-            <label for="waf-comment">Comments / Rationale — Azure WAF</label>
-            <textarea id="waf-comment" data-connector="Azure WAF" placeholder="e.g. Application Gateway WAF v2 in WestEurope. No Front Door in use."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- ===== VNet Flow Logs ===== -->
-      <div class="connector-section collapsed" id="conn-vnet">
-        <div class="connector-header" onclick="toggleConnector('conn-vnet')">
-          <h3>VNet Flow Logs &amp; Traffic Analytics</h3>
-          <span class="cost-badge paid">Paid</span>
-          <span class="connector-progress" id="conn-vnet-progress">0/0</span>
-          <span class="connector-chevron">▼</span>
-        </div>
-        <div class="connector-body">
-          <div class="check-group">
-            <div class="check-group-title">Connector Setup</div>
-            <div class="check-item">
-              <select class="status-select" id="vnet-c1" data-tier="2" data-connector="VNet Flow Logs" data-item="VNet Flow Logs enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="vnet-c1">VNet Flow Logs enabled<div class="check-detail">Successor to NSG Flow Logs — captures gateway traffic</div></label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="vnet-c2" data-tier="2" data-connector="VNet Flow Logs" data-item="Traffic Analytics enabled (10-minute interval)" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="vnet-c2">Traffic Analytics enabled (10-minute interval)<div class="check-detail">Required for NTANetAnalytics table in Sentinel</div></label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Content Hub</div>
-            <div class="check-item">
-              <select class="status-select" id="vnet-ch1" data-tier="2" data-connector="VNet Flow Logs" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="vnet-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="vnet-ch2" data-tier="2" data-connector="VNet Flow Logs" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="vnet-ch2">Workbooks deployed</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="vnet-r1" data-tier="2" data-connector="VNet Flow Logs" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="vnet-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="vnet-r2" data-tier="2" data-connector="VNet Flow Logs" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="vnet-r2">Lake retention</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Validation</div>
-            <div class="check-item">
-              <select class="status-select" id="vnet-v1" data-tier="2" data-connector="VNet Flow Logs" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="vnet-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
-            </div>
-          </div>
-          <div class="section-comment">
-            <label for="vnet-comment">Comments / Rationale — VNet Flow Logs</label>
-            <textarea id="vnet-comment" data-connector="VNet Flow Logs" placeholder="e.g. Enabled on hub VNets only. Spoke VNets deferred to Phase 2."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- ===== Global Secure Access ===== -->
-      <div class="connector-section collapsed" id="conn-gsa">
-        <div class="connector-header" onclick="toggleConnector('conn-gsa')">
-          <h3>Microsoft Global Secure Access</h3>
-          <span class="cost-badge paid">Paid</span>
-          <span class="connector-progress" id="conn-gsa-progress">0/0</span>
-          <span class="connector-chevron">▼</span>
-        </div>
-        <div class="connector-body">
-          <div class="check-group">
-            <div class="check-group-title">Connector Setup</div>
-            <div class="check-item">
-              <select class="status-select" id="gsa-c1" data-tier="2" data-connector="Global Secure Access" data-item="Connector enabled in Sentinel" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gsa-c1">Connector enabled in Sentinel</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Content Hub</div>
-            <div class="check-item">
-              <select class="status-select" id="gsa-ch1" data-tier="2" data-connector="Global Secure Access" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gsa-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="gsa-ch2" data-tier="2" data-connector="Global Secure Access" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gsa-ch2">Workbooks deployed</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="gsa-r1" data-tier="2" data-connector="Global Secure Access" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gsa-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="gsa-r2" data-tier="2" data-connector="Global Secure Access" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gsa-r2">Lake retention</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Validation</div>
-            <div class="check-item">
-              <select class="status-select" id="gsa-v1" data-tier="2" data-connector="Global Secure Access" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gsa-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
-            </div>
-          </div>
-          <div class="section-comment">
-            <label for="gsa-comment">Comments / Rationale — Global Secure Access</label>
-            <textarea id="gsa-comment" data-connector="Global Secure Access" placeholder="e.g. Not applicable — customer not using GSA."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- ===== DNS Security Logs ===== -->
-      <div class="connector-section collapsed" id="conn-dns">
-        <div class="connector-header" onclick="toggleConnector('conn-dns')">
-          <h3>DNS Security Logs</h3>
-          <span class="cost-badge paid">Paid</span>
-          <span class="connector-progress" id="conn-dns-progress">0/0</span>
-          <span class="connector-chevron">▼</span>
-        </div>
-        <div class="connector-body">
-          <div class="check-group">
-            <div class="check-group-title">Connector Setup</div>
-            <div class="check-item">
-              <select class="status-select" id="dns-c1" data-tier="2" data-connector="DNS Security Logs" data-item="Endpoint DNS collection via AMA configured" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="dns-c1">Endpoint DNS collection via AMA<div class="check-detail">DnsEvents / DnsInventory via NXlog DNS extension</div></label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="dns-c2" data-tier="2" data-connector="DNS Security Logs" data-item="Azure DNS diagnostic settings configured" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="dns-c2">Azure DNS diagnostic settings<div class="check-detail">Private DNS zones / DNS Resolver</div></label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Content Hub</div>
-            <div class="check-item">
-              <select class="status-select" id="dns-ch1" data-tier="2" data-connector="DNS Security Logs" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="dns-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="dns-ch2" data-tier="2" data-connector="DNS Security Logs" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="dns-ch2">Workbooks deployed</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="dns-r1" data-tier="2" data-connector="DNS Security Logs" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="dns-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="dns-r2" data-tier="2" data-connector="DNS Security Logs" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="dns-r2">Lake retention</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Validation</div>
-            <div class="check-item">
-              <select class="status-select" id="dns-v1" data-tier="2" data-connector="DNS Security Logs" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="dns-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
-            </div>
-          </div>
-          <div class="section-comment">
-            <label for="dns-comment">Comments / Rationale — DNS Security Logs</label>
-            <textarea id="dns-comment" data-connector="DNS Security Logs" placeholder="e.g. Endpoint DNS piloted on 10 servers. Azure DNS Resolver diagnostic settings enabled."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- ===== Third-Party Network Appliances (dynamic) ===== -->
-      <div class="connector-section collapsed" id="conn-thirdparty">
-        <div class="connector-header" onclick="toggleConnector('conn-thirdparty')">
-          <h3>Third-Party Network &amp; Proxy Appliances</h3>
-          <span class="cost-badge paid">Paid</span>
-          <span class="connector-progress" id="conn-thirdparty-progress">0/0</span>
-          <span class="connector-chevron">▼</span>
-        </div>
-        <div class="connector-body">
-          <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 12px;">
-            Add each third-party appliance individually. Common connectors include check items for setup, retention, and validation.
-          </p>
-          <div id="thirdparty-connectors"></div>
-          <div class="add-connector-bar">
-            <input type="text" id="thirdparty-name-input" placeholder="Connector name — e.g. Palo Alto Networks, Fortinet FortiGate, Zscaler ZIA" onkeydown="if(event.key==='Enter')addThirdPartyConnector()">
-            <button class="btn-icon" onclick="addThirdPartyConnector()" title="Add connector">+</button>
-          </div>
-          <div class="section-comment" style="margin-top: 12px;">
-            <label for="thirdparty-comment">Comments / Rationale — Third-Party Network Appliances</label>
-            <textarea id="thirdparty-comment" data-connector="Third-Party Network Appliances" placeholder="e.g. Palo Alto and Fortinet via CEF. Linux AMA forwarder in WestEurope hub."></textarea>
-          </div>
-        </div>
-      </div>
 
       <!-- ~~~~~ SUBSECTION: Data Protection & Governance ~~~~~ -->
       <div class="subsection-header">Data Protection &amp; Governance</div>
+      <div class="subsection-description">Monitors access to sensitive data, secrets, and AI-powered services — helps detect data leakage, unauthorized access to credentials, and policy violations.</div>
+
+      <!-- ===== Azure Key Vault ===== -->
+      <div class="connector-section collapsed" id="conn-akv">
+        <div class="connector-header" onclick="toggleConnector('conn-akv')">
+          <h3>Azure Key Vault</h3>
+          <span class="cost-badge paid">Paid</span>
+          <span class="connector-progress" id="conn-akv-progress">0/0</span>
+          <span class="connector-chevron">▼</span>
+        </div>
+        <div class="connector-body">
+          <div class="check-group">
+            <div class="check-group-title">Connector Setup</div>
+            <div class="check-item">
+              <select class="status-select" id="akv-c1" data-tier="2" data-connector="Azure Key Vault" data-item="Diagnostic settings configured (resource-specific mode)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="akv-c1">Diagnostic settings configured (resource-specific)<div class="check-detail">Use AKVAuditLogs, not AzureDiagnostics</div></label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Content Hub</div>
+            <div class="check-item">
+              <select class="status-select" id="akv-ch1" data-tier="2" data-connector="Azure Key Vault" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="akv-ch1">Analytic rules deployed</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="akv-ch2" data-tier="2" data-connector="Azure Key Vault" data-item="Workbooks deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="akv-ch2">Workbooks deployed</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Retention</div>
+            <div class="check-item">
+              <select class="status-select" id="akv-r1" data-tier="2" data-connector="Azure Key Vault" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="akv-r1">Analytics retention</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="akv-r2" data-tier="2" data-connector="Azure Key Vault" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="akv-r2">Lake retention</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Validation</div>
+            <div class="check-item">
+              <select class="status-select" id="akv-v1" data-tier="2" data-connector="Azure Key Vault" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="akv-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
+            </div>
+          </div>
+          <div class="section-comment">
+            <label for="akv-comment">Comments / Rationale — Azure Key Vault</label>
+            <textarea id="akv-comment" data-connector="Azure Key Vault" placeholder="e.g. 12 Key Vaults across prod + dev. Policy enforced via Azure Policy."></textarea>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ===== Copilot / AI Governance ===== -->
+      <div class="connector-section collapsed" id="conn-copilot">
+        <div class="connector-header" onclick="toggleConnector('conn-copilot')">
+          <h3>Microsoft Copilot / AI Governance</h3>
+          <span class="cost-badge paid">Paid</span>
+          <span class="connector-progress" id="conn-copilot-progress">0/0</span>
+          <span class="connector-chevron">▼</span>
+        </div>
+        <div class="connector-body">
+          <div class="check-group">
+            <div class="check-group-title">Connector Setup</div>
+            <div class="check-item">
+              <select class="status-select" id="copilot-c1" data-tier="2" data-connector="Copilot / AI Governance" data-item="Connector enabled in Sentinel" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="copilot-c1">Connector enabled in Sentinel</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Content Hub</div>
+            <div class="check-item">
+              <select class="status-select" id="copilot-ch1" data-tier="2" data-connector="Copilot / AI Governance" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="copilot-ch1">Analytic rules deployed</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="copilot-ch2" data-tier="2" data-connector="Copilot / AI Governance" data-item="Workbooks deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="copilot-ch2">Workbooks deployed</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Retention</div>
+            <div class="check-item">
+              <select class="status-select" id="copilot-r1" data-tier="2" data-connector="Copilot / AI Governance" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="copilot-r1">Analytics retention</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="copilot-r2" data-tier="2" data-connector="Copilot / AI Governance" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="copilot-r2">Lake retention</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Validation</div>
+            <div class="check-item">
+              <select class="status-select" id="copilot-v1" data-tier="2" data-connector="Copilot / AI Governance" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="copilot-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
+            </div>
+          </div>
+          <div class="section-comment">
+            <label for="copilot-comment">Comments / Rationale — Copilot / AI Governance</label>
+            <textarea id="copilot-comment" data-connector="Copilot / AI Governance" placeholder="e.g. Not applicable — no Copilot licences deployed yet."></textarea>
+          </div>
+        </div>
+      </div>
+
+
 
       <!-- ===== Microsoft Purview ===== -->
       <div class="connector-section collapsed" id="conn-purview">
@@ -2055,224 +1786,9 @@
         </div>
       </div>
 
-      <!-- ===== Azure Key Vault ===== -->
-      <div class="connector-section collapsed" id="conn-akv">
-        <div class="connector-header" onclick="toggleConnector('conn-akv')">
-          <h3>Azure Key Vault</h3>
-          <span class="cost-badge paid">Paid</span>
-          <span class="connector-progress" id="conn-akv-progress">0/0</span>
-          <span class="connector-chevron">▼</span>
-        </div>
-        <div class="connector-body">
-          <div class="check-group">
-            <div class="check-group-title">Connector Setup</div>
-            <div class="check-item">
-              <select class="status-select" id="akv-c1" data-tier="2" data-connector="Azure Key Vault" data-item="Diagnostic settings configured (resource-specific mode)" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="akv-c1">Diagnostic settings configured (resource-specific)<div class="check-detail">Use AKVAuditLogs, not AzureDiagnostics</div></label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Content Hub</div>
-            <div class="check-item">
-              <select class="status-select" id="akv-ch1" data-tier="2" data-connector="Azure Key Vault" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="akv-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="akv-ch2" data-tier="2" data-connector="Azure Key Vault" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="akv-ch2">Workbooks deployed</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="akv-r1" data-tier="2" data-connector="Azure Key Vault" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="akv-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="akv-r2" data-tier="2" data-connector="Azure Key Vault" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="akv-r2">Lake retention</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Validation</div>
-            <div class="check-item">
-              <select class="status-select" id="akv-v1" data-tier="2" data-connector="Azure Key Vault" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="akv-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
-            </div>
-          </div>
-          <div class="section-comment">
-            <label for="akv-comment">Comments / Rationale — Azure Key Vault</label>
-            <textarea id="akv-comment" data-connector="Azure Key Vault" placeholder="e.g. 12 Key Vaults across prod + dev. Policy enforced via Azure Policy."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- ===== Copilot / AI Governance ===== -->
-      <div class="connector-section collapsed" id="conn-copilot">
-        <div class="connector-header" onclick="toggleConnector('conn-copilot')">
-          <h3>Microsoft Copilot / AI Governance</h3>
-          <span class="cost-badge paid">Paid</span>
-          <span class="connector-progress" id="conn-copilot-progress">0/0</span>
-          <span class="connector-chevron">▼</span>
-        </div>
-        <div class="connector-body">
-          <div class="check-group">
-            <div class="check-group-title">Connector Setup</div>
-            <div class="check-item">
-              <select class="status-select" id="copilot-c1" data-tier="2" data-connector="Copilot / AI Governance" data-item="Connector enabled in Sentinel" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="copilot-c1">Connector enabled in Sentinel</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Content Hub</div>
-            <div class="check-item">
-              <select class="status-select" id="copilot-ch1" data-tier="2" data-connector="Copilot / AI Governance" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="copilot-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="copilot-ch2" data-tier="2" data-connector="Copilot / AI Governance" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="copilot-ch2">Workbooks deployed</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="copilot-r1" data-tier="2" data-connector="Copilot / AI Governance" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="copilot-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="copilot-r2" data-tier="2" data-connector="Copilot / AI Governance" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="copilot-r2">Lake retention</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Validation</div>
-            <div class="check-item">
-              <select class="status-select" id="copilot-v1" data-tier="2" data-connector="Copilot / AI Governance" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="copilot-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
-            </div>
-          </div>
-          <div class="section-comment">
-            <label for="copilot-comment">Comments / Rationale — Copilot / AI Governance</label>
-            <textarea id="copilot-comment" data-connector="Copilot / AI Governance" placeholder="e.g. Not applicable — no Copilot licences deployed yet."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- ~~~~~ SUBSECTION: Endpoint Compliance ~~~~~ -->
-      <div class="subsection-header">Endpoint Compliance</div>
-
-      <!-- ===== Microsoft Intune ===== -->
-      <div class="connector-section collapsed" id="conn-intune">
-        <div class="connector-header" onclick="toggleConnector('conn-intune')">
-          <h3>Microsoft Intune (Endpoint Management)</h3>
-          <span class="cost-badge paid">Paid</span>
-          <span class="connector-progress" id="conn-intune-progress">0/0</span>
-          <span class="connector-chevron">▼</span>
-        </div>
-        <div class="connector-body">
-          <div class="check-group">
-            <div class="check-group-title">Connector Setup</div>
-            <div class="check-item">
-              <select class="status-select" id="intune-c1" data-tier="2" data-connector="Microsoft Intune" data-item="Intune logs routed via Entra ID diagnostic settings" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="intune-c1">Intune logs routed via Entra ID diagnostic settings</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Tables</div>
-            <div class="check-item">
-              <select class="status-select" id="intune-t1" data-tier="2" data-connector="Microsoft Intune" data-item="IntuneAuditLogs table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="intune-t1">IntuneAuditLogs<div class="check-detail">Free data source</div></label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="intune-t2" data-tier="2" data-connector="Microsoft Intune" data-item="IntuneOperationalLogs table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="intune-t2">IntuneOperationalLogs<div class="check-detail">Free data source</div></label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="intune-t3" data-tier="2" data-connector="Microsoft Intune" data-item="IntuneDevices table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="intune-t3">IntuneDevices<div class="check-detail">Paid — device compliance and inventory data</div></label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Content Hub</div>
-            <div class="check-item">
-              <select class="status-select" id="intune-ch1" data-tier="2" data-connector="Microsoft Intune" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="intune-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="intune-ch2" data-tier="2" data-connector="Microsoft Intune" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="intune-ch2">Workbooks deployed</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="intune-r1" data-tier="2" data-connector="Microsoft Intune" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="intune-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="intune-r2" data-tier="2" data-connector="Microsoft Intune" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="intune-r2">Lake retention</label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Validation</div>
-            <div class="check-item">
-              <select class="status-select" id="intune-v1" data-tier="2" data-connector="Microsoft Intune" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="intune-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
-            </div>
-          </div>
-          <div class="section-comment">
-            <label for="intune-comment">Comments / Rationale — Microsoft Intune</label>
-            <textarea id="intune-comment" data-connector="Microsoft Intune" placeholder="e.g. Audit and operational logs enabled. IntuneDevices deferred."></textarea>
-          </div>
-        </div>
-      </div>
-
       <!-- ~~~~~ SUBSECTION: Detection Enrichment ~~~~~ -->
       <div class="subsection-header">Detection Enrichment</div>
+      <div class="subsection-description">Threat intelligence feeds that match indicators of compromise against log data — improves detection accuracy by correlating known-bad IPs, domains, URLs, and file hashes with observed activity.</div>
 
       <!-- ===== Microsoft Defender TI ===== -->
       <div class="connector-section collapsed" id="conn-ti">
@@ -2362,8 +1878,100 @@
         </div>
       </div>
 
+
+      <!-- ~~~~~ SUBSECTION: Endpoint Compliance ~~~~~ -->
+      <div class="subsection-header">Endpoint Compliance</div>
+      <div class="subsection-description">Tracks device compliance state, configuration changes, and endpoint management events — supports detection of non-compliant or unmanaged devices accessing corporate resources.</div>
+
+      <!-- ===== Microsoft Intune ===== -->
+      <div class="connector-section collapsed" id="conn-intune">
+        <div class="connector-header" onclick="toggleConnector('conn-intune')">
+          <h3>Microsoft Intune (Endpoint Management)</h3>
+          <span class="cost-badge paid">Paid</span>
+          <span class="connector-progress" id="conn-intune-progress">0/0</span>
+          <span class="connector-chevron">▼</span>
+        </div>
+        <div class="connector-body">
+          <div class="check-group">
+            <div class="check-group-title">Connector Setup</div>
+            <div class="check-item">
+              <select class="status-select" id="intune-c1" data-tier="2" data-connector="Microsoft Intune" data-item="Intune logs routed via Entra ID diagnostic settings" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="intune-c1">Intune logs routed via Entra ID diagnostic settings</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Tables</div>
+            <div class="check-item">
+              <select class="status-select" id="intune-t1" data-tier="2" data-connector="Microsoft Intune" data-item="IntuneAuditLogs table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="intune-t1">IntuneAuditLogs<div class="check-detail">Free data source</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="intune-t2" data-tier="2" data-connector="Microsoft Intune" data-item="IntuneOperationalLogs table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="intune-t2">IntuneOperationalLogs<div class="check-detail">Free data source</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="intune-t3" data-tier="2" data-connector="Microsoft Intune" data-item="IntuneDevices table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="intune-t3">IntuneDevices<div class="check-detail">Paid — device compliance and inventory data</div></label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Content Hub</div>
+            <div class="check-item">
+              <select class="status-select" id="intune-ch1" data-tier="2" data-connector="Microsoft Intune" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="intune-ch1">Analytic rules deployed</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="intune-ch2" data-tier="2" data-connector="Microsoft Intune" data-item="Workbooks deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="intune-ch2">Workbooks deployed</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Retention</div>
+            <div class="check-item">
+              <select class="status-select" id="intune-r1" data-tier="2" data-connector="Microsoft Intune" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="intune-r1">Analytics retention</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="intune-r2" data-tier="2" data-connector="Microsoft Intune" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="intune-r2">Lake retention</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Validation</div>
+            <div class="check-item">
+              <select class="status-select" id="intune-v1" data-tier="2" data-connector="Microsoft Intune" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="intune-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
+            </div>
+          </div>
+          <div class="section-comment">
+            <label for="intune-comment">Comments / Rationale — Microsoft Intune</label>
+            <textarea id="intune-comment" data-connector="Microsoft Intune" placeholder="e.g. Audit and operational logs enabled. IntuneDevices deferred."></textarea>
+          </div>
+        </div>
+      </div>
+
+
       <!-- ~~~~~ SUBSECTION: Multi-Cloud ~~~~~ -->
       <div class="subsection-header">Multi-Cloud</div>
+      <div class="subsection-description">Extends visibility to workloads running outside the primary cloud environment — centralizes audit logs, threat detections, and network flow data from additional cloud providers.</div>
 
       <!-- ===== Amazon Web Services ===== -->
       <div class="connector-section collapsed" id="conn-aws">
@@ -2522,6 +2130,417 @@
           </div>
         </div>
       </div>
+
+      <!-- ~~~~~ SUBSECTION: Network Visibility ~~~~~ -->
+      <div class="subsection-header">Network Visibility</div>
+      <div class="subsection-description">Firewall, proxy, DNS, and flow-log data used to detect perimeter attacks, lateral movement, command-and-control traffic, and data exfiltration across the network.</div>
+
+      <!-- ===== Azure Firewall ===== -->
+      <div class="connector-section collapsed" id="conn-azfw">
+        <div class="connector-header" onclick="toggleConnector('conn-azfw')">
+          <h3>Azure Firewall</h3>
+          <span class="cost-badge paid">Paid</span>
+          <span class="connector-progress" id="conn-azfw-progress">0/0</span>
+          <span class="connector-chevron">▼</span>
+        </div>
+        <div class="connector-body">
+          <div class="check-group">
+            <div class="check-group-title">Connector Setup</div>
+            <div class="check-item">
+              <select class="status-select" id="azfw-c1" data-tier="2" data-connector="Azure Firewall" data-item="Diagnostic settings configured (resource-specific mode)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="azfw-c1">Diagnostic settings configured (resource-specific mode)<div class="check-detail">Must use resource-specific tables, not legacy AzureDiagnostics</div></label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Tables</div>
+            <div class="check-item">
+              <select class="status-select" id="azfw-t1" data-tier="2" data-connector="Azure Firewall" data-item="AZFWNetworkRule table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="azfw-t1">AZFWNetworkRule</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="azfw-t2" data-tier="2" data-connector="Azure Firewall" data-item="AZFWApplicationRule table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="azfw-t2">AZFWApplicationRule</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="azfw-t3" data-tier="2" data-connector="Azure Firewall" data-item="AZFWThreatIntel table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="azfw-t3">AZFWThreatIntel</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="azfw-t4" data-tier="2" data-connector="Azure Firewall" data-item="AZFWDnsQuery table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="azfw-t4">AZFWDnsQuery<div class="check-detail">High-volume — consider Data Lake tier</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="azfw-t5" data-tier="2" data-connector="Azure Firewall" data-item="AZFWIdpsSignature table enabled (Premium)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="azfw-t5">AZFWIdpsSignature<div class="check-detail">Requires Azure Firewall Premium</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="azfw-t6" data-tier="2" data-connector="Azure Firewall" data-item="AZFWNatRule table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="azfw-t6">AZFWNatRule</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Content Hub</div>
+            <div class="check-item">
+              <select class="status-select" id="azfw-ch1" data-tier="2" data-connector="Azure Firewall" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="azfw-ch1">Analytic rules deployed</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="azfw-ch2" data-tier="2" data-connector="Azure Firewall" data-item="Workbooks deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="azfw-ch2">Workbooks deployed</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Retention</div>
+            <div class="check-item">
+              <select class="status-select" id="azfw-r1" data-tier="2" data-connector="Azure Firewall" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="azfw-r1">Analytics retention</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="azfw-r2" data-tier="2" data-connector="Azure Firewall" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="azfw-r2">Lake retention</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Validation</div>
+            <div class="check-item">
+              <select class="status-select" id="azfw-v1" data-tier="2" data-connector="Azure Firewall" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="azfw-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
+            </div>
+          </div>
+          <div class="section-comment">
+            <label for="azfw-comment">Comments / Rationale — Azure Firewall</label>
+            <textarea id="azfw-comment" data-connector="Azure Firewall" placeholder="e.g. 2 firewall instances (hub WestEurope + NorthEurope). IDPS enabled on Premium SKU."></textarea>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ===== Azure WAF ===== -->
+      <div class="connector-section collapsed" id="conn-waf">
+        <div class="connector-header" onclick="toggleConnector('conn-waf')">
+          <h3>Azure WAF (Application Gateway / Front Door)</h3>
+          <span class="cost-badge paid">Paid</span>
+          <span class="connector-progress" id="conn-waf-progress">0/0</span>
+          <span class="connector-chevron">▼</span>
+        </div>
+        <div class="connector-body">
+          <div class="check-group">
+            <div class="check-group-title">Connector Setup</div>
+            <div class="check-item">
+              <select class="status-select" id="waf-c1" data-tier="2" data-connector="Azure WAF" data-item="Diagnostic settings configured on Application Gateway" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="waf-c1">Diagnostic settings on Application Gateway<div class="check-detail">WAF v2 required; use resource-specific tables where available</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="waf-c2" data-tier="2" data-connector="Azure WAF" data-item="Diagnostic settings configured on Front Door" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="waf-c2">Diagnostic settings on Front Door<div class="check-detail">If using Azure Front Door with WAF policy</div></label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Content Hub</div>
+            <div class="check-item">
+              <select class="status-select" id="waf-ch1" data-tier="2" data-connector="Azure WAF" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="waf-ch1">Analytic rules deployed</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="waf-ch2" data-tier="2" data-connector="Azure WAF" data-item="Workbooks deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="waf-ch2">Workbooks deployed</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Retention</div>
+            <div class="check-item">
+              <select class="status-select" id="waf-r1" data-tier="2" data-connector="Azure WAF" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="waf-r1">Analytics retention</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="waf-r2" data-tier="2" data-connector="Azure WAF" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="waf-r2">Lake retention</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Validation</div>
+            <div class="check-item">
+              <select class="status-select" id="waf-v1" data-tier="2" data-connector="Azure WAF" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="waf-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
+            </div>
+          </div>
+          <div class="section-comment">
+            <label for="waf-comment">Comments / Rationale — Azure WAF</label>
+            <textarea id="waf-comment" data-connector="Azure WAF" placeholder="e.g. Application Gateway WAF v2 in WestEurope. No Front Door in use."></textarea>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ===== DNS Security Logs ===== -->
+      <div class="connector-section collapsed" id="conn-dns">
+        <div class="connector-header" onclick="toggleConnector('conn-dns')">
+          <h3>DNS Security Logs</h3>
+          <span class="cost-badge paid">Paid</span>
+          <span class="connector-progress" id="conn-dns-progress">0/0</span>
+          <span class="connector-chevron">▼</span>
+        </div>
+        <div class="connector-body">
+          <div class="check-group">
+            <div class="check-group-title">Connector Setup</div>
+            <div class="check-item">
+              <select class="status-select" id="dns-c1" data-tier="2" data-connector="DNS Security Logs" data-item="Endpoint DNS collection via AMA configured" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="dns-c1">Endpoint DNS collection via AMA<div class="check-detail">DnsEvents / DnsInventory via NXlog DNS extension</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="dns-c2" data-tier="2" data-connector="DNS Security Logs" data-item="Azure DNS diagnostic settings configured" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="dns-c2">Azure DNS diagnostic settings<div class="check-detail">Private DNS zones / DNS Resolver</div></label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Content Hub</div>
+            <div class="check-item">
+              <select class="status-select" id="dns-ch1" data-tier="2" data-connector="DNS Security Logs" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="dns-ch1">Analytic rules deployed</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="dns-ch2" data-tier="2" data-connector="DNS Security Logs" data-item="Workbooks deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="dns-ch2">Workbooks deployed</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Retention</div>
+            <div class="check-item">
+              <select class="status-select" id="dns-r1" data-tier="2" data-connector="DNS Security Logs" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="dns-r1">Analytics retention</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="dns-r2" data-tier="2" data-connector="DNS Security Logs" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="dns-r2">Lake retention</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Validation</div>
+            <div class="check-item">
+              <select class="status-select" id="dns-v1" data-tier="2" data-connector="DNS Security Logs" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="dns-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
+            </div>
+          </div>
+          <div class="section-comment">
+            <label for="dns-comment">Comments / Rationale — DNS Security Logs</label>
+            <textarea id="dns-comment" data-connector="DNS Security Logs" placeholder="e.g. Endpoint DNS piloted on 10 servers. Azure DNS Resolver diagnostic settings enabled."></textarea>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ===== Global Secure Access ===== -->
+      <div class="connector-section collapsed" id="conn-gsa">
+        <div class="connector-header" onclick="toggleConnector('conn-gsa')">
+          <h3>Microsoft Global Secure Access</h3>
+          <span class="cost-badge paid">Paid</span>
+          <span class="connector-progress" id="conn-gsa-progress">0/0</span>
+          <span class="connector-chevron">▼</span>
+        </div>
+        <div class="connector-body">
+          <div class="check-group">
+            <div class="check-group-title">Connector Setup</div>
+            <div class="check-item">
+              <select class="status-select" id="gsa-c1" data-tier="2" data-connector="Global Secure Access" data-item="Connector enabled in Sentinel" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gsa-c1">Connector enabled in Sentinel</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Content Hub</div>
+            <div class="check-item">
+              <select class="status-select" id="gsa-ch1" data-tier="2" data-connector="Global Secure Access" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gsa-ch1">Analytic rules deployed</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="gsa-ch2" data-tier="2" data-connector="Global Secure Access" data-item="Workbooks deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gsa-ch2">Workbooks deployed</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Retention</div>
+            <div class="check-item">
+              <select class="status-select" id="gsa-r1" data-tier="2" data-connector="Global Secure Access" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gsa-r1">Analytics retention</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="gsa-r2" data-tier="2" data-connector="Global Secure Access" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gsa-r2">Lake retention</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Validation</div>
+            <div class="check-item">
+              <select class="status-select" id="gsa-v1" data-tier="2" data-connector="Global Secure Access" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gsa-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
+            </div>
+          </div>
+          <div class="section-comment">
+            <label for="gsa-comment">Comments / Rationale — Global Secure Access</label>
+            <textarea id="gsa-comment" data-connector="Global Secure Access" placeholder="e.g. Not applicable — customer not using GSA."></textarea>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ===== VNet Flow Logs ===== -->
+      <div class="connector-section collapsed" id="conn-vnet">
+        <div class="connector-header" onclick="toggleConnector('conn-vnet')">
+          <h3>VNet Flow Logs &amp; Traffic Analytics</h3>
+          <span class="cost-badge paid">Paid</span>
+          <span class="connector-progress" id="conn-vnet-progress">0/0</span>
+          <span class="connector-chevron">▼</span>
+        </div>
+        <div class="connector-body">
+          <div class="check-group">
+            <div class="check-group-title">Connector Setup</div>
+            <div class="check-item">
+              <select class="status-select" id="vnet-c1" data-tier="2" data-connector="VNet Flow Logs" data-item="VNet Flow Logs enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="vnet-c1">VNet Flow Logs enabled<div class="check-detail">Successor to NSG Flow Logs — captures gateway traffic</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="vnet-c2" data-tier="2" data-connector="VNet Flow Logs" data-item="Traffic Analytics enabled (10-minute interval)" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="vnet-c2">Traffic Analytics enabled (10-minute interval)<div class="check-detail">Required for NTANetAnalytics table in Sentinel</div></label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Content Hub</div>
+            <div class="check-item">
+              <select class="status-select" id="vnet-ch1" data-tier="2" data-connector="VNet Flow Logs" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="vnet-ch1">Analytic rules deployed</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="vnet-ch2" data-tier="2" data-connector="VNet Flow Logs" data-item="Workbooks deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="vnet-ch2">Workbooks deployed</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Retention</div>
+            <div class="check-item">
+              <select class="status-select" id="vnet-r1" data-tier="2" data-connector="VNet Flow Logs" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="vnet-r1">Analytics retention</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="vnet-r2" data-tier="2" data-connector="VNet Flow Logs" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="vnet-r2">Lake retention</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Validation</div>
+            <div class="check-item">
+              <select class="status-select" id="vnet-v1" data-tier="2" data-connector="VNet Flow Logs" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="vnet-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
+            </div>
+          </div>
+          <div class="section-comment">
+            <label for="vnet-comment">Comments / Rationale — VNet Flow Logs</label>
+            <textarea id="vnet-comment" data-connector="VNet Flow Logs" placeholder="e.g. Enabled on hub VNets only. Spoke VNets deferred to Phase 2."></textarea>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ===== Third-Party Network Appliances (dynamic) ===== -->
+      <div class="connector-section collapsed" id="conn-thirdparty">
+        <div class="connector-header" onclick="toggleConnector('conn-thirdparty')">
+          <h3>Third-Party Network &amp; Proxy Appliances</h3>
+          <span class="cost-badge paid">Paid</span>
+          <span class="connector-progress" id="conn-thirdparty-progress">0/0</span>
+          <span class="connector-chevron">▼</span>
+        </div>
+        <div class="connector-body">
+          <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 12px;">
+            Add each third-party appliance individually. Common connectors include check items for setup, retention, and validation.
+          </p>
+          <div id="thirdparty-connectors"></div>
+          <div class="add-connector-bar">
+            <input type="text" id="thirdparty-name-input" placeholder="Connector name — e.g. Palo Alto Networks, Fortinet FortiGate, Zscaler ZIA" onkeydown="if(event.key==='Enter')addThirdPartyConnector()">
+            <button class="btn-icon" onclick="addThirdPartyConnector()" title="Add connector">+</button>
+          </div>
+          <div class="section-comment" style="margin-top: 12px;">
+            <label for="thirdparty-comment">Comments / Rationale — Third-Party Network Appliances</label>
+            <textarea id="thirdparty-comment" data-connector="Third-Party Network Appliances" placeholder="e.g. Palo Alto and Fortinet via CEF. Linux AMA forwarder in WestEurope hub."></textarea>
+          </div>
+        </div>
+      </div>
+
 
     </div>
   </div>
