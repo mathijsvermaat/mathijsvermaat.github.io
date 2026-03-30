@@ -816,6 +816,75 @@
         </div>
       </div>
 
+      <!-- ===== FREE: Sentinel Health & Audit Diagnostics ===== -->
+      <div class="connector-section collapsed" id="conn-health">
+        <div class="connector-header" onclick="toggleConnector('conn-health')">
+          <h3>Sentinel Health & Audit Diagnostics</h3>
+          <span class="cost-badge free">Free Data Source</span>
+          <span class="connector-progress" id="conn-health-progress">0/0</span>
+          <span class="connector-chevron">▼</span>
+        </div>
+        <div class="connector-body">
+
+          <div class="check-group">
+            <div class="check-group-title">Connector Setup</div>
+            <div class="check-item">
+              <select class="status-select" id="health-c1" data-tier="1" data-connector="Sentinel Health" data-item="Health monitoring enabled in Sentinel Settings" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="health-c1">Health monitoring enabled in Sentinel Settings<div class="check-detail">Settings → Auditing and health monitoring → Enable</div></label>
+            </div>
+          </div>
+
+          <div class="check-group">
+            <div class="check-group-title">Content Hub</div>
+            <div class="check-item">
+              <select class="status-select" id="health-ch1" data-tier="1" data-connector="Sentinel Health" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="health-ch1">Analytic rules deployed</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="health-ch2" data-tier="1" data-connector="Sentinel Health" data-item="Workbooks deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="health-ch2">Workbooks deployed<div class="check-detail">Sentinel Health workbook and Data collection health monitoring workbook</div></label>
+            </div>
+          </div>
+
+          <div class="check-group">
+            <div class="check-group-title">Retention</div>
+            <div class="check-item">
+              <select class="status-select" id="health-r1" data-tier="1" data-connector="Sentinel Health" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="health-r1">Analytics retention</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="health-r2" data-tier="1" data-connector="Sentinel Health" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="health-r2">Lake retention</label>
+            </div>
+          </div>
+
+          <div class="check-group">
+            <div class="check-group-title">Validation</div>
+            <div class="check-item">
+              <select class="status-select" id="health-v1" data-tier="1" data-connector="Sentinel Health" data-item="Ingestion volumes validated in Workspace Usage Report" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="health-v1">Ingestion volumes validated in Workspace Usage Report</label>
+            </div>
+          </div>
+
+          <div class="section-comment">
+            <label for="health-comment">Comments / Rationale — Sentinel Health & Audit Diagnostics</label>
+            <textarea id="health-comment" data-connector="Sentinel Health" placeholder="e.g. Health monitoring enabled. Sentinel Health workbook deployed. Azure Monitor alert rule configured for connector failures."></textarea>
+          </div>
+        </div>
+      </div>
+
       <!-- ===== INGESTION BENEFIT: Microsoft Defender XDR ===== -->
       <div class="connector-section collapsed" id="conn-xdr">
         <div class="connector-header" onclick="toggleConnector('conn-xdr')">
@@ -1391,6 +1460,7 @@
           </div>
         </div>
       </div>
+
 
     </div>
   </div>
@@ -2572,7 +2642,7 @@ function updateProgress() {
 
   // Per connector (static)
   const connectors = [
-    'conn-o365', 'conn-azactivity', 'conn-xdr', 'conn-entra', 'conn-winsec', 'conn-syslog',
+    'conn-o365', 'conn-azactivity', 'conn-xdr', 'conn-entra', 'conn-winsec', 'conn-syslog', 'conn-health',
     'conn-dfc', 'conn-azfw', 'conn-waf', 'conn-vnet', 'conn-gsa', 'conn-dns', 'conn-thirdparty',
     'conn-purview', 'conn-akv', 'conn-copilot', 'conn-intune', 'conn-ti', 'conn-thirdpartyti', 'conn-aws', 'conn-gcp'
   ];
