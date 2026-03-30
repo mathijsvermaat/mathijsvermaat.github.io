@@ -190,6 +190,15 @@
     .connector-header:hover { background: var(--secondary); }
 
     .connector-header h3 { flex: 1; font-size: 0.95rem; font-weight: 600; }
+    .connector-header h3 a {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px dashed var(--text-light);
+    }
+    .connector-header h3 a:hover {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
     .connector-progress { font-size: 0.8rem; color: var(--text-light); min-width: 60px; text-align: right; }
     .connector-chevron { font-size: 1rem; color: var(--text-light); transition: transform 0.2s; }
     .connector-section.collapsed .connector-chevron { transform: rotate(-90deg); }
@@ -667,7 +676,7 @@
       <!-- ===== FREE: Office 365 ===== -->
       <div class="connector-section collapsed" id="conn-o365">
         <div class="connector-header" onclick="toggleConnector('conn-o365')">
-          <h3>Office 365</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/office-365.md" target="_blank" onclick="event.stopPropagation()">Office 365</a></h3>
           <span class="cost-badge free">Free Data Source</span>
           <span class="connector-progress" id="conn-o365-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -758,7 +767,7 @@
       <!-- ===== FREE: Azure Activity Logs ===== -->
       <div class="connector-section collapsed" id="conn-azactivity">
         <div class="connector-header" onclick="toggleConnector('conn-azactivity')">
-          <h3>Azure Activity Logs</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/azure-activity-logs.md" target="_blank" onclick="event.stopPropagation()">Azure Activity Logs</a></h3>
           <span class="cost-badge free">Free Data Source</span>
           <span class="connector-progress" id="conn-azactivity-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -873,7 +882,7 @@
       <!-- ===== FREE: Sentinel Health & Audit Diagnostics ===== -->
       <div class="connector-section collapsed" id="conn-health">
         <div class="connector-header" onclick="toggleConnector('conn-health')">
-          <h3>Sentinel Health & Audit Diagnostics</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/sentinel-health.md" target="_blank" onclick="event.stopPropagation()">Sentinel Health & Audit Diagnostics</a></h3>
           <span class="cost-badge free">Free Data Source</span>
           <span class="connector-progress" id="conn-health-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -942,7 +951,7 @@
       <!-- ===== INGESTION BENEFIT: Microsoft Defender XDR ===== -->
       <div class="connector-section collapsed" id="conn-xdr">
         <div class="connector-header" onclick="toggleConnector('conn-xdr')">
-          <h3>Microsoft Defender XDR</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/microsoft-defender-xdr.md" target="_blank" onclick="event.stopPropagation()">Microsoft Defender XDR</a></h3>
           <span class="cost-badge benefit">Ingestion Benefit (E5)</span>
           <span class="connector-progress" id="conn-xdr-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -1161,7 +1170,7 @@
       <!-- ===== INGESTION BENEFIT: Microsoft Entra ID ===== -->
       <div class="connector-section collapsed" id="conn-entra">
         <div class="connector-header" onclick="toggleConnector('conn-entra')">
-          <h3>Microsoft Entra ID</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/microsoft-entra-id.md" target="_blank" onclick="event.stopPropagation()">Microsoft Entra ID</a></h3>
           <span class="cost-badge benefit">Ingestion Benefit (E5)</span>
           <span class="connector-progress" id="conn-entra-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -1302,7 +1311,7 @@
       <!-- ===== INGESTION BENEFIT: Windows Security Events ===== -->
       <div class="connector-section collapsed" id="conn-winsec">
         <div class="connector-header" onclick="toggleConnector('conn-winsec')">
-          <h3>Windows Security Events</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/windows-security-events.md" target="_blank" onclick="event.stopPropagation()">Windows Security Events</a></h3>
           <span class="cost-badge benefit">Ingestion Benefit (P2)</span>
           <span class="connector-progress" id="conn-winsec-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -1397,7 +1406,7 @@
       <!-- ===== PAID: Syslog for Linux ===== -->
       <div class="connector-section collapsed" id="conn-syslog">
         <div class="connector-header" onclick="toggleConnector('conn-syslog')">
-          <h3>Syslog for Linux</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/syslog-linux.md" target="_blank" onclick="event.stopPropagation()">Syslog for Linux</a></h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-syslog-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -1536,7 +1545,7 @@
       <!-- ===== Defender for Cloud ===== -->
       <div class="connector-section collapsed" id="conn-dfc">
         <div class="connector-header" onclick="toggleConnector('conn-dfc')">
-          <h3>Microsoft Defender for Cloud</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/microsoft-defender-for-cloud.md" target="_blank" onclick="event.stopPropagation()">Microsoft Defender for Cloud</a></h3>
           <span class="cost-badge free">SecurityAlert Free</span>
           <span class="connector-progress" id="conn-dfc-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -1632,7 +1641,7 @@
       <!-- ===== Azure Key Vault ===== -->
       <div class="connector-section collapsed" id="conn-akv">
         <div class="connector-header" onclick="toggleConnector('conn-akv')">
-          <h3>Azure Key Vault</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/azure-key-vault.md" target="_blank" onclick="event.stopPropagation()">Azure Key Vault</a></h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-akv-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -1697,7 +1706,7 @@
       <!-- ===== Copilot / AI Governance ===== -->
       <div class="connector-section collapsed" id="conn-copilot">
         <div class="connector-header" onclick="toggleConnector('conn-copilot')">
-          <h3>Microsoft Copilot / AI Governance</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/copilot-ai-governance.md" target="_blank" onclick="event.stopPropagation()">Microsoft Copilot / AI Governance</a></h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-copilot-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -1763,7 +1772,7 @@
       <!-- ===== Microsoft Purview ===== -->
       <div class="connector-section collapsed" id="conn-purview">
         <div class="connector-header" onclick="toggleConnector('conn-purview')">
-          <h3>Microsoft Purview (Information Protection &amp; DLP)</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/microsoft-purview.md" target="_blank" onclick="event.stopPropagation()">Microsoft Purview (Information Protection &amp; DLP)</a></h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-purview-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -1846,7 +1855,7 @@
       <!-- ===== Microsoft Defender TI ===== -->
       <div class="connector-section collapsed" id="conn-ti">
         <div class="connector-header" onclick="toggleConnector('conn-ti')">
-          <h3>Microsoft Defender Threat Intelligence</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/threat-intelligence.md" target="_blank" onclick="event.stopPropagation()">Microsoft Defender Threat Intelligence</a></h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-ti-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -1910,7 +1919,7 @@
       <!-- ===== Third-Party Threat Intelligence (dynamic) ===== -->
       <div class="connector-section collapsed" id="conn-thirdpartyti">
         <div class="connector-header" onclick="toggleConnector('conn-thirdpartyti')">
-          <h3>Third-Party Threat Intelligence</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/threat-intelligence.md" target="_blank" onclick="event.stopPropagation()">Third-Party Threat Intelligence</a></h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-thirdpartyti-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -1939,7 +1948,7 @@
       <!-- ===== Microsoft Intune ===== -->
       <div class="connector-section collapsed" id="conn-intune">
         <div class="connector-header" onclick="toggleConnector('conn-intune')">
-          <h3>Microsoft Intune (Endpoint Management)</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/microsoft-intune.md" target="_blank" onclick="event.stopPropagation()">Microsoft Intune (Endpoint Management)</a></h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-intune-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -2029,7 +2038,7 @@
       <!-- ===== Amazon Web Services ===== -->
       <div class="connector-section collapsed" id="conn-aws">
         <div class="connector-header" onclick="toggleConnector('conn-aws')">
-          <h3>Amazon Web Services (AWS)</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/amazon-web-services.md" target="_blank" onclick="event.stopPropagation()">Amazon Web Services (AWS)</a></h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-aws-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -2114,7 +2123,7 @@
       <!-- ===== Google Cloud Platform ===== -->
       <div class="connector-section collapsed" id="conn-gcp">
         <div class="connector-header" onclick="toggleConnector('conn-gcp')">
-          <h3>Google Cloud Platform (GCP)</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/google-cloud-platform.md" target="_blank" onclick="event.stopPropagation()">Google Cloud Platform (GCP)</a></h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-gcp-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -2191,7 +2200,7 @@
       <!-- ===== Azure Firewall ===== -->
       <div class="connector-section collapsed" id="conn-azfw">
         <div class="connector-header" onclick="toggleConnector('conn-azfw')">
-          <h3>Azure Firewall</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/azure-firewall.md" target="_blank" onclick="event.stopPropagation()">Azure Firewall</a></h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-azfw-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -2295,7 +2304,7 @@
       <!-- ===== Azure WAF ===== -->
       <div class="connector-section collapsed" id="conn-waf">
         <div class="connector-header" onclick="toggleConnector('conn-waf')">
-          <h3>Azure WAF (Application Gateway / Front Door)</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/azure-waf.md" target="_blank" onclick="event.stopPropagation()">Azure WAF (Application Gateway / Front Door)</a></h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-waf-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -2366,7 +2375,7 @@
       <!-- ===== DNS Security Logs ===== -->
       <div class="connector-section collapsed" id="conn-dns">
         <div class="connector-header" onclick="toggleConnector('conn-dns')">
-          <h3>DNS Security Logs</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/dns-security-logs.md" target="_blank" onclick="event.stopPropagation()">DNS Security Logs</a></h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-dns-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -2437,7 +2446,7 @@
       <!-- ===== Global Secure Access ===== -->
       <div class="connector-section collapsed" id="conn-gsa">
         <div class="connector-header" onclick="toggleConnector('conn-gsa')">
-          <h3>Microsoft Global Secure Access</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/global-secure-access.md" target="_blank" onclick="event.stopPropagation()">Microsoft Global Secure Access</a></h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-gsa-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -2502,7 +2511,7 @@
       <!-- ===== VNet Flow Logs ===== -->
       <div class="connector-section collapsed" id="conn-vnet">
         <div class="connector-header" onclick="toggleConnector('conn-vnet')">
-          <h3>VNet Flow Logs &amp; Traffic Analytics</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/nsg-flow-logs.md" target="_blank" onclick="event.stopPropagation()">VNet Flow Logs &amp; Traffic Analytics</a></h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-vnet-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -2573,7 +2582,7 @@
       <!-- ===== Third-Party Network Appliances (dynamic) ===== -->
       <div class="connector-section collapsed" id="conn-thirdparty">
         <div class="connector-header" onclick="toggleConnector('conn-thirdparty')">
-          <h3>Third-Party Network &amp; Proxy Appliances</h3>
+          <h3><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/third-party-network-appliances.md" target="_blank" onclick="event.stopPropagation()">Third-Party Network &amp; Proxy Appliances</a></h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-thirdparty-progress">0/0</span>
           <span class="connector-chevron">▼</span>
