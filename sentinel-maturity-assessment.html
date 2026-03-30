@@ -445,6 +445,52 @@
       padding: 2px 0;
     }
 
+    .risk-summary {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 24px;
+      border-left: 4px solid #c0392b;
+    }
+
+    .risk-summary h2 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: #c0392b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .risk-summary .risk-count {
+      background: #c0392b;
+      color: var(--white);
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .risk-connector-group {
+      margin-bottom: 12px;
+    }
+
+    .risk-connector-group h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+      color: var(--text);
+    }
+
+    .risk-connector-group p {
+      font-size: 0.85rem;
+      color: var(--text);
+      margin: 0 0 0 0;
+      padding-left: 4px;
+      line-height: 1.5;
+    }
+
     .section-comment {
       margin-top: 16px;
       padding-top: 12px;
@@ -532,6 +578,7 @@
       .connector-section { break-inside: avoid; }
       textarea { border: 1px solid #ccc !important; }
       .todo-summary { break-inside: avoid; box-shadow: none; }
+      .risk-summary { break-inside: avoid; box-shadow: none; }
       .retention-inline { display: inline-flex !important; }
     }
   </style>
@@ -599,6 +646,12 @@
   <div class="todo-summary" id="todo-summary" style="display: none;">
     <h2>📋 To Do — Items to be Added <span class="todo-count" id="todo-count">0</span></h2>
     <div id="todo-list"></div>
+  </div>
+
+  <!-- Accepted Risks — connectors set to "Not configured" -->
+  <div class="risk-summary" id="risk-summary" style="display: none;">
+    <h2>⚠️ Not Covered — Accepted Risks <span class="risk-count" id="risk-count">0</span></h2>
+    <div id="risk-list"></div>
   </div>
 
   <!-- ==================== TIER 1 ==================== -->
@@ -2592,17 +2645,89 @@ function onStatusChange(sel) {
     handleRetentionDropdown(sel);
   }
 
-  // Handle GB/day input for "To be added"
+  // Handle GB/day input for "To be added" (only in Connector Setup groups)
   handleGbdayInput(sel);
+
+  // Handle connector collapse when first setup item is N/A, Not configured, or To be added
+  handleConnectorCollapse(sel);
 
   updateProgress();
   updateTodoSummary();
+  updateAcceptedRisks();
+}
+
+// ===================== CONNECTOR COLLAPSE ON N/A / NOT CONFIGURED / TO BE ADDED =====================
+function handleConnectorCollapse(sel) {
+  // Only act on the first Connector Setup select (-c1) within a connector body
+  const connectorBody = sel.closest('.connector-body');
+  if (!connectorBody) return;
+  const setupGroup = connectorBody.querySelector('.check-group');
+  if (!setupGroup) return;
+  const firstSetupSelect = setupGroup.querySelector('select.status-select');
+  if (sel !== firstSetupSelect) return;
+
+  const collapseValues = ['N/A', 'Not configured', 'To be added'];
+  const shouldCollapse = collapseValues.includes(sel.value);
+
+  // Find all check-groups after the first one (Tables, Content Hub, Retention, Validation)
+  const allGroups = connectorBody.querySelectorAll('.check-group');
+  for (let i = 1; i < allGroups.length; i++) {
+    const group = allGroups[i];
+    if (shouldCollapse) {
+      // Reset all selects in this group to "Not assessed" and clear styling
+      group.querySelectorAll('select.status-select').forEach(s => {
+        s.value = '';
+        s.classList.remove('status-configured', 'status-not-configured', 'status-na', 'status-to-be-added');
+        // Remove any retention dropdowns or GB/day inputs
+        const checkItem = s.closest('.check-item');
+        if (checkItem) {
+          const retDrop = checkItem.querySelector('.retention-dropdown');
+          if (retDrop) retDrop.remove();
+          const gbday = checkItem.querySelector('.gbday-inline');
+          if (gbday) gbday.remove();
+        }
+      });
+      group.style.display = 'none';
+    } else {
+      group.style.display = '';
+    }
+  }
+
+  // Also hide/show additional Connector Setup items (c2, c3, etc.) when collapsing
+  if (shouldCollapse) {
+    const setupItems = setupGroup.querySelectorAll('.check-item');
+    for (let i = 1; i < setupItems.length; i++) {
+      const s = setupItems[i].querySelector('select.status-select');
+      if (s) {
+        s.value = '';
+        s.classList.remove('status-configured', 'status-not-configured', 'status-na', 'status-to-be-added');
+      }
+      setupItems[i].style.display = 'none';
+    }
+  } else {
+    const setupItems = setupGroup.querySelectorAll('.check-item');
+    for (let i = 1; i < setupItems.length; i++) {
+      setupItems[i].style.display = '';
+    }
+  }
 }
 
 // ===================== GB/DAY INPUT FOR "TO BE ADDED" =====================
 function handleGbdayInput(sel) {
   const checkItem = sel.closest('.check-item');
   if (!checkItem) return;
+
+  // Only show GB/day input for the first setup item in each connector (the primary enable/configure step)
+  const connectorBody = sel.closest('.connector-body');
+  if (!connectorBody) return;
+  // Skip free data source connectors where GB/day is not relevant
+  const connSection = connectorBody.closest('.connector-section');
+  if (connSection && ['conn-health', 'conn-o365', 'conn-azactivity'].includes(connSection.id)) return;
+  const firstGroup = connectorBody.querySelector('.check-group');
+  if (!firstGroup) return;
+  const firstSelect = firstGroup.querySelector('select.status-select');
+  if (sel !== firstSelect) return;
+
   let container = checkItem.querySelector('.gbday-inline');
 
   if (sel.value === 'To be added') {
@@ -2839,6 +2964,94 @@ function updateTodoSummary() {
   container.appendChild(totalDiv);
 }
 
+// ===================== ACCEPTED RISKS SUMMARY =====================
+const connectorRiskTexts = {
+  'Microsoft Defender XDR': 'No advanced hunting telemetry from MDE, MDO, MDI, and MDA in Sentinel. Limits cross-workload attack reconstruction, automated investigation, and forensic analysis of endpoint, email, and identity threats.',
+  'Microsoft Entra ID': 'No visibility on sign-in activity, MFA events, or directory changes. Unable to detect compromised accounts, privilege escalation, or persistence via app registrations — critical identity data missing for incident response.',
+  'Windows Security Events': 'No Windows server audit trail for logons, process execution, or group membership changes. Forensic investigation of lateral movement, persistence mechanisms, and credential abuse on Windows servers not possible.',
+  'Syslog for Linux': 'No Linux server audit trail for SSH authentication, sudo escalation, or service changes. Unable to detect brute-force attacks, rootkit activity, or unauthorized access on Linux infrastructure.',
+  'Microsoft Defender for Cloud': 'No cloud workload threat alerts or security posture data in Sentinel. Misconfiguration drift, VM brute-force, storage anomalies, and container escape alerts are not correlated with other security signals.',
+  'Azure Key Vault': 'No audit trail for secret, key, or certificate access. Unable to determine if attackers accessed credentials during a breach — no forensic evidence of vault access or access policy tampering.',
+  'Copilot / AI Governance': 'No visibility on AI assistant usage patterns. Unable to detect data oversharing through Copilot interactions or unauthorized AI model usage — AI-related data exfiltration risk unmonitored.',
+  'Microsoft Purview': 'No tracking of sensitivity label changes or DLP policy matches. Unable to detect data staging via label downgrades or correlate data protection violations with security incidents.',
+  'Microsoft Defender TI': 'No automated IOC matching across log data. Known malicious IPs, domains, and file hashes are not correlated with environment activity — known threats may go undetected across all data sources.',
+  'Microsoft Intune': 'No device compliance or management data in Sentinel. Unable to verify endpoint compliance state during incidents or audit administrative actions such as policy changes and remote wipes.',
+  'Amazon Web Services': 'No AWS control plane visibility. IAM privilege escalation, S3 exposure, resource changes, and GuardDuty threat detections are not ingested — AWS infrastructure blind spot for SOC operations.',
+  'Google Cloud Platform': 'No GCP audit trail. IAM binding changes, firewall modifications, secret access, and compute provisioning invisible to SOC — GCP infrastructure blind spot in multi-cloud environments.',
+  'Azure Firewall': 'No network rule, application rule, or DNS proxy logs from Azure Firewall. Unable to detect lateral movement, C2 communication, or data exfiltration through the cloud perimeter. IDPS signature alerts (Premium) also lost.',
+  'Azure WAF': 'No application-layer attack visibility. SQL injection, XSS, RCE attempts, and bot activity against internet-facing web applications go undetected — attacks invisible to network firewalls are missed.',
+  'DNS Security Logs': 'No endpoint DNS query visibility. Unable to detect C2 beaconing, DGA domains, or DNS tunneling — the earliest stage of many attacks goes unmonitored.',
+  'Global Secure Access': 'No identity-enriched web traffic or private application access logs. User-level browsing activity and ZTNA access patterns unavailable — no visibility on what users access through Entra Internet/Private Access.',
+  'VNet Flow Logs': 'No east-west network flow data between Azure resources. Lateral movement, internal reconnaissance, and data exfiltration between VMs invisible — attacks that bypass north-south firewall inspection go undetected.'
+};
+
+function getThirdPartyRiskText(connectorName, type) {
+  const name = connectorName || 'unnamed third-party connector';
+  if (type === 'ti') {
+    return `No enrichment from ${name} threat intelligence feed. Detection coverage for threats beyond Microsoft built-in intelligence is reduced.`;
+  }
+  return `No logs from ${name}. Perimeter and internal network activity from ${name} not available for SOC correlation.`;
+}
+
+function updateAcceptedRisks() {
+  const container = document.getElementById('risk-list');
+  const summaryDiv = document.getElementById('risk-summary');
+  const countBadge = document.getElementById('risk-count');
+
+  // Collect all connectors where the first setup item is "Not configured"
+  const riskItems = [];
+  document.querySelectorAll('.connector-section').forEach(section => {
+    // Skip free-only connectors (O365, Azure Activity, Sentinel Health)
+    const sectionId = section.id;
+    if (['conn-o365', 'conn-azactivity', 'conn-health'].includes(sectionId)) return;
+
+    const body = section.querySelector('.connector-body');
+    if (!body) return;
+    const firstGroup = body.querySelector('.check-group');
+    if (!firstGroup) return;
+    const firstSelect = firstGroup.querySelector('select.status-select');
+    if (!firstSelect || firstSelect.value !== 'Not configured') return;
+
+    const connectorName = firstSelect.dataset.connector;
+    let riskText = connectorRiskTexts[connectorName];
+
+    // Handle dynamic third-party connectors
+    if (!riskText) {
+      if (sectionId.startsWith('conn-tp-')) {
+        riskText = getThirdPartyRiskText(connectorName, 'network');
+      } else if (sectionId.startsWith('conn-tti-')) {
+        riskText = getThirdPartyRiskText(connectorName, 'ti');
+      }
+    }
+
+    if (riskText) {
+      riskItems.push({ connector: connectorName, risk: riskText });
+    }
+  });
+
+  countBadge.textContent = riskItems.length;
+
+  if (riskItems.length === 0) {
+    summaryDiv.style.display = 'none';
+    return;
+  }
+
+  summaryDiv.style.display = 'block';
+  container.innerHTML = '';
+
+  riskItems.forEach(item => {
+    const group = document.createElement('div');
+    group.className = 'risk-connector-group';
+    const h3 = document.createElement('h3');
+    h3.textContent = item.connector;
+    group.appendChild(h3);
+    const p = document.createElement('p');
+    p.textContent = item.risk;
+    group.appendChild(p);
+    container.appendChild(group);
+  });
+}
+
 // ===================== THIRD-PARTY DYNAMIC CONNECTORS =====================
 let thirdPartyCounter = 0;
 
@@ -2934,6 +3147,7 @@ function addThirdPartyConnector(name) {
   document.getElementById('thirdparty-connectors').appendChild(section);
   updateProgress();
   updateTodoSummary();
+  updateAcceptedRisks();
 }
 
 function removeThirdPartyConnector(id) {
@@ -2941,6 +3155,7 @@ function removeThirdPartyConnector(id) {
   if (el) el.remove();
   updateProgress();
   updateTodoSummary();
+  updateAcceptedRisks();
 }
 
 // ===================== THIRD-PARTY TI DYNAMIC CONNECTORS =====================
@@ -3038,6 +3253,7 @@ function addThirdPartyTIConnector(name) {
   document.getElementById('thirdpartyti-connectors').appendChild(section);
   updateProgress();
   updateTodoSummary();
+  updateAcceptedRisks();
 }
 
 function removeThirdPartyTIConnector(id) {
@@ -3045,6 +3261,7 @@ function removeThirdPartyTIConnector(id) {
   if (el) el.remove();
   updateProgress();
   updateTodoSummary();
+  updateAcceptedRisks();
 }
 
 // Attach listeners
@@ -3062,6 +3279,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('assessment-date').valueAsDate = new Date();
   updateProgress();
   updateTodoSummary();
+  updateAcceptedRisks();
 });
 
 // ===================== SAVE / LOAD JSON =====================
@@ -3196,6 +3414,7 @@ function applyState(state) {
 
   updateProgress();
   updateTodoSummary();
+  updateAcceptedRisks();
 }
 
 function saveToJSON() {
