@@ -483,6 +483,24 @@
       white-space: nowrap;
     }
 
+    .gbday-plan {
+      padding: 3px 6px;
+      border: 1px solid var(--warning);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: inherit;
+      background: #fff8e1;
+      color: #8a6d00;
+      cursor: pointer;
+    }
+
+    .todo-plan {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-light);
+      margin-left: 2px;
+    }
+
     .todo-total {
       margin-top: 16px;
       padding-top: 12px;
@@ -4031,8 +4049,16 @@ function handleGbdayInput(sel) {
       label.className = 'gbday-label';
       label.textContent = 'GB/day';
 
+      const plan = document.createElement('select');
+      plan.className = 'gbday-plan';
+      plan.id = sel.id + '-plan';
+      plan.title = 'Table plan';
+      plan.innerHTML = '<option value="Analytics">Analytics</option><option value="Data Lake">Data Lake</option>';
+      plan.addEventListener('change', () => updateTodoSummary());
+
       container.appendChild(input);
       container.appendChild(label);
+      container.appendChild(plan);
       checkItem.appendChild(container);
     }
   } else {
@@ -4251,6 +4277,8 @@ function updateTodoSummary() {
     });
 
     let totalGbday = 0;
+    let totalAnalytics = 0;
+    let totalDataLake = 0;
 
     for (const [connector, items] of grouped) {
       const group = document.createElement('div');
@@ -4265,10 +4293,18 @@ function updateTodoSummary() {
         const gbInput = document.getElementById(item.selectId + '-gbday');
         if (gbInput && gbInput.value) {
           const val = parseFloat(gbInput.value) || 0;
+          const planSel = document.getElementById(item.selectId + '-plan');
+          const plan = planSel ? planSel.value : 'Analytics';
+          if (plan === 'Data Lake') { totalDataLake += val; } else { totalAnalytics += val; }
           totalGbday += val;
           const badge = document.createElement('span');
           badge.className = 'todo-gbday';
-          badge.textContent = `(${val} GB/day)`;
+          badge.textContent = `(${val} GB/day`;
+          const planBadge = document.createElement('span');
+          planBadge.className = 'todo-plan';
+          planBadge.textContent = plan === 'Data Lake' ? ' · Data Lake' : ' · Analytics';
+          badge.appendChild(planBadge);
+          badge.appendChild(document.createTextNode(')'));
           li.appendChild(badge);
         }
         ul.appendChild(li);
@@ -4277,10 +4313,15 @@ function updateTodoSummary() {
       container.appendChild(group);
     }
 
-    // Total GB/day at the bottom
+    // Total GB/day at the bottom with per-plan breakdown
     const totalDiv = document.createElement('div');
     totalDiv.className = 'todo-total';
-    totalDiv.textContent = `Estimated total ingest: ${totalGbday.toFixed(1)} GB/day`;
+    let totalText = `Estimated total ingest: ${totalGbday.toFixed(1)} GB/day`;
+    if (totalAnalytics > 0 || totalDataLake > 0) {
+      totalText += ` — Analytics: ${totalAnalytics.toFixed(1)} GB/day`;
+      totalText += ` · Data Lake: ${totalDataLake.toFixed(1)} GB/day`;
+    }
+    totalDiv.textContent = totalText;
     container.appendChild(totalDiv);
   }
 }
@@ -5367,6 +5408,7 @@ function gatherState() {
     comments: {},
     retentionValues: {},
     gbdayValues: {},
+    tablePlanValues: {},
     thirdPartyConnectors: [],
     thirdPartyTIConnectors: [],
     thirdPartyIdConnectors: [],
@@ -5397,6 +5439,9 @@ function gatherState() {
   // Save GB/day estimates for "To be added" items
   document.querySelectorAll('.gbday-input').forEach(inp => {
     if (inp.value) state.gbdayValues[inp.id] = inp.value;
+  });
+  document.querySelectorAll('.gbday-plan').forEach(sel => {
+    if (sel.value !== 'Analytics') state.tablePlanValues[sel.id] = sel.value;
   });
 
   // Save third-party dynamic connectors
@@ -5569,6 +5614,12 @@ function applyState(state) {
   // Restore GB/day estimates (gbday inputs were created by onStatusChange above)
   if (state.gbdayValues) {
     for (const [id, value] of Object.entries(state.gbdayValues)) {
+      const el = document.getElementById(id);
+      if (el) el.value = value;
+    }
+  }
+  if (state.tablePlanValues) {
+    for (const [id, value] of Object.entries(state.tablePlanValues)) {
       const el = document.getElementById(id);
       if (el) el.value = value;
     }
