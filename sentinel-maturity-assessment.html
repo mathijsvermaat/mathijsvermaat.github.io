@@ -493,6 +493,82 @@
       padding: 2px 0;
     }
 
+    .manual-todo-input {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      align-items: flex-end;
+    }
+
+    .manual-todo-input .todo-fields {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .manual-todo-input input {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+
+    .manual-todo-input .todo-title-input {
+      font-weight: 600;
+    }
+
+    .manual-todo-list {
+      margin-top: 12px;
+    }
+
+    .manual-todo-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 8px 0;
+      font-size: 0.85rem;
+      color: var(--text);
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .manual-todo-item:last-child {
+      border-bottom: none;
+    }
+
+    .manual-todo-item .todo-text {
+      flex: 1;
+    }
+
+    .manual-todo-item .todo-title {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .manual-todo-item .todo-desc {
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    .manual-todo-item .btn-remove-todo {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 2px 6px;
+      border-radius: var(--radius);
+    }
+
+    .manual-todo-item .btn-remove-todo:hover {
+      color: #c0392b;
+      background: #fce4ec;
+    }
+
     .risk-summary {
       background: var(--white);
       border-radius: var(--radius);
@@ -717,10 +793,18 @@
     <span class="percent" id="overall-percent">0%</span>
   </div>
 
-  <!-- To Do Summary — items marked "To be added" -->
-  <div class="todo-summary" id="todo-summary" style="display: none;">
+  <!-- To Do Summary — items marked "To be added" + manual items -->
+  <div class="todo-summary" id="todo-summary">
     <h2>📋 To Do — Items to be Added <span class="todo-count" id="todo-count">0</span></h2>
     <div id="todo-list"></div>
+    <div id="manual-todo-list" class="manual-todo-list"></div>
+    <div class="manual-todo-input">
+      <div class="todo-fields">
+        <input type="text" id="manual-todo-title" class="todo-title-input" placeholder="Title — e.g. Configure Syslog forwarding" onkeydown="if(event.key==='Enter')document.getElementById('manual-todo-desc').focus()">
+        <input type="text" id="manual-todo-desc" placeholder="Description (optional) — e.g. Set up rsyslog on all Linux servers to forward auth.log" onkeydown="if(event.key==='Enter')addManualTodo()">
+      </div>
+      <button class="btn-icon" onclick="addManualTodo()" title="Add to-do item">+</button>
+    </div>
   </div>
 
   <!-- Accepted Risks — connectors set to "Not configured" -->
@@ -4083,55 +4167,99 @@ function updateTodoSummary() {
     }
   });
 
-  countBadge.textContent = todoItems.length;
+  const manualCount = document.querySelectorAll('#manual-todo-list .manual-todo-item').length;
+  const totalCount = todoItems.length + manualCount;
+  countBadge.textContent = totalCount;
 
-  if (todoItems.length === 0) {
-    summaryDiv.style.display = 'none';
-    return;
-  }
-
-  summaryDiv.style.display = 'block';
   container.innerHTML = '';
 
-  // Group by connector (preserving order)
-  const grouped = new Map();
-  todoItems.forEach(item => {
-    if (!grouped.has(item.connector)) grouped.set(item.connector, []);
-    grouped.get(item.connector).push(item);
-  });
-
-  let totalGbday = 0;
-
-  for (const [connector, items] of grouped) {
-    const group = document.createElement('div');
-    group.className = 'todo-connector-group';
-    const h3 = document.createElement('h3');
-    h3.textContent = connector;
-    group.appendChild(h3);
-    const ul = document.createElement('ul');
-    items.forEach(item => {
-      const li = document.createElement('li');
-      li.textContent = item.item;
-      const gbInput = document.getElementById(item.selectId + '-gbday');
-      if (gbInput && gbInput.value) {
-        const val = parseFloat(gbInput.value) || 0;
-        totalGbday += val;
-        const badge = document.createElement('span');
-        badge.className = 'todo-gbday';
-        badge.textContent = `(${val} GB/day)`;
-        li.appendChild(badge);
-      }
-      ul.appendChild(li);
+  if (todoItems.length === 0) {
+    // No auto-generated items — clear the auto list but keep section visible for manual todos
+  } else {
+    // Group by connector (preserving order)
+    const grouped = new Map();
+    todoItems.forEach(item => {
+      if (!grouped.has(item.connector)) grouped.set(item.connector, []);
+      grouped.get(item.connector).push(item);
     });
-    group.appendChild(ul);
-    container.appendChild(group);
+
+    let totalGbday = 0;
+
+    for (const [connector, items] of grouped) {
+      const group = document.createElement('div');
+      group.className = 'todo-connector-group';
+      const h3 = document.createElement('h3');
+      h3.textContent = connector;
+      group.appendChild(h3);
+      const ul = document.createElement('ul');
+      items.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item.item;
+        const gbInput = document.getElementById(item.selectId + '-gbday');
+        if (gbInput && gbInput.value) {
+          const val = parseFloat(gbInput.value) || 0;
+          totalGbday += val;
+          const badge = document.createElement('span');
+          badge.className = 'todo-gbday';
+          badge.textContent = `(${val} GB/day)`;
+          li.appendChild(badge);
+        }
+        ul.appendChild(li);
+      });
+      group.appendChild(ul);
+      container.appendChild(group);
+    }
+
+    // Total GB/day at the bottom
+    const totalDiv = document.createElement('div');
+    totalDiv.className = 'todo-total';
+    totalDiv.textContent = `Estimated total ingest: ${totalGbday.toFixed(1)} GB/day`;
+    container.appendChild(totalDiv);
+  }
+}
+
+// ===================== MANUAL TO DO ITEMS =====================
+function addManualTodo(title, desc) {
+  const titleInput = document.getElementById('manual-todo-title');
+  const descInput  = document.getElementById('manual-todo-desc');
+  const todoTitle = title || (titleInput ? titleInput.value.trim() : '');
+  const todoDesc  = desc  || (descInput  ? descInput.value.trim()  : '');
+  if (!todoTitle) return;
+  if (titleInput) titleInput.value = '';
+  if (descInput)  descInput.value  = '';
+
+  const container = document.getElementById('manual-todo-list');
+  const item = document.createElement('div');
+  item.className = 'manual-todo-item';
+  item.dataset.todoTitle = todoTitle;
+  item.dataset.todoDesc  = todoDesc;
+
+  const textDiv = document.createElement('div');
+  textDiv.className = 'todo-text';
+  const tDiv = document.createElement('div');
+  tDiv.className = 'todo-title';
+  tDiv.textContent = todoTitle;
+  textDiv.appendChild(tDiv);
+  if (todoDesc) {
+    const dDiv = document.createElement('div');
+    dDiv.className = 'todo-desc';
+    dDiv.textContent = todoDesc;
+    textDiv.appendChild(dDiv);
   }
 
-  // Total GB/day at the bottom
-  const totalDiv = document.createElement('div');
-  totalDiv.className = 'todo-total';
-  totalDiv.textContent = `Estimated total ingest: ${totalGbday.toFixed(1)} GB/day`;
-  container.appendChild(totalDiv);
+  const btn = document.createElement('button');
+  btn.className = 'btn-remove-todo';
+  btn.textContent = '✕';
+  btn.title = 'Remove to-do';
+  btn.onclick = function() {
+    item.remove();
+    updateTodoSummary();
+  };
+
+  item.appendChild(textDiv);
+  item.appendChild(btn);
+  container.appendChild(item);
+  updateTodoSummary();
 }
 
 // ===================== ACCEPTED RISKS SUMMARY =====================
@@ -5156,6 +5284,7 @@ function gatherState() {
     customAppConnectors: [],
     thirdPartyDevOpsConnectors: [],
     thirdPartyOTConnectors: [],
+    manualTodos: [],
   };
 
   document.querySelectorAll('select.status-select[data-tier]').forEach(sel => {
@@ -5217,6 +5346,11 @@ function gatherState() {
   // Save third-party OT/IoT dynamic connectors
   document.querySelectorAll('#thirdpartyot-connectors > .connector-section').forEach(section => {
     state.thirdPartyOTConnectors.push(section.dataset.tpName);
+  });
+
+  // Save manual to-do items
+  document.querySelectorAll('#manual-todo-list .manual-todo-item').forEach(item => {
+    state.manualTodos.push({ title: item.dataset.todoTitle, desc: item.dataset.todoDesc || '' });
   });
 
   return state;
@@ -5342,6 +5476,19 @@ function applyState(state) {
       const el = document.getElementById(id);
       if (el) el.value = value;
     }
+  }
+
+  // Restore manual to-do items
+  if (state.manualTodos) {
+    document.getElementById('manual-todo-list').innerHTML = '';
+    state.manualTodos.forEach(item => {
+      if (typeof item === 'string') {
+        // Backward compat with v3 saves that stored plain strings
+        addManualTodo(item, '');
+      } else {
+        addManualTodo(item.title, item.desc);
+      }
+    });
   }
 
   updateProgress();
