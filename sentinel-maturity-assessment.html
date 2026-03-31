@@ -168,6 +168,64 @@
       font-size: 0.8rem;
     }
 
+    .notes-section {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .notes-section h2 {
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .notes-display {
+      white-space: pre-wrap;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--text);
+      padding: 12px 16px;
+      background: var(--secondary);
+      border-radius: var(--radius);
+      min-height: 60px;
+    }
+
+    .notes-display:empty::before {
+      content: 'No notes yet. Click Edit to add notes.';
+      color: var(--text-light);
+      font-style: italic;
+    }
+
+    .notes-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      font-family: inherit;
+      line-height: 1.6;
+      resize: vertical;
+      background: var(--white);
+    }
+
+    .notes-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(0,120,212,0.15);
+    }
+
+    .btn-notes {
+      padding: 6px 14px;
+      font-size: 0.8rem;
+    }
+
     .tier-section {
       margin-bottom: 32px;
     }
@@ -780,6 +838,15 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- General Information — Notes -->
+  <div class="notes-section" id="notes-section">
+    <h2>General Information — Notes
+      <button class="btn btn-notes" id="notes-edit-btn" onclick="toggleNotesEdit()">✏️ Edit</button>
+    </h2>
+    <div id="notes-display" class="notes-display"></div>
+    <textarea id="notes-textarea" class="notes-textarea" style="display: none;" placeholder="Add general notes, observations, or context for this assessment…"></textarea>
   </div>
 
   <!-- Overall Progress -->
@@ -4218,6 +4285,29 @@ function updateTodoSummary() {
   }
 }
 
+// ===================== GENERAL NOTES EDIT/SAVE =====================
+function toggleNotesEdit() {
+  const display = document.getElementById('notes-display');
+  const textarea = document.getElementById('notes-textarea');
+  const btn = document.getElementById('notes-edit-btn');
+  const isEditing = textarea.style.display !== 'none';
+
+  if (isEditing) {
+    // Save: copy textarea value to display and switch to read mode
+    display.textContent = textarea.value;
+    display.style.display = '';
+    textarea.style.display = 'none';
+    btn.textContent = '✏️ Edit';
+  } else {
+    // Edit: copy display text to textarea and switch to edit mode
+    textarea.value = display.textContent;
+    display.style.display = 'none';
+    textarea.style.display = '';
+    textarea.focus();
+    btn.textContent = '💾 Save';
+  }
+}
+
 // ===================== MANUAL TO DO ITEMS =====================
 function addManualTodo(title, desc) {
   const titleInput = document.getElementById('manual-todo-title');
@@ -5271,6 +5361,7 @@ function gatherState() {
       workspace: document.getElementById('sentinel-workspace').value,
       e5Licenses: document.getElementById('e5-licenses').value,
       p2Licenses: document.getElementById('p2-licenses').value,
+      notes: document.getElementById('notes-display').textContent,
     },
     selects: {},
     comments: {},
@@ -5364,6 +5455,11 @@ function applyState(state) {
     document.getElementById('sentinel-workspace').value = state.meta.workspace || '';
     document.getElementById('e5-licenses').value = state.meta.e5Licenses || '';
     document.getElementById('p2-licenses').value = state.meta.p2Licenses || '';
+    document.getElementById('notes-display').textContent = state.meta.notes || '';
+    // Ensure notes are in read mode after load
+    document.getElementById('notes-textarea').style.display = 'none';
+    document.getElementById('notes-display').style.display = '';
+    document.getElementById('notes-edit-btn').textContent = '✏️ Edit';
     updateLicenseBenefit();
   }
 
