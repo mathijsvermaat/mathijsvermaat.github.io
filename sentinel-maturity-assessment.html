@@ -254,6 +254,7 @@
       letter-spacing: 0.5px;
     }
 
+    .tier-badge.general { background: #e8eaf6; color: #283593; }
     .tier-badge.tier-1 { background: #e6f4ea; color: var(--success); }
     .tier-badge.tier-2 { background: #fff8e1; color: #8a6d00; }
     .tier-badge.tier-3 { background: #fce4ec; color: #c62828; }
@@ -898,6 +899,73 @@
     <div id="risk-list"></div>
   </div>
 
+  <!-- ==================== GENERAL ==================== -->
+  <div class="tier-section collapsed" id="tier-general">
+    <div class="tier-header" onclick="toggleTier('tier-general')">
+      <span class="tier-badge general">General</span>
+      <h2>General — Workspace, Dashboards and Tooling</h2>
+      <span class="tier-progress" id="tier-general-progress">0 / 0</span>
+      <span class="tier-chevron">▼</span>
+    </div>
+    <div class="tier-body" id="tier-general-body">
+
+      <!-- ===== Workspace ===== -->
+      <div class="connector-section collapsed" id="conn-gen-workspace">
+        <div class="connector-header" onclick="toggleConnector('conn-gen-workspace')">
+          <h3>Workspace</h3>
+          <span class="connector-progress" id="conn-gen-workspace-progress">0/0</span>
+          <span class="connector-chevron">▼</span>
+        </div>
+        <div class="connector-body">
+          <div class="check-group">
+            <div class="check-group-title">Configuration</div>
+            <div class="check-item">
+              <select class="status-select" id="gen-ws-c1" data-tier="general" data-connector="Workspace" data-item="Workspace set to default 90 days analytic retention" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gen-ws-c1">Workspace set to default 90 days analytic retention</label>
+            </div>
+          </div>
+          <div class="section-comment">
+            <label for="gen-ws-comment">Comments / Rationale — Workspace</label>
+            <textarea id="gen-ws-comment" data-connector="Workspace" placeholder="e.g. LAW retention set to 90 days. Long-term archive configured for 2 years."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Workbooks ===== -->
+      <div class="connector-section collapsed" id="conn-gen-workbooks">
+        <div class="connector-header" onclick="toggleConnector('conn-gen-workbooks')">
+          <h3>Workbooks</h3>
+          <span class="connector-progress" id="conn-gen-workbooks-progress">0/0</span>
+          <span class="connector-chevron">▼</span>
+        </div>
+        <div class="connector-body">
+          <div class="check-group">
+            <div class="check-group-title">Deployed Workbooks</div>
+            <div class="check-item">
+              <select class="status-select" id="gen-wb-c1" data-tier="general" data-connector="Workbooks" data-item="Workspace Usage Report workbook deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gen-wb-c1">Workspace Usage Report workbook deployed</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="gen-wb-c2" data-tier="general" data-connector="Workbooks" data-item="Defender vs AMA coverage workbook deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gen-wb-c2">Defender vs AMA coverage workbook deployed</label>
+            </div>
+          </div>
+          <div class="section-comment">
+            <label for="gen-wb-comment">Comments / Rationale — Workbooks</label>
+            <textarea id="gen-wb-comment" data-connector="Workbooks" placeholder="e.g. Additional custom workbooks deployed for SOC dashboards."></textarea>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ==================== TIER 1 ==================== -->
   <div class="tier-section collapsed" id="tier-1">
     <div class="tier-header" onclick="toggleTier('tier-1')">
@@ -957,12 +1025,6 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="o365-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="o365-ch2" data-tier="1" data-connector="Office 365" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="o365-ch2">Workbooks deployed</label>
             </div>
           </div>
 
@@ -1073,12 +1135,6 @@
               </select>
               <label for="azact-ch1">Analytic rules deployed</label>
             </div>
-            <div class="check-item">
-              <select class="status-select" id="azact-ch2" data-tier="1" data-connector="Azure Activity Logs" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azact-ch2">Workbooks deployed</label>
-            </div>
           </div>
 
           <div class="check-group">
@@ -1141,12 +1197,6 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="health-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="health-ch2" data-tier="1" data-connector="Sentinel Health" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="health-ch2">Workbooks deployed<div class="check-detail">Sentinel Health workbook and Data collection health monitoring workbook</div></label>
             </div>
           </div>
 
@@ -1361,12 +1411,6 @@
               </select>
               <label for="xdr-ch1">Analytic rules deployed</label>
             </div>
-            <div class="check-item">
-              <select class="status-select" id="xdr-ch2" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="xdr-ch2">Workbooks deployed</label>
-            </div>
           </div>
 
           <div class="check-group">
@@ -1502,12 +1546,6 @@
               </select>
               <label for="entra-ch1">Analytic rules deployed</label>
             </div>
-            <div class="check-item">
-              <select class="status-select" id="entra-ch2" data-tier="1" data-connector="Microsoft Entra ID" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="entra-ch2">Workbooks deployed</label>
-            </div>
           </div>
 
           <div class="check-group">
@@ -1596,12 +1634,6 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="winsec-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="winsec-ch2" data-tier="1" data-connector="Windows Security Events" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="winsec-ch2">Workbooks deployed</label>
             </div>
           </div>
 
@@ -1718,12 +1750,6 @@
               </select>
               <label for="syslog-ch1">Analytic rules deployed</label>
             </div>
-            <div class="check-item">
-              <select class="status-select" id="syslog-ch2" data-tier="1" data-connector="Syslog for Linux" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="syslog-ch2">Workbooks deployed</label>
-            </div>
           </div>
 
           <div class="check-group">
@@ -1830,12 +1856,6 @@
               </select>
               <label for="dfc-ch1">Analytic rules deployed</label>
             </div>
-            <div class="check-item">
-              <select class="status-select" id="dfc-ch2" data-tier="2" data-connector="Microsoft Defender for Cloud" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="dfc-ch2">Workbooks deployed</label>
-            </div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Retention</div>
@@ -1899,12 +1919,6 @@
               </select>
               <label for="akv-ch1">Analytic rules deployed</label>
             </div>
-            <div class="check-item">
-              <select class="status-select" id="akv-ch2" data-tier="2" data-connector="Azure Key Vault" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="akv-ch2">Workbooks deployed</label>
-            </div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Retention</div>
@@ -1963,12 +1977,6 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="copilot-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="copilot-ch2" data-tier="2" data-connector="Copilot / AI Governance" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="copilot-ch2">Workbooks deployed</label>
             </div>
           </div>
           <div class="check-group">
@@ -2045,12 +2053,6 @@
               </select>
               <label for="purview-ch1">Analytic rules deployed</label>
             </div>
-            <div class="check-item">
-              <select class="status-select" id="purview-ch2" data-tier="2" data-connector="Microsoft Purview" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="purview-ch2">Workbooks deployed</label>
-            </div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Retention</div>
@@ -2112,12 +2114,6 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="ti-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="ti-ch2" data-tier="2" data-connector="Microsoft Defender TI" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="ti-ch2">Workbooks deployed</label>
             </div>
           </div>
           <div class="check-group">
@@ -2227,12 +2223,6 @@
               </select>
               <label for="intune-ch1">Analytic rules deployed</label>
             </div>
-            <div class="check-item">
-              <select class="status-select" id="intune-ch2" data-tier="2" data-connector="Microsoft Intune" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="intune-ch2">Workbooks deployed</label>
-            </div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Retention</div>
@@ -2316,12 +2306,6 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="entraprotect-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="entraprotect-ch2" data-tier="2" data-connector="Microsoft Entra ID Protection" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="entraprotect-ch2">Workbooks deployed</label>
             </div>
           </div>
           <div class="check-group">
@@ -2427,12 +2411,6 @@
               </select>
               <label for="aws-ch1">Analytic rules deployed</label>
             </div>
-            <div class="check-item">
-              <select class="status-select" id="aws-ch2" data-tier="2" data-connector="Amazon Web Services" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="aws-ch2">Workbooks deployed</label>
-            </div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Retention</div>
@@ -2499,12 +2477,6 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="gcp-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="gcp-ch2" data-tier="2" data-connector="Google Cloud Platform" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gcp-ch2">Workbooks deployed</label>
             </div>
           </div>
           <div class="check-group">
@@ -2607,12 +2579,6 @@
               </select>
               <label for="azfw-ch1">Analytic rules deployed</label>
             </div>
-            <div class="check-item">
-              <select class="status-select" id="azfw-ch2" data-tier="2" data-connector="Azure Firewall" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azfw-ch2">Workbooks deployed</label>
-            </div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Retention</div>
@@ -2677,12 +2643,6 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="waf-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="waf-ch2" data-tier="2" data-connector="Azure WAF" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="waf-ch2">Workbooks deployed</label>
             </div>
           </div>
           <div class="check-group">
@@ -2749,12 +2709,6 @@
               </select>
               <label for="dns-ch1">Analytic rules deployed</label>
             </div>
-            <div class="check-item">
-              <select class="status-select" id="dns-ch2" data-tier="2" data-connector="DNS Security Logs" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="dns-ch2">Workbooks deployed</label>
-            </div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Retention</div>
@@ -2813,12 +2767,6 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="gsa-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="gsa-ch2" data-tier="2" data-connector="Global Secure Access" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gsa-ch2">Workbooks deployed</label>
             </div>
           </div>
           <div class="check-group">
@@ -2884,12 +2832,6 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="vnet-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="vnet-ch2" data-tier="2" data-connector="VNet Flow Logs" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="vnet-ch2">Workbooks deployed</label>
             </div>
           </div>
           <div class="check-group">
@@ -3068,12 +3010,6 @@
               </select>
               <label for="mdca-ch1">Analytic rules deployed</label>
             </div>
-            <div class="check-item">
-              <select class="status-select" id="mdca-ch2" data-tier="3" data-connector="Microsoft Defender for Cloud Apps" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="mdca-ch2">Workbooks deployed</label>
-            </div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Retention</div>
@@ -3140,12 +3076,6 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="sap-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="sap-ch2" data-tier="3" data-connector="SAP" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="sap-ch2">Workbooks deployed</label>
             </div>
           </div>
           <div class="check-group">
@@ -3297,12 +3227,6 @@
               </select>
               <label for="teams-ch1">Analytic rules deployed</label>
             </div>
-            <div class="check-item">
-              <select class="status-select" id="teams-ch2" data-tier="3" data-connector="Microsoft Teams Advanced" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="teams-ch2">Workbooks deployed</label>
-            </div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Retention</div>
@@ -3420,12 +3344,6 @@
               </select>
               <label for="azdevops-ch1">Analytic rules deployed</label>
             </div>
-            <div class="check-item">
-              <select class="status-select" id="azdevops-ch2" data-tier="3" data-connector="Azure DevOps" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azdevops-ch2">Workbooks deployed</label>
-            </div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Retention</div>
@@ -3492,12 +3410,6 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="github-ch1">Analytic rules deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="github-ch2" data-tier="3" data-connector="GitHub Enterprise" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="github-ch2">Workbooks deployed</label>
             </div>
           </div>
           <div class="check-group">
@@ -3855,12 +3767,6 @@
               </select>
               <label for="mdiot-ch1">Analytic rules deployed</label>
             </div>
-            <div class="check-item">
-              <select class="status-select" id="mdiot-ch2" data-tier="3" data-connector="Microsoft Defender for IoT" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="mdiot-ch2">Workbooks deployed</label>
-            </div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Retention</div>
@@ -4104,7 +4010,7 @@ function updateProgress() {
   document.getElementById('overall-percent').textContent = pct + '%';
 
   // Per tier
-  for (const tier of ['1', '2', '3']) {
+  for (const tier of ['general', '1', '2', '3']) {
     const tierAll = document.querySelectorAll(`select.status-select[data-tier="${tier}"]`);
     let tierAssessed = 0;
     tierAll.forEach(sel => { if (sel.value !== '') tierAssessed++; });
@@ -4116,6 +4022,7 @@ function updateProgress() {
 
   // Per connector (static)
   const connectors = [
+    'conn-gen-workspace', 'conn-gen-workbooks',
     'conn-o365', 'conn-azactivity', 'conn-xdr', 'conn-entra', 'conn-winsec', 'conn-syslog', 'conn-health',
     'conn-dfc', 'conn-azfw', 'conn-waf', 'conn-vnet', 'conn-gsa', 'conn-dns', 'conn-thirdparty',
     'conn-purview', 'conn-akv', 'conn-copilot', 'conn-intune', 'conn-ti', 'conn-thirdpartyti', 'conn-aws', 'conn-gcp',
@@ -4578,12 +4485,6 @@ function addThirdPartyConnector(name) {
           </select>
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-ch2" data-tier="2" data-connector="${safeName}" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-ch2">Workbooks deployed</label>
-        </div>
       </div>
       <div class="check-group">
         <div class="check-group-title">Retention</div>
@@ -4683,12 +4584,6 @@ function addThirdPartyTIConnector(name) {
             ${optionsHtml}
           </select>
           <label for="${prefix}-ch1">Analytic rules deployed</label>
-        </div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-ch2" data-tier="2" data-connector="${safeName}" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-ch2">Workbooks deployed</label>
         </div>
       </div>
       <div class="check-group">
@@ -4790,12 +4685,6 @@ function addThirdPartyIdConnector(name) {
           </select>
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-ch2" data-tier="2" data-connector="${safeName}" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-ch2">Workbooks deployed</label>
-        </div>
       </div>
       <div class="check-group">
         <div class="check-group-title">Retention</div>
@@ -4895,12 +4784,6 @@ function addThirdPartyAppConnector(name) {
             ${optionsHtml}
           </select>
           <label for="${prefix}-ch1">Analytic rules deployed</label>
-        </div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-ch2" data-tier="3" data-connector="${safeName}" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-ch2">Workbooks deployed</label>
         </div>
       </div>
       <div class="check-group">
@@ -5002,12 +4885,6 @@ function addThirdPartyCollabConnector(name) {
           </select>
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-ch2" data-tier="3" data-connector="${safeName}" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-ch2">Workbooks deployed</label>
-        </div>
       </div>
       <div class="check-group">
         <div class="check-group-title">Retention</div>
@@ -5107,12 +4984,6 @@ function addCustomAppConnector(name) {
             ${optionsHtml}
           </select>
           <label for="${prefix}-ch1">Analytic rules deployed</label>
-        </div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-ch2" data-tier="3" data-connector="${safeName}" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-ch2">Workbooks deployed</label>
         </div>
       </div>
       <div class="check-group">
@@ -5214,12 +5085,6 @@ function addThirdPartyDevOpsConnector(name) {
           </select>
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-ch2" data-tier="3" data-connector="${safeName}" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-ch2">Workbooks deployed</label>
-        </div>
       </div>
       <div class="check-group">
         <div class="check-group-title">Retention</div>
@@ -5319,12 +5184,6 @@ function addThirdPartyOTConnector(name) {
             ${optionsHtml}
           </select>
           <label for="${prefix}-ch1">Analytic rules deployed</label>
-        </div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-ch2" data-tier="3" data-connector="${safeName}" data-item="Workbooks deployed" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-ch2">Workbooks deployed</label>
         </div>
       </div>
       <div class="check-group">
