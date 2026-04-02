@@ -515,6 +515,45 @@
       color: var(--primary);
     }
 
+    .retention-section-inline {
+      padding: 10px 24px 10px 24px;
+    }
+
+    .retention-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+
+    .retention-row-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+      min-width: 70px;
+    }
+
+    .retention-inherited {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      font-style: italic;
+    }
+
+    .retention-override-toggle,
+    .retention-archive-toggle {
+      padding: 3px 6px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .retention-total-select {
+      font-size: 0.8rem;
+    }
+
     .gbday-inline {
       display: inline-flex;
       align-items: center;
@@ -974,10 +1013,22 @@
           <div class="check-group">
             <div class="check-group-title">Configuration</div>
             <div class="check-item">
-              <select class="status-select" id="gen-ws-c1" data-tier="general" data-connector="Workspace" data-item="Workspace set to default 90 days analytic retention" onchange="onStatusChange(this)">
+              <select class="status-select" id="gen-ws-c1" data-tier="general" data-connector="Workspace" data-item="Workspace default analytics retention configured" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="gen-ws-c1">Workspace set to default 90 days analytic retention</label>
+              <label for="gen-ws-c1">Workspace default analytics retention</label>
+              <span class="retention-inline">
+                <select class="retention-period-select workspace-retention-select" id="workspace-default-retention" onchange="onWorkspaceRetentionChange()">
+                  <option value="30 days">30 days</option>
+                  <option value="60 days">60 days</option>
+                  <option value="90 days" selected>90 days</option>
+                  <option value="120 days">120 days</option>
+                  <option value="180 days">180 days</option>
+                  <option value="270 days">270 days</option>
+                  <option value="365 days">365 days</option>
+                  <option value="2 years">2 years</option>
+                </select>
+              </span>
             </div>
           </div>
           <div class="section-comment">
@@ -1082,20 +1133,9 @@
             </div>
           </div>
 
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="o365" data-connector="Office 365">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="o365-r1" data-tier="1" data-connector="Office 365" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="o365-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="o365-r2" data-tier="1" data-connector="Office 365" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="o365-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="o365-retention-section"></div>
           </div>
 
           <div class="check-group">
@@ -1191,20 +1231,9 @@
             </div>
           </div>
 
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="azact" data-connector="Azure Activity Logs">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="azact-r1" data-tier="1" data-connector="Azure Activity Logs" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azact-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="azact-r2" data-tier="1" data-connector="Azure Activity Logs" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azact-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="azact-retention-section"></div>
           </div>
 
           <div class="check-group">
@@ -1254,20 +1283,9 @@
             </div>
           </div>
 
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="health" data-connector="Sentinel Health">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="health-r1" data-tier="1" data-connector="Sentinel Health" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="health-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="health-r2" data-tier="1" data-connector="Sentinel Health" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="health-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="health-retention-section"></div>
           </div>
 
           <div class="check-group">
@@ -1467,20 +1485,9 @@
             </div>
           </div>
 
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="xdr" data-connector="Microsoft Defender XDR">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="xdr-r1" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="xdr-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="xdr-r2" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="xdr-r2">Lake retention<div class="check-detail">Note: Lake retention incurs cost — E5 grant covers Analytics only</div></label>
-            </div>
+            <div class="retention-section-inline" id="xdr-retention-section"></div>
           </div>
 
           <div class="check-group">
@@ -1495,7 +1502,7 @@
 
           <div class="section-comment">
             <label for="xdr-comment">Comments / Rationale — Microsoft Defender XDR</label>
-            <textarea id="xdr-comment" data-connector="Microsoft Defender XDR" placeholder="e.g. Customer deferred Lake retention for DeviceFileEvents due to budget. Revisit Q3 2026."></textarea>
+            <textarea id="xdr-comment" data-connector="Microsoft Defender XDR" placeholder="e.g. Customer deferred Total retention for DeviceFileEvents due to budget. Revisit Q3 2026."></textarea>
           </div>
         </div>
       </div>
@@ -1602,20 +1609,9 @@
             </div>
           </div>
 
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="entra" data-connector="Microsoft Entra ID">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="entra-r1" data-tier="1" data-connector="Microsoft Entra ID" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="entra-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="entra-r2" data-tier="1" data-connector="Microsoft Entra ID" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="entra-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="entra-retention-section"></div>
           </div>
 
           <div class="check-group">
@@ -1691,20 +1687,9 @@
             </div>
           </div>
 
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="winsec" data-connector="Windows Security Events">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="winsec-r1" data-tier="1" data-connector="Windows Security Events" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="winsec-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="winsec-r2" data-tier="1" data-connector="Windows Security Events" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="winsec-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="winsec-retention-section"></div>
           </div>
 
           <div class="check-group">
@@ -1806,20 +1791,9 @@
             </div>
           </div>
 
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="syslog" data-connector="Syslog for Linux">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="syslog-r1" data-tier="1" data-connector="Syslog for Linux" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="syslog-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="syslog-r2" data-tier="1" data-connector="Syslog for Linux" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="syslog-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="syslog-retention-section"></div>
           </div>
 
           <div class="check-group">
@@ -1911,20 +1885,9 @@
               <label for="dfc-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="dfc" data-connector="Microsoft Defender for Cloud">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="dfc-r1" data-tier="2" data-connector="Microsoft Defender for Cloud" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="dfc-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="dfc-r2" data-tier="2" data-connector="Microsoft Defender for Cloud" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="dfc-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="dfc-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -1974,20 +1937,9 @@
               <label for="akv-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="akv" data-connector="Azure Key Vault">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="akv-r1" data-tier="2" data-connector="Azure Key Vault" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="akv-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="akv-r2" data-tier="2" data-connector="Azure Key Vault" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="akv-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="akv-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -2033,20 +1985,9 @@
               <label for="copilot-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="copilot" data-connector="Copilot / AI Governance">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="copilot-r1" data-tier="2" data-connector="Copilot / AI Governance" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="copilot-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="copilot-r2" data-tier="2" data-connector="Copilot / AI Governance" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="copilot-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="copilot-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -2108,20 +2049,9 @@
               <label for="purview-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="purview" data-connector="Microsoft Purview">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="purview-r1" data-tier="2" data-connector="Microsoft Purview" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="purview-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="purview-r2" data-tier="2" data-connector="Microsoft Purview" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="purview-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="purview-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -2170,20 +2100,9 @@
               <label for="ti-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="ti" data-connector="Microsoft Defender TI">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="ti-r1" data-tier="2" data-connector="Microsoft Defender TI" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="ti-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="ti-r2" data-tier="2" data-connector="Microsoft Defender TI" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="ti-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="ti-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -2278,20 +2197,9 @@
               <label for="intune-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="intune" data-connector="Microsoft Intune">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="intune-r1" data-tier="2" data-connector="Microsoft Intune" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="intune-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="intune-r2" data-tier="2" data-connector="Microsoft Intune" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="intune-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="intune-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -2362,20 +2270,9 @@
               <label for="entraprotect-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="entraprotect" data-connector="Microsoft Entra ID Protection">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="entraprotect-r1" data-tier="2" data-connector="Microsoft Entra ID Protection" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="entraprotect-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="entraprotect-r2" data-tier="2" data-connector="Microsoft Entra ID Protection" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="entraprotect-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="entraprotect-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -2466,20 +2363,9 @@
               <label for="aws-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="aws" data-connector="Amazon Web Services">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="aws-r1" data-tier="2" data-connector="Amazon Web Services" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="aws-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="aws-r2" data-tier="2" data-connector="Amazon Web Services" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="aws-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="aws-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -2533,20 +2419,9 @@
               <label for="gcp-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="gcp" data-connector="Google Cloud Platform">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="gcp-r1" data-tier="2" data-connector="Google Cloud Platform" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gcp-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="gcp-r2" data-tier="2" data-connector="Google Cloud Platform" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gcp-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="gcp-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -2634,20 +2509,9 @@
               <label for="azfw-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="azfw" data-connector="Azure Firewall">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="azfw-r1" data-tier="2" data-connector="Azure Firewall" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azfw-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="azfw-r2" data-tier="2" data-connector="Azure Firewall" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azfw-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="azfw-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -2699,20 +2563,9 @@
               <label for="waf-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="waf" data-connector="Azure WAF">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="waf-r1" data-tier="2" data-connector="Azure WAF" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="waf-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="waf-r2" data-tier="2" data-connector="Azure WAF" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="waf-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="waf-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -2764,20 +2617,9 @@
               <label for="dns-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="dns" data-connector="DNS Security Logs">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="dns-r1" data-tier="2" data-connector="DNS Security Logs" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="dns-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="dns-r2" data-tier="2" data-connector="DNS Security Logs" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="dns-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="dns-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -2823,20 +2665,9 @@
               <label for="gsa-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="gsa" data-connector="Global Secure Access">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="gsa-r1" data-tier="2" data-connector="Global Secure Access" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gsa-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="gsa-r2" data-tier="2" data-connector="Global Secure Access" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gsa-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="gsa-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -2888,20 +2719,9 @@
               <label for="vnet-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="vnet" data-connector="VNet Flow Logs">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="vnet-r1" data-tier="2" data-connector="VNet Flow Logs" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="vnet-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="vnet-r2" data-tier="2" data-connector="VNet Flow Logs" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="vnet-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="vnet-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -2998,20 +2818,9 @@
               <label for="iis-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="iis" data-connector="IIS Web Server Logs">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="iis-r1" data-tier="3" data-connector="IIS Web Server Logs" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="iis-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="iis-r2" data-tier="3" data-connector="IIS Web Server Logs" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="iis-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="iis-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -3065,20 +2874,9 @@
               <label for="mdca-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="mdca" data-connector="Microsoft Defender for Cloud Apps">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="mdca-r1" data-tier="3" data-connector="Microsoft Defender for Cloud Apps" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="mdca-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="mdca-r2" data-tier="3" data-connector="Microsoft Defender for Cloud Apps" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="mdca-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="mdca-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -3132,20 +2930,9 @@
               <label for="sap-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="sap" data-connector="SAP">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="sap-r1" data-tier="3" data-connector="SAP" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="sap-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="sap-r2" data-tier="3" data-connector="SAP" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="sap-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="sap-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -3199,20 +2986,9 @@
               <label for="sql-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="sql" data-connector="SQL Database Audit">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="sql-r1" data-tier="3" data-connector="SQL Database Audit" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="sql-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="sql-r2" data-tier="3" data-connector="SQL Database Audit" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="sql-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="sql-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -3282,20 +3058,9 @@
               <label for="teams-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="teams" data-connector="Microsoft Teams Advanced">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="teams-r1" data-tier="3" data-connector="Microsoft Teams Advanced" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="teams-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="teams-r2" data-tier="3" data-connector="Microsoft Teams Advanced" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="teams-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="teams-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -3399,20 +3164,9 @@
               <label for="azdevops-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="azdevops" data-connector="Azure DevOps">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="azdevops-r1" data-tier="3" data-connector="Azure DevOps" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azdevops-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="azdevops-r2" data-tier="3" data-connector="Azure DevOps" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="azdevops-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="azdevops-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -3466,20 +3220,9 @@
               <label for="github-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="github" data-connector="GitHub Enterprise">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="github-r1" data-tier="3" data-connector="GitHub Enterprise" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="github-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="github-r2" data-tier="3" data-connector="GitHub Enterprise" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="github-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="github-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -3558,20 +3301,9 @@
               <label for="aks-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="aks" data-connector="Azure Kubernetes Service">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="aks-r1" data-tier="3" data-connector="Azure Kubernetes Service" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="aks-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="aks-r2" data-tier="3" data-connector="Azure Kubernetes Service" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="aks-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="aks-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -3625,20 +3357,9 @@
               <label for="storage-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="storage" data-connector="Azure Storage Analytics">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="storage-r1" data-tier="3" data-connector="Azure Storage Analytics" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="storage-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="storage-r2" data-tier="3" data-connector="Azure Storage Analytics" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="storage-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="storage-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -3683,20 +3404,9 @@
               <label for="mddns-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="mddns" data-connector="Microsoft Defender for DNS">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="mddns-r1" data-tier="3" data-connector="Microsoft Defender for DNS" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="mddns-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="mddns-r2" data-tier="3" data-connector="Microsoft Defender for DNS" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="mddns-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="mddns-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -3750,20 +3460,9 @@
               <label for="wfe-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="wfe" data-connector="Windows Forwarded Events">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="wfe-r1" data-tier="3" data-connector="Windows Forwarded Events" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="wfe-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="wfe-r2" data-tier="3" data-connector="Windows Forwarded Events" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="wfe-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="wfe-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -3822,20 +3521,9 @@
               <label for="mdiot-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group retention-group" data-prefix="mdiot" data-connector="Microsoft Defender for IoT">
             <div class="check-group-title">Retention</div>
-            <div class="check-item">
-              <select class="status-select" id="mdiot-r1" data-tier="3" data-connector="Microsoft Defender for IoT" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="mdiot-r1">Analytics retention</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="mdiot-r2" data-tier="3" data-connector="Microsoft Defender for IoT" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="mdiot-r2">Lake retention</label>
-            </div>
+            <div class="retention-section-inline" id="mdiot-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
@@ -3902,11 +3590,6 @@ function onStatusChange(sel) {
   else if (sel.value === 'N/A') sel.classList.add('status-na');
   else if (sel.value === 'Healthy') sel.classList.add('status-healthy');
   else if (sel.value === 'Unhealthy') sel.classList.add('status-unhealthy');
-
-  // Handle retention dropdown visibility
-  if (sel.dataset.retention === 'true') {
-    handleRetentionDropdown(sel);
-  }
 
   // Handle GB/day input for "To be added" (only in Connector Setup groups)
   handleGbdayInput(sel);
@@ -4129,110 +3812,131 @@ function updateProgress() {
   });
 }
 
-// ===================== RETENTION DROPDOWN =====================
-function handleRetentionDropdown(sel) {
-  const checkItem = sel.closest('.check-item');
-  let container = checkItem.querySelector('.retention-inline');
+// ===================== RETENTION SECTION SYSTEM =====================
 
-  if (sel.value === 'Configured') {
-    if (!container) {
-      container = document.createElement('span');
-      container.className = 'retention-inline';
+// Initialize all retention sections (called on DOMContentLoaded)
+function initRetentionSections() {
+  document.querySelectorAll('.retention-group[data-prefix]').forEach(group => {
+    initRetentionSection(group.dataset.prefix);
+  });
+}
 
-      const isAnalytics = (sel.dataset.item || '').toLowerCase().indexOf('analytics') !== -1;
+// Build the retention UI for a single connector
+function initRetentionSection(prefix) {
+  const container = document.getElementById(prefix + '-retention-section');
+  if (!container || container.dataset.initialized) return;
+  container.dataset.initialized = 'true';
 
-      const periodSelect = document.createElement('select');
-      periodSelect.className = 'retention-period-select';
-      periodSelect.id = sel.id + '-retention';
+  const wsDefault = document.getElementById('workspace-default-retention');
+  const defaultPeriod = wsDefault ? wsDefault.value : '90 days';
 
-      if (isAnalytics) {
-        periodSelect.innerHTML =
-          '<option value="60 days">60 days</option>' +
-          '<option value="90 days" selected>90 days</option>' +
-          '<option value="120 days">120 days</option>' +
-          '<option value="180 days">180 days</option>' +
-          '<option value="270 days">270 days</option>' +
-          '<option value="365 days">365 days</option>' +
-          '<option value="1.5 years">1.5 </option>' +
-          '<option value="2 years">2 years</option>' +
-          '<option value="Custom">Custom</option>';
-      } else {
-        periodSelect.innerHTML =
-          '<option value="">— Select period —</option>' +
-          '<option value="60 days">60 days</option>' +
-          '<option value="90 days">90 days</option>' +
-          '<option value="120 days">120 days</option>' +
-          '<option value="180 days">180 days</option>' +
-          '<option value="270 days">270 days</option>' +
-          '<option value="365 days">365 days</option>' +
-          '<option value="1.5 years">1.5 years</option>' +
-          '<option value="2 years">2 years</option>' +
-          '<option value="3 years">3 years</option>' +
-          '<option value="4 years">4 years</option>' +
-          '<option value="5 years">5 years</option>' +
-          '<option value="6 years">6 years</option>' +
-          '<option value="7 years">7 years</option>' +
-          '<option value="8 years">8 years</option>' +
-          '<option value="9 years">9 years</option>' +
-          '<option value="10 years">10 years</option>' +
-          '<option value="11 years">11 years</option>' +
-          '<option value="12 years">12 years</option>' +
-          '<option value="Custom">Custom</option>';
-      }
+  const analyticsOpts = ['30 days','60 days','90 days','120 days','180 days','270 days','365 days','2 years']
+    .map(p => `<option value="${p}"${p === defaultPeriod ? ' selected' : ''}>${p}</option>`).join('');
 
-      periodSelect.onchange = function() {
-        let customInput = container.querySelector('.custom-retention-input');
-        if (this.value === 'Custom') {
-          if (!customInput) {
-            customInput = document.createElement('input');
-            customInput.type = 'text';
-            customInput.className = 'custom-retention-input';
-            customInput.id = sel.id + '-custom';
-            customInput.placeholder = 'e.g. 18 months';
-            container.appendChild(customInput);
-          }
-        } else if (customInput) {
-          customInput.remove();
-        }
-        updateRetentionCalc(sel.id);
-        updateTodoSummary();
-      };
+  const totalOpts = ['','1 year','2 years','3 years','4 years','5 years','6 years','7 years','8 years','9 years','10 years','11 years','12 years']
+    .map(p => p === '' ? '<option value="">\u2014 Select period \u2014</option>' : `<option value="${p}">${p}</option>`).join('');
 
-      container.appendChild(periodSelect);
-      checkItem.appendChild(container);
+  const targetOpts = ['','120 days','180 days','270 days','365 days','1.5 years','2 years']
+    .map(p => p === '' ? '<option value="">\u2014 Select \u2014</option>' : `<option value="${p}">${p}</option>`).join('');
+
+  container.innerHTML =
+    `<div class="retention-row">` +
+      `<span class="retention-row-label">Analytics retention:</span>` +
+      `<span class="retention-inherited" id="${prefix}-ret-display">${defaultPeriod} (Workspace default)</span>` +
+      `<select class="retention-override-toggle" id="${prefix}-ret-override" onchange="onRetentionOverride('${prefix}')">` +
+        `<option value="inherit">Inherit workspace</option>` +
+        `<option value="override">Override</option>` +
+      `</select>` +
+      `<select class="retention-period-select" id="${prefix}-ret-analytics" style="display:none" onchange="onRetentionChange('${prefix}')">` +
+        analyticsOpts +
+      `</select>` +
+    `</div>` +
+    `<div class="retention-row">` +
+      `<span class="retention-row-label">Archive (Data Lake):</span>` +
+      `<select class="retention-archive-toggle" id="${prefix}-ret-archive" onchange="onArchiveToggle('${prefix}')">` +
+        `<option value="No">No</option>` +
+        `<option value="Yes">Yes</option>` +
+      `</select>` +
+      `<select class="retention-period-select retention-total-select" id="${prefix}-ret-total" style="display:none" onchange="onRetentionChange('${prefix}')">` +
+        totalOpts +
+      `</select>` +
+    `</div>` +
+    `<div class="retention-row">` +
+      `<span class="retention-row-label">Change retention?</span>` +
+      `<select class="retention-change-toggle" id="${prefix}-ret-change" onchange="handleRetentionChangeToggle('${prefix}')">` +
+        `<option value="No">No</option>` +
+        `<option value="Yes">Yes</option>` +
+      `</select>` +
+      `<span class="retention-change-fields" id="${prefix}-ret-change-fields" style="display:none"></span>` +
+    `</div>`;
+}
+
+// When workspace default retention changes, update all inherited displays
+function onWorkspaceRetentionChange() {
+  const wsDefault = document.getElementById('workspace-default-retention');
+  const newPeriod = wsDefault ? wsDefault.value : '90 days';
+
+  document.querySelectorAll('.retention-override-toggle').forEach(toggle => {
+    const prefix = toggle.id.replace('-ret-override', '');
+    if (toggle.value === 'inherit') {
+      const display = document.getElementById(prefix + '-ret-display');
+      if (display) display.textContent = newPeriod + ' (Workspace default)';
+      // Also update the hidden analytics select to match
+      const analyticsSel = document.getElementById(prefix + '-ret-analytics');
+      if (analyticsSel) analyticsSel.value = newPeriod;
     }
+  });
+  updateTodoSummary();
+}
 
-    // Always ensure the retention change row exists when Configured
-    let changeRow = checkItem.querySelector('.retention-change-row');
-    if (!changeRow) {
-      changeRow = document.createElement('div');
-      changeRow.className = 'retention-change-row';
+// Handle override toggle for a connector
+function onRetentionOverride(prefix) {
+  const toggle = document.getElementById(prefix + '-ret-override');
+  const display = document.getElementById(prefix + '-ret-display');
+  const analyticsSel = document.getElementById(prefix + '-ret-analytics');
+  if (!toggle || !display || !analyticsSel) return;
 
-      const lbl = document.createElement('span');
-      lbl.className = 'retention-change-label';
-      lbl.textContent = 'Change retention?';
-
-      const toggle = document.createElement('select');
-      toggle.className = 'retention-change-toggle';
-      toggle.id = sel.id + '-change';
-      toggle.innerHTML = '<option value="No">No</option><option value="Yes">Yes</option>';
-      toggle.onchange = function() { handleRetentionChangeToggle(sel.id); };
-
-      const fields = document.createElement('span');
-      fields.className = 'retention-change-fields';
-      fields.id = sel.id + '-change-fields';
-      fields.style.display = 'none';
-
-      changeRow.appendChild(lbl);
-      changeRow.appendChild(toggle);
-      changeRow.appendChild(fields);
-      checkItem.appendChild(changeRow);
-    }
+  if (toggle.value === 'override') {
+    display.style.display = 'none';
+    analyticsSel.style.display = '';
   } else {
-    if (container) container.remove();
-    const changeRow = checkItem.querySelector('.retention-change-row');
-    if (changeRow) changeRow.remove();
+    display.style.display = '';
+    analyticsSel.style.display = 'none';
+    // Reset to workspace default
+    const wsDefault = document.getElementById('workspace-default-retention');
+    const defaultPeriod = wsDefault ? wsDefault.value : '90 days';
+    analyticsSel.value = defaultPeriod;
+    display.textContent = defaultPeriod + ' (Workspace default)';
   }
+  updateTodoSummary();
+}
+
+// Handle archive toggle
+function onArchiveToggle(prefix) {
+  const archive = document.getElementById(prefix + '-ret-archive');
+  const totalSel = document.getElementById(prefix + '-ret-total');
+  if (!archive || !totalSel) return;
+
+  totalSel.style.display = archive.value === 'Yes' ? '' : 'none';
+  if (archive.value === 'No') totalSel.value = '';
+  updateTodoSummary();
+}
+
+// Called when analytics or total period changes
+function onRetentionChange(prefix) {
+  updateRetentionCalc(prefix);
+  updateTodoSummary();
+}
+
+// Get effective analytics period for a connector
+function getEffectiveAnalyticsPeriod(prefix) {
+  const override = document.getElementById(prefix + '-ret-override');
+  if (override && override.value === 'override') {
+    const sel = document.getElementById(prefix + '-ret-analytics');
+    return sel ? sel.value : '90 days';
+  }
+  const wsDefault = document.getElementById('workspace-default-retention');
+  return wsDefault ? wsDefault.value : '90 days';
 }
 
 // ===================== TO DO SUMMARY =====================
@@ -4249,15 +3953,21 @@ function parsePeriodToDays(period) {
 }
 
 // Handle the "Change retention?" toggle
-function handleRetentionChangeToggle(selId) {
-  const toggle = document.getElementById(selId + '-change');
-  const fields = document.getElementById(selId + '-change-fields');
+function handleRetentionChangeToggle(prefix) {
+  const toggle = document.getElementById(prefix + '-ret-change');
+  const fields = document.getElementById(prefix + '-ret-change-fields');
   if (!toggle || !fields) return;
 
   if (toggle.value === 'Yes') {
     if (!fields.querySelector('.retention-target-select')) {
-      const retSelect = document.getElementById(selId + '-retention');
-      const isAnalytics = (document.getElementById(selId)?.dataset.item || '').toLowerCase().includes('analytics');
+      const targetOpts =
+        '<option value="">\u2014 Select \u2014</option>' +
+        '<option value="120 days">120 days</option>' +
+        '<option value="180 days">180 days</option>' +
+        '<option value="270 days">270 days</option>' +
+        '<option value="365 days">365 days</option>' +
+        '<option value="1.5 years">1.5 years</option>' +
+        '<option value="2 years">2 years</option>';
 
       const targetLbl = document.createElement('span');
       targetLbl.className = 'retention-change-label';
@@ -4265,32 +3975,9 @@ function handleRetentionChangeToggle(selId) {
 
       const targetSel = document.createElement('select');
       targetSel.className = 'retention-period-select retention-target-select';
-      targetSel.id = selId + '-target';
-      if (isAnalytics) {
-        targetSel.innerHTML =
-          '<option value="">\u2014 Select \u2014</option>' +
-          '<option value="120 days">120 days</option>' +
-          '<option value="180 days">180 days</option>' +
-          '<option value="270 days">270 days</option>' +
-          '<option value="365 days">365 days</option>' +
-          '<option value="1.5 years">1.5 years</option>' +
-          '<option value="2 years">2 years</option>';
-      } else {
-        targetSel.innerHTML =
-          '<option value="">\u2014 Select \u2014</option>' +
-          '<option value="180 days">180 days</option>' +
-          '<option value="270 days">270 days</option>' +
-          '<option value="365 days">365 days</option>' +
-          '<option value="1.5 years">1.5 years</option>' +
-          '<option value="2 years">2 years</option>' +
-          '<option value="3 years">3 years</option>' +
-          '<option value="4 years">4 years</option>' +
-          '<option value="5 years">5 years</option>' +
-          '<option value="7 years">7 years</option>' +
-          '<option value="10 years">10 years</option>' +
-          '<option value="12 years">12 years</option>';
-      }
-      targetSel.onchange = function() { updateRetentionCalc(selId); updateTodoSummary(); };
+      targetSel.id = prefix + '-ret-target';
+      targetSel.innerHTML = targetOpts;
+      targetSel.onchange = function() { updateRetentionCalc(prefix); updateTodoSummary(); };
 
       const gbLbl = document.createElement('span');
       gbLbl.className = 'retention-change-label';
@@ -4299,15 +3986,15 @@ function handleRetentionChangeToggle(selId) {
       const gbInput = document.createElement('input');
       gbInput.type = 'number';
       gbInput.className = 'gbday-input retention-change-gbday';
-      gbInput.id = selId + '-change-gbday';
+      gbInput.id = prefix + '-ret-change-gbday';
       gbInput.placeholder = '0';
       gbInput.min = '0';
       gbInput.step = '0.1';
-      gbInput.oninput = function() { updateRetentionCalc(selId); updateTodoSummary(); };
+      gbInput.oninput = function() { updateRetentionCalc(prefix); updateTodoSummary(); };
 
       const resultDiv = document.createElement('span');
       resultDiv.className = 'retention-change-result';
-      resultDiv.id = selId + '-change-result';
+      resultDiv.id = prefix + '-ret-change-result';
       resultDiv.style.display = 'none';
 
       fields.appendChild(targetLbl);
@@ -4324,14 +4011,14 @@ function handleRetentionChangeToggle(selId) {
 }
 
 // Calculate and display retention storage estimates
-function updateRetentionCalc(selId) {
-  const currentSel = document.getElementById(selId + '-retention');
-  const targetSel = document.getElementById(selId + '-target');
-  const gbInput = document.getElementById(selId + '-change-gbday');
-  const resultDiv = document.getElementById(selId + '-change-result');
-  if (!currentSel || !targetSel || !gbInput || !resultDiv) return;
+function updateRetentionCalc(prefix) {
+  const currentPeriod = getEffectiveAnalyticsPeriod(prefix);
+  const targetSel = document.getElementById(prefix + '-ret-target');
+  const gbInput = document.getElementById(prefix + '-ret-change-gbday');
+  const resultDiv = document.getElementById(prefix + '-ret-change-result');
+  if (!targetSel || !gbInput || !resultDiv) return;
 
-  const currentDays = parsePeriodToDays(currentSel.value);
+  const currentDays = parsePeriodToDays(currentPeriod);
   const targetDays = parsePeriodToDays(targetSel.value);
   const gbday = parseFloat(gbInput.value) || 0;
 
@@ -4443,24 +4130,22 @@ function updateTodoSummary() {
   // Retention change todos
   document.querySelectorAll('.retention-change-toggle').forEach(toggle => {
     if (toggle.value !== 'Yes') return;
-    const selId = toggle.id.replace('-change', '');
-    const sel = document.getElementById(selId);
-    if (!sel) return;
-    const targetSel = document.getElementById(selId + '-target');
-    const gbInput = document.getElementById(selId + '-change-gbday');
+    const prefix = toggle.id.replace('-ret-change', '');
+    const retGroup = document.querySelector(`.retention-group[data-prefix="${prefix}"]`);
+    if (!retGroup) return;
+    const targetSel = document.getElementById(prefix + '-ret-target');
+    const gbInput = document.getElementById(prefix + '-ret-change-gbday');
     if (!targetSel || !targetSel.value) return;
 
-    const currentSel = document.getElementById(selId + '-retention');
-    const currentPeriod = currentSel ? currentSel.value : '?';
+    const currentPeriod = getEffectiveAnalyticsPeriod(prefix);
     const targetPeriod = targetSel.value;
     const gbday = parseFloat(gbInput?.value) || 0;
     const currentDays = parsePeriodToDays(currentPeriod);
     const targetDays = parsePeriodToDays(targetPeriod);
     const delta = gbday && targetDays > currentDays ? Math.round((targetDays - currentDays) * gbday) : 0;
-    const connectorName = sel.dataset.connector;
-    const retType = sel.dataset.item || 'retention';
+    const connectorName = retGroup.dataset.connector;
 
-    let text = `Change ${retType} from ${currentPeriod} to ${targetPeriod}`;
+    let text = `Change analytics retention from ${currentPeriod} to ${targetPeriod}`;
     if (delta > 0) text += ` (+${delta.toLocaleString()} GB storage)`;
 
     // Add to existing connector group or create new one
@@ -4749,20 +4434,9 @@ function addThirdPartyConnector(name) {
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
       </div>
-      <div class="check-group">
+      <div class="check-group retention-group" data-prefix="${prefix}" data-connector="${safeName}">
         <div class="check-group-title">Retention</div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-r1" data-tier="2" data-connector="${safeName}" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-r1">Analytics retention</label>
-        </div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-r2" data-tier="2" data-connector="${safeName}" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-r2">Lake retention</label>
-        </div>
+        <div class="retention-section-inline" id="${prefix}-retention-section"></div>
       </div>
       <div class="check-group">
         <div class="check-group-title">Validation</div>
@@ -4781,6 +4455,7 @@ function addThirdPartyConnector(name) {
   `;
 
   document.getElementById('thirdparty-connectors').appendChild(section);
+  initRetentionSection(prefix);
   updateProgress();
   updateTodoSummary();
   updateAcceptedRisks();
@@ -4853,20 +4528,9 @@ function addThirdPartyTIConnector(name) {
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
       </div>
-      <div class="check-group">
+      <div class="check-group retention-group" data-prefix="${prefix}" data-connector="${safeName}">
         <div class="check-group-title">Retention</div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-r1" data-tier="2" data-connector="${safeName}" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-r1">Analytics retention</label>
-        </div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-r2" data-tier="2" data-connector="${safeName}" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-r2">Lake retention</label>
-        </div>
+        <div class="retention-section-inline" id="${prefix}-retention-section"></div>
       </div>
       <div class="check-group">
         <div class="check-group-title">Validation</div>
@@ -4885,6 +4549,7 @@ function addThirdPartyTIConnector(name) {
   `;
 
   document.getElementById('thirdpartyti-connectors').appendChild(section);
+  initRetentionSection(prefix);
   updateProgress();
   updateTodoSummary();
   updateAcceptedRisks();
@@ -4957,20 +4622,9 @@ function addThirdPartyIdConnector(name) {
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
       </div>
-      <div class="check-group">
+      <div class="check-group retention-group" data-prefix="${prefix}" data-connector="${safeName}">
         <div class="check-group-title">Retention</div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-r1" data-tier="2" data-connector="${safeName}" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-r1">Analytics retention</label>
-        </div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-r2" data-tier="2" data-connector="${safeName}" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-r2">Lake retention</label>
-        </div>
+        <div class="retention-section-inline" id="${prefix}-retention-section"></div>
       </div>
       <div class="check-group">
         <div class="check-group-title">Validation</div>
@@ -4989,6 +4643,7 @@ function addThirdPartyIdConnector(name) {
   `;
 
   document.getElementById('thirdpartyid-connectors').appendChild(section);
+  initRetentionSection(prefix);
   updateProgress();
   updateTodoSummary();
   updateAcceptedRisks();
@@ -5061,20 +4716,9 @@ function addThirdPartyAppConnector(name) {
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
       </div>
-      <div class="check-group">
+      <div class="check-group retention-group" data-prefix="${prefix}" data-connector="${safeName}">
         <div class="check-group-title">Retention</div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-r1" data-tier="3" data-connector="${safeName}" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-r1">Analytics retention</label>
-        </div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-r2" data-tier="3" data-connector="${safeName}" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-r2">Lake retention</label>
-        </div>
+        <div class="retention-section-inline" id="${prefix}-retention-section"></div>
       </div>
       <div class="check-group">
         <div class="check-group-title">Validation</div>
@@ -5093,6 +4737,7 @@ function addThirdPartyAppConnector(name) {
   `;
 
   document.getElementById('thirdpartyapp-connectors').appendChild(section);
+  initRetentionSection(prefix);
   updateProgress();
   updateTodoSummary();
   updateAcceptedRisks();
@@ -5165,20 +4810,9 @@ function addThirdPartyCollabConnector(name) {
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
       </div>
-      <div class="check-group">
+      <div class="check-group retention-group" data-prefix="${prefix}" data-connector="${safeName}">
         <div class="check-group-title">Retention</div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-r1" data-tier="3" data-connector="${safeName}" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-r1">Analytics retention</label>
-        </div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-r2" data-tier="3" data-connector="${safeName}" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-r2">Lake retention</label>
-        </div>
+        <div class="retention-section-inline" id="${prefix}-retention-section"></div>
       </div>
       <div class="check-group">
         <div class="check-group-title">Validation</div>
@@ -5197,6 +4831,7 @@ function addThirdPartyCollabConnector(name) {
   `;
 
   document.getElementById('thirdpartycollab-connectors').appendChild(section);
+  initRetentionSection(prefix);
   updateProgress();
   updateTodoSummary();
   updateAcceptedRisks();
@@ -5269,20 +4904,9 @@ function addCustomAppConnector(name) {
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
       </div>
-      <div class="check-group">
+      <div class="check-group retention-group" data-prefix="${prefix}" data-connector="${safeName}">
         <div class="check-group-title">Retention</div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-r1" data-tier="3" data-connector="${safeName}" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-r1">Analytics retention</label>
-        </div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-r2" data-tier="3" data-connector="${safeName}" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-r2">Lake retention</label>
-        </div>
+        <div class="retention-section-inline" id="${prefix}-retention-section"></div>
       </div>
       <div class="check-group">
         <div class="check-group-title">Validation</div>
@@ -5301,6 +4925,7 @@ function addCustomAppConnector(name) {
   `;
 
   document.getElementById('customapp-connectors').appendChild(section);
+  initRetentionSection(prefix);
   updateProgress();
   updateTodoSummary();
   updateAcceptedRisks();
@@ -5373,20 +4998,9 @@ function addThirdPartyDevOpsConnector(name) {
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
       </div>
-      <div class="check-group">
+      <div class="check-group retention-group" data-prefix="${prefix}" data-connector="${safeName}">
         <div class="check-group-title">Retention</div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-r1" data-tier="3" data-connector="${safeName}" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-r1">Analytics retention</label>
-        </div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-r2" data-tier="3" data-connector="${safeName}" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-r2">Lake retention</label>
-        </div>
+        <div class="retention-section-inline" id="${prefix}-retention-section"></div>
       </div>
       <div class="check-group">
         <div class="check-group-title">Validation</div>
@@ -5405,6 +5019,7 @@ function addThirdPartyDevOpsConnector(name) {
   `;
 
   document.getElementById('thirdpartydevops-connectors').appendChild(section);
+  initRetentionSection(prefix);
   updateProgress();
   updateTodoSummary();
   updateAcceptedRisks();
@@ -5477,20 +5092,9 @@ function addThirdPartyOTConnector(name) {
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
       </div>
-      <div class="check-group">
+      <div class="check-group retention-group" data-prefix="${prefix}" data-connector="${safeName}">
         <div class="check-group-title">Retention</div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-r1" data-tier="3" data-connector="${safeName}" data-item="Analytics retention" data-retention="true" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-r1">Analytics retention</label>
-        </div>
-        <div class="check-item">
-          <select class="status-select" id="${prefix}-r2" data-tier="3" data-connector="${safeName}" data-item="Lake retention" data-retention="true" onchange="onStatusChange(this)">
-            ${optionsHtml}
-          </select>
-          <label for="${prefix}-r2">Lake retention</label>
-        </div>
+        <div class="retention-section-inline" id="${prefix}-retention-section"></div>
       </div>
       <div class="check-group">
         <div class="check-group-title">Validation</div>
@@ -5509,6 +5113,7 @@ function addThirdPartyOTConnector(name) {
   `;
 
   document.getElementById('thirdpartyot-connectors').appendChild(section);
+  initRetentionSection(prefix);
   updateProgress();
   updateTodoSummary();
   updateAcceptedRisks();
@@ -5535,6 +5140,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('assessment-date').valueAsDate = new Date();
+  initRetentionSections();
   updateProgress();
   updateTodoSummary();
   updateAcceptedRisks();
@@ -5556,8 +5162,7 @@ function gatherState() {
     },
     selects: {},
     comments: {},
-    retentionValues: {},
-    retentionChanges: {},
+    retentionSections: {},
     gbdayValues: {},
     tablePlanValues: {},
     thirdPartyConnectors: [],
@@ -5579,25 +5184,31 @@ function gatherState() {
     state.comments[ta.id] = ta.value;
   });
 
-  // Save retention period selections and custom values
-  document.querySelectorAll('.retention-period-select:not(.retention-target-select)').forEach(sel => {
-    if (sel.value) state.retentionValues[sel.id] = sel.value;
-  });
-  document.querySelectorAll('.custom-retention-input').forEach(inp => {
-    if (inp.value.trim()) state.retentionValues[inp.id] = inp.value.trim();
-  });
+  // Save workspace default retention
+  const wsRetSel = document.getElementById('workspace-default-retention');
+  if (wsRetSel) state.meta.workspaceRetention = wsRetSel.value;
 
-  // Save retention change toggle, target, and GB/day values
-  document.querySelectorAll('.retention-change-toggle').forEach(toggle => {
-    if (toggle.value === 'Yes') {
-      const baseId = toggle.id.replace('-change', '');
-      const entry = { change: 'Yes' };
-      const target = document.getElementById(baseId + '-target');
-      if (target && target.value) entry.target = target.value;
-      const gbday = document.getElementById(baseId + '-change-gbday');
-      if (gbday && gbday.value) entry.gbday = gbday.value;
-      state.retentionChanges[baseId] = entry;
+  // Save per-connector retention sections
+  document.querySelectorAll('.retention-group[data-prefix]').forEach(group => {
+    const prefix = group.dataset.prefix;
+    const entry = {};
+    const override = document.getElementById(prefix + '-ret-override');
+    if (override) entry.override = override.value;
+    const analytics = document.getElementById(prefix + '-ret-analytics');
+    if (analytics && override && override.value === 'override') entry.analytics = analytics.value;
+    const archive = document.getElementById(prefix + '-ret-archive');
+    if (archive) entry.archive = archive.value;
+    const total = document.getElementById(prefix + '-ret-total');
+    if (total && total.value) entry.total = total.value;
+    const change = document.getElementById(prefix + '-ret-change');
+    if (change && change.value === 'Yes') {
+      entry.change = 'Yes';
+      const target = document.getElementById(prefix + '-ret-target');
+      if (target && target.value) entry.changeTarget = target.value;
+      const gbday = document.getElementById(prefix + '-ret-change-gbday');
+      if (gbday && gbday.value) entry.changeGbday = gbday.value;
     }
+    state.retentionSections[prefix] = entry;
   });
 
   // Save GB/day estimates for "To be added" items
@@ -5757,36 +5368,58 @@ function applyState(state) {
   }
 
   // Restore retention period selections (dropdowns were created by onStatusChange above)
-  if (state.retentionValues) {
-    // First pass: set period selects (may trigger custom input creation)
-    for (const [id, value] of Object.entries(state.retentionValues)) {
-      if (id.endsWith('-custom')) continue;
-      const el = document.getElementById(id);
-      if (el) {
-        el.value = value;
-        if (el.onchange) el.onchange();
-      }
-    }
-    // Second pass: set custom input values
-    for (const [id, value] of Object.entries(state.retentionValues)) {
-      if (!id.endsWith('-custom')) continue;
-      const el = document.getElementById(id);
-      if (el) el.value = value;
+  // Restore workspace default retention first
+  if (state.meta && state.meta.workspaceRetention) {
+    const wsSel = document.getElementById('workspace-default-retention');
+    if (wsSel) {
+      wsSel.value = state.meta.workspaceRetention;
+      onWorkspaceRetentionChange();
     }
   }
 
-  // Restore retention change toggles, targets, and GB/day values
-  if (state.retentionChanges) {
-    for (const [baseId, entry] of Object.entries(state.retentionChanges)) {
-      const toggle = document.getElementById(baseId + '-change');
-      if (toggle) {
-        toggle.value = 'Yes';
-        handleRetentionChangeToggle(baseId);
-        const target = document.getElementById(baseId + '-target');
-        if (target && entry.target) target.value = entry.target;
-        const gbday = document.getElementById(baseId + '-change-gbday');
-        if (gbday && entry.gbday) gbday.value = entry.gbday;
-        updateRetentionCalc(baseId);
+  // Restore per-connector retention sections
+  if (state.retentionSections) {
+    for (const [prefix, entry] of Object.entries(state.retentionSections)) {
+      // Override
+      if (entry.override === 'override') {
+        const overrideSel = document.getElementById(prefix + '-ret-override');
+        if (overrideSel) {
+          overrideSel.value = 'override';
+          onRetentionOverride(prefix);
+          if (entry.analytics) {
+            const analyticsSel = document.getElementById(prefix + '-ret-analytics');
+            if (analyticsSel) analyticsSel.value = entry.analytics;
+          }
+        }
+      }
+      // Archive
+      if (entry.archive === 'Yes') {
+        const archiveSel = document.getElementById(prefix + '-ret-archive');
+        if (archiveSel) {
+          archiveSel.value = 'Yes';
+          onArchiveToggle(prefix);
+          if (entry.total) {
+            const totalSel = document.getElementById(prefix + '-ret-total');
+            if (totalSel) totalSel.value = entry.total;
+          }
+        }
+      }
+      // Change retention
+      if (entry.change === 'Yes') {
+        const changeSel = document.getElementById(prefix + '-ret-change');
+        if (changeSel) {
+          changeSel.value = 'Yes';
+          handleRetentionChangeToggle(prefix);
+          if (entry.changeTarget) {
+            const targetSel = document.getElementById(prefix + '-ret-target');
+            if (targetSel) targetSel.value = entry.changeTarget;
+          }
+          if (entry.changeGbday) {
+            const gbInput = document.getElementById(prefix + '-ret-change-gbday');
+            if (gbInput) gbInput.value = entry.changeGbday;
+          }
+          updateRetentionCalc(prefix);
+        }
       }
     }
   }
@@ -5883,16 +5516,6 @@ function exportToExcel() {
     const connector = sel.dataset.connector;
     const item = sel.dataset.item;
     let status = sel.value || 'Not assessed';
-
-    // Append retention period to status if configured
-    if (sel.dataset.retention === 'true' && sel.value === 'Configured') {
-      const retSel = document.getElementById(sel.id + '-retention');
-      if (retSel && retSel.value) {
-        const customInp = document.getElementById(sel.id + '-custom');
-        const retVal = retSel.value === 'Custom' && customInp ? customInp.value : retSel.value;
-        if (retVal) status += ' (' + retVal + ')';
-      }
-    }
 
     // Find the parent check-group-title
     const group = sel.closest('.check-group');
