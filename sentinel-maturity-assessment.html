@@ -434,6 +434,8 @@
     .status-select.status-not-configured { background: #fce4ec; border-color: var(--danger); color: var(--danger); }
     .status-select.status-to-be-added { background: #fff8e1; border-color: var(--warning); color: #8a6d00; }
     .status-select.status-na { background: var(--secondary); border-color: var(--border); color: var(--text-light); }
+    .status-select.status-healthy { background: #e6f4ea; border-color: var(--success); color: var(--success); }
+    .status-select.status-unhealthy { background: #fff3e0; border-color: #e65100; color: #e65100; }
 
     .retention-inline {
       display: inline-flex;
@@ -1048,7 +1050,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="o365-v1" data-tier="1" data-connector="Office 365" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="o365-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -1157,7 +1159,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="azact-v1" data-tier="1" data-connector="Azure Activity Logs" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="azact-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -1220,7 +1222,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="health-v1" data-tier="1" data-connector="Sentinel Health" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="health-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -1433,7 +1435,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="xdr-v1" data-tier="1" data-connector="Microsoft Defender XDR" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="xdr-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -1568,7 +1570,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="entra-v1" data-tier="1" data-connector="Microsoft Entra ID" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="entra-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -1657,7 +1659,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="winsec-v1" data-tier="1" data-connector="Windows Security Events" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="winsec-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -1772,7 +1774,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="syslog-v1" data-tier="1" data-connector="Syslog for Linux" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="syslog-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -1876,7 +1878,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="dfc-v1" data-tier="2" data-connector="Microsoft Defender for Cloud" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="dfc-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -1939,7 +1941,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="akv-v1" data-tier="2" data-connector="Azure Key Vault" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="akv-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -1998,7 +2000,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="copilot-v1" data-tier="2" data-connector="Copilot / AI Governance" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="copilot-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -2073,7 +2075,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="purview-v1" data-tier="2" data-connector="Microsoft Purview" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="purview-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -2135,7 +2137,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="ti-v1" data-tier="2" data-connector="Microsoft Defender TI" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="ti-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -2243,7 +2245,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="intune-v1" data-tier="2" data-connector="Microsoft Intune" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="intune-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -2327,7 +2329,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="entraprotect-v1" data-tier="2" data-connector="Microsoft Entra ID Protection" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="entraprotect-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -2431,7 +2433,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="aws-v1" data-tier="2" data-connector="Amazon Web Services" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="aws-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -2498,7 +2500,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="gcp-v1" data-tier="2" data-connector="Google Cloud Platform" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="gcp-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -2599,7 +2601,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="azfw-v1" data-tier="2" data-connector="Azure Firewall" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="azfw-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -2664,7 +2666,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="waf-v1" data-tier="2" data-connector="Azure WAF" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="waf-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -2729,7 +2731,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="dns-v1" data-tier="2" data-connector="DNS Security Logs" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="dns-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -2788,7 +2790,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="gsa-v1" data-tier="2" data-connector="Global Secure Access" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="gsa-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -2853,7 +2855,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="vnet-v1" data-tier="2" data-connector="VNet Flow Logs" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="vnet-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -2963,7 +2965,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="iis-v1" data-tier="3" data-connector="IIS Web Server Logs" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="iis-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -3030,7 +3032,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="mdca-v1" data-tier="3" data-connector="Microsoft Defender for Cloud Apps" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="mdca-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -3097,7 +3099,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="sap-v1" data-tier="3" data-connector="SAP" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="sap-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -3164,7 +3166,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="sql-v1" data-tier="3" data-connector="SQL Database Audit" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="sql-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -3247,7 +3249,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="teams-v1" data-tier="3" data-connector="Microsoft Teams Advanced" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="teams-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -3364,7 +3366,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="azdevops-v1" data-tier="3" data-connector="Azure DevOps" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="azdevops-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -3431,7 +3433,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="github-v1" data-tier="3" data-connector="GitHub Enterprise" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="github-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -3523,7 +3525,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="aks-v1" data-tier="3" data-connector="Azure Kubernetes Service" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="aks-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -3590,7 +3592,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="storage-v1" data-tier="3" data-connector="Azure Storage Analytics" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="storage-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -3648,7 +3650,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="mddns-v1" data-tier="3" data-connector="Microsoft Defender for DNS" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="mddns-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -3715,7 +3717,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="wfe-v1" data-tier="3" data-connector="Windows Forwarded Events" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="wfe-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -3787,7 +3789,7 @@
             <div class="check-group-title">Validation</div>
             <div class="check-item">
               <select class="status-select" id="mdiot-v1" data-tier="3" data-connector="Microsoft Defender for IoT" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="mdiot-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
@@ -3841,11 +3843,13 @@ function toggleConnector(id) {
 
 // ===================== STATUS SELECT STYLING =====================
 function onStatusChange(sel) {
-  sel.classList.remove('status-configured', 'status-not-configured', 'status-na', 'status-to-be-added');
+  sel.classList.remove('status-configured', 'status-not-configured', 'status-na', 'status-to-be-added', 'status-healthy', 'status-unhealthy');
   if (sel.value === 'Configured') sel.classList.add('status-configured');
   else if (sel.value === 'Not configured') sel.classList.add('status-not-configured');
   else if (sel.value === 'To be added') sel.classList.add('status-to-be-added');
   else if (sel.value === 'N/A') sel.classList.add('status-na');
+  else if (sel.value === 'Healthy') sel.classList.add('status-healthy');
+  else if (sel.value === 'Unhealthy') sel.classList.add('status-unhealthy');
 
   // Handle retention dropdown visibility
   if (sel.dataset.retention === 'true') {
@@ -4164,6 +4168,13 @@ function updateTodoSummary() {
         tier: sel.dataset.tier,
         selectId: sel.id
       });
+    } else if (sel.value === 'Unhealthy') {
+      todoItems.push({
+        connector: sel.dataset.connector,
+        item: 'Investigate unhealthy connector — ' + sel.dataset.item,
+        tier: sel.dataset.tier,
+        selectId: sel.id
+      });
     }
   });
 
@@ -4459,6 +4470,10 @@ function addThirdPartyConnector(name) {
     '<option value="Not configured">Not configured</option>' +
     '<option value="To be added">To be added</option>' +
     '<option value="N/A">N/A</option>';
+  const validationOptionsHtml =
+    '<option value="">— Not assessed —</option>' +
+    '<option value="Healthy">Healthy</option>' +
+    '<option value="Unhealthy">Unhealthy</option>';
 
   section.innerHTML = `
     <div class="connector-header" onclick="toggleConnector('conn-tp-${idx}')">
@@ -4508,7 +4523,7 @@ function addThirdPartyConnector(name) {
         <div class="check-group-title">Validation</div>
         <div class="check-item">
           <select class="status-select" id="${prefix}-v1" data-tier="2" data-connector="${safeName}" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-            ${optionsHtml}
+            ${validationOptionsHtml}
           </select>
           <label for="${prefix}-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
         </div>
@@ -4559,6 +4574,10 @@ function addThirdPartyTIConnector(name) {
     '<option value="Not configured">Not configured</option>' +
     '<option value="To be added">To be added</option>' +
     '<option value="N/A">N/A</option>';
+  const validationOptionsHtml =
+    '<option value="">— Not assessed —</option>' +
+    '<option value="Healthy">Healthy</option>' +
+    '<option value="Unhealthy">Unhealthy</option>';
 
   section.innerHTML = `
     <div class="connector-header" onclick="toggleConnector('conn-tti-${idx}')">
@@ -4608,7 +4627,7 @@ function addThirdPartyTIConnector(name) {
         <div class="check-group-title">Validation</div>
         <div class="check-item">
           <select class="status-select" id="${prefix}-v1" data-tier="2" data-connector="${safeName}" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-            ${optionsHtml}
+            ${validationOptionsHtml}
           </select>
           <label for="${prefix}-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
         </div>
@@ -4659,6 +4678,10 @@ function addThirdPartyIdConnector(name) {
     '<option value="Not configured">Not configured</option>' +
     '<option value="To be added">To be added</option>' +
     '<option value="N/A">N/A</option>';
+  const validationOptionsHtml =
+    '<option value="">— Not assessed —</option>' +
+    '<option value="Healthy">Healthy</option>' +
+    '<option value="Unhealthy">Unhealthy</option>';
 
   section.innerHTML = `
     <div class="connector-header" onclick="toggleConnector('conn-tid-${idx}')">
@@ -4708,7 +4731,7 @@ function addThirdPartyIdConnector(name) {
         <div class="check-group-title">Validation</div>
         <div class="check-item">
           <select class="status-select" id="${prefix}-v1" data-tier="2" data-connector="${safeName}" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-            ${optionsHtml}
+            ${validationOptionsHtml}
           </select>
           <label for="${prefix}-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
         </div>
@@ -4759,6 +4782,10 @@ function addThirdPartyAppConnector(name) {
     '<option value="Not configured">Not configured</option>' +
     '<option value="To be added">To be added</option>' +
     '<option value="N/A">N/A</option>';
+  const validationOptionsHtml =
+    '<option value="">— Not assessed —</option>' +
+    '<option value="Healthy">Healthy</option>' +
+    '<option value="Unhealthy">Unhealthy</option>';
 
   section.innerHTML = `
     <div class="connector-header" onclick="toggleConnector('conn-tapp-${idx}')">
@@ -4808,7 +4835,7 @@ function addThirdPartyAppConnector(name) {
         <div class="check-group-title">Validation</div>
         <div class="check-item">
           <select class="status-select" id="${prefix}-v1" data-tier="3" data-connector="${safeName}" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-            ${optionsHtml}
+            ${validationOptionsHtml}
           </select>
           <label for="${prefix}-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
         </div>
@@ -4859,6 +4886,10 @@ function addThirdPartyCollabConnector(name) {
     '<option value="Not configured">Not configured</option>' +
     '<option value="To be added">To be added</option>' +
     '<option value="N/A">N/A</option>';
+  const validationOptionsHtml =
+    '<option value="">— Not assessed —</option>' +
+    '<option value="Healthy">Healthy</option>' +
+    '<option value="Unhealthy">Unhealthy</option>';
 
   section.innerHTML = `
     <div class="connector-header" onclick="toggleConnector('conn-tcollab-${idx}')">
@@ -4908,7 +4939,7 @@ function addThirdPartyCollabConnector(name) {
         <div class="check-group-title">Validation</div>
         <div class="check-item">
           <select class="status-select" id="${prefix}-v1" data-tier="3" data-connector="${safeName}" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-            ${optionsHtml}
+            ${validationOptionsHtml}
           </select>
           <label for="${prefix}-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
         </div>
@@ -4959,6 +4990,10 @@ function addCustomAppConnector(name) {
     '<option value="Not configured">Not configured</option>' +
     '<option value="To be added">To be added</option>' +
     '<option value="N/A">N/A</option>';
+  const validationOptionsHtml =
+    '<option value="">— Not assessed —</option>' +
+    '<option value="Healthy">Healthy</option>' +
+    '<option value="Unhealthy">Unhealthy</option>';
 
   section.innerHTML = `
     <div class="connector-header" onclick="toggleConnector('conn-capp-${idx}')">
@@ -5008,7 +5043,7 @@ function addCustomAppConnector(name) {
         <div class="check-group-title">Validation</div>
         <div class="check-item">
           <select class="status-select" id="${prefix}-v1" data-tier="3" data-connector="${safeName}" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-            ${optionsHtml}
+            ${validationOptionsHtml}
           </select>
           <label for="${prefix}-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
         </div>
@@ -5059,6 +5094,10 @@ function addThirdPartyDevOpsConnector(name) {
     '<option value="Not configured">Not configured</option>' +
     '<option value="To be added">To be added</option>' +
     '<option value="N/A">N/A</option>';
+  const validationOptionsHtml =
+    '<option value="">— Not assessed —</option>' +
+    '<option value="Healthy">Healthy</option>' +
+    '<option value="Unhealthy">Unhealthy</option>';
 
   section.innerHTML = `
     <div class="connector-header" onclick="toggleConnector('conn-tdevops-${idx}')">
@@ -5108,7 +5147,7 @@ function addThirdPartyDevOpsConnector(name) {
         <div class="check-group-title">Validation</div>
         <div class="check-item">
           <select class="status-select" id="${prefix}-v1" data-tier="3" data-connector="${safeName}" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-            ${optionsHtml}
+            ${validationOptionsHtml}
           </select>
           <label for="${prefix}-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
         </div>
@@ -5159,6 +5198,10 @@ function addThirdPartyOTConnector(name) {
     '<option value="Not configured">Not configured</option>' +
     '<option value="To be added">To be added</option>' +
     '<option value="N/A">N/A</option>';
+  const validationOptionsHtml =
+    '<option value="">— Not assessed —</option>' +
+    '<option value="Healthy">Healthy</option>' +
+    '<option value="Unhealthy">Unhealthy</option>';
 
   section.innerHTML = `
     <div class="connector-header" onclick="toggleConnector('conn-tot-${idx}')">
@@ -5208,7 +5251,7 @@ function addThirdPartyOTConnector(name) {
         <div class="check-group-title">Validation</div>
         <div class="check-item">
           <select class="status-select" id="${prefix}-v1" data-tier="3" data-connector="${safeName}" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-            ${optionsHtml}
+            ${validationOptionsHtml}
           </select>
           <label for="${prefix}-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
         </div>
