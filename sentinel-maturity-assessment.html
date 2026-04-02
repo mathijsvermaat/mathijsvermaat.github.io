@@ -463,6 +463,58 @@
       font-family: inherit;
     }
 
+    .retention-change-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      margin-left: 8px;
+      flex-wrap: wrap;
+    }
+
+    .retention-change-label {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      white-space: nowrap;
+    }
+
+    .retention-change-toggle {
+      padding: 3px 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-family: inherit;
+      background: var(--white);
+      cursor: pointer;
+    }
+
+    .retention-change-fields {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .retention-change-fields .gbday-input {
+      width: 70px;
+    }
+
+    .retention-change-result {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 4px 10px;
+      background: #f0f7ff;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      color: var(--text);
+    }
+
+    .retention-change-result .storage-value {
+      font-weight: 700;
+      color: var(--primary);
+    }
+
     .gbday-inline {
       display: inline-flex;
       align-items: center;
@@ -4142,17 +4194,163 @@ function handleRetentionDropdown(sel) {
         } else if (customInput) {
           customInput.remove();
         }
+        updateRetentionCalc(sel.id);
+        updateTodoSummary();
       };
 
       container.appendChild(periodSelect);
       checkItem.appendChild(container);
     }
+
+    // Always ensure the retention change row exists when Configured
+    let changeRow = checkItem.querySelector('.retention-change-row');
+    if (!changeRow) {
+      changeRow = document.createElement('div');
+      changeRow.className = 'retention-change-row';
+
+      const lbl = document.createElement('span');
+      lbl.className = 'retention-change-label';
+      lbl.textContent = 'Change retention?';
+
+      const toggle = document.createElement('select');
+      toggle.className = 'retention-change-toggle';
+      toggle.id = sel.id + '-change';
+      toggle.innerHTML = '<option value="No">No</option><option value="Yes">Yes</option>';
+      toggle.onchange = function() { handleRetentionChangeToggle(sel.id); };
+
+      const fields = document.createElement('span');
+      fields.className = 'retention-change-fields';
+      fields.id = sel.id + '-change-fields';
+      fields.style.display = 'none';
+
+      changeRow.appendChild(lbl);
+      changeRow.appendChild(toggle);
+      changeRow.appendChild(fields);
+      checkItem.appendChild(changeRow);
+    }
   } else {
     if (container) container.remove();
+    const changeRow = checkItem.querySelector('.retention-change-row');
+    if (changeRow) changeRow.remove();
   }
 }
 
 // ===================== TO DO SUMMARY =====================
+
+// Helper: convert period string to days
+function parsePeriodToDays(period) {
+  if (!period) return 0;
+  const p = period.toLowerCase().trim();
+  const num = parseFloat(p);
+  if (p.includes('year')) return Math.round(num * 365);
+  if (p.includes('month')) return Math.round(num * 30);
+  if (p.includes('day')) return num;
+  return num || 0;
+}
+
+// Handle the "Change retention?" toggle
+function handleRetentionChangeToggle(selId) {
+  const toggle = document.getElementById(selId + '-change');
+  const fields = document.getElementById(selId + '-change-fields');
+  if (!toggle || !fields) return;
+
+  if (toggle.value === 'Yes') {
+    if (!fields.querySelector('.retention-target-select')) {
+      const retSelect = document.getElementById(selId + '-retention');
+      const isAnalytics = (document.getElementById(selId)?.dataset.item || '').toLowerCase().includes('analytics');
+
+      const targetLbl = document.createElement('span');
+      targetLbl.className = 'retention-change-label';
+      targetLbl.textContent = 'Target:';
+
+      const targetSel = document.createElement('select');
+      targetSel.className = 'retention-period-select retention-target-select';
+      targetSel.id = selId + '-target';
+      if (isAnalytics) {
+        targetSel.innerHTML =
+          '<option value="">\u2014 Select \u2014</option>' +
+          '<option value="120 days">120 days</option>' +
+          '<option value="180 days">180 days</option>' +
+          '<option value="270 days">270 days</option>' +
+          '<option value="365 days">365 days</option>' +
+          '<option value="1.5 years">1.5 years</option>' +
+          '<option value="2 years">2 years</option>';
+      } else {
+        targetSel.innerHTML =
+          '<option value="">\u2014 Select \u2014</option>' +
+          '<option value="180 days">180 days</option>' +
+          '<option value="270 days">270 days</option>' +
+          '<option value="365 days">365 days</option>' +
+          '<option value="1.5 years">1.5 years</option>' +
+          '<option value="2 years">2 years</option>' +
+          '<option value="3 years">3 years</option>' +
+          '<option value="4 years">4 years</option>' +
+          '<option value="5 years">5 years</option>' +
+          '<option value="7 years">7 years</option>' +
+          '<option value="10 years">10 years</option>' +
+          '<option value="12 years">12 years</option>';
+      }
+      targetSel.onchange = function() { updateRetentionCalc(selId); updateTodoSummary(); };
+
+      const gbLbl = document.createElement('span');
+      gbLbl.className = 'retention-change-label';
+      gbLbl.textContent = 'GB/day:';
+
+      const gbInput = document.createElement('input');
+      gbInput.type = 'number';
+      gbInput.className = 'gbday-input retention-change-gbday';
+      gbInput.id = selId + '-change-gbday';
+      gbInput.placeholder = '0';
+      gbInput.min = '0';
+      gbInput.step = '0.1';
+      gbInput.oninput = function() { updateRetentionCalc(selId); updateTodoSummary(); };
+
+      const resultDiv = document.createElement('span');
+      resultDiv.className = 'retention-change-result';
+      resultDiv.id = selId + '-change-result';
+      resultDiv.style.display = 'none';
+
+      fields.appendChild(targetLbl);
+      fields.appendChild(targetSel);
+      fields.appendChild(gbLbl);
+      fields.appendChild(gbInput);
+      fields.appendChild(resultDiv);
+    }
+    fields.style.display = 'flex';
+  } else {
+    fields.style.display = 'none';
+  }
+  updateTodoSummary();
+}
+
+// Calculate and display retention storage estimates
+function updateRetentionCalc(selId) {
+  const currentSel = document.getElementById(selId + '-retention');
+  const targetSel = document.getElementById(selId + '-target');
+  const gbInput = document.getElementById(selId + '-change-gbday');
+  const resultDiv = document.getElementById(selId + '-change-result');
+  if (!currentSel || !targetSel || !gbInput || !resultDiv) return;
+
+  const currentDays = parsePeriodToDays(currentSel.value);
+  const targetDays = parsePeriodToDays(targetSel.value);
+  const gbday = parseFloat(gbInput.value) || 0;
+
+  if (!targetDays || !gbday || targetDays <= currentDays) {
+    resultDiv.style.display = 'none';
+    return;
+  }
+
+  const currentStorage = Math.round(currentDays * gbday);
+  const targetStorage = Math.round(targetDays * gbday);
+  const delta = targetStorage - currentStorage;
+
+  resultDiv.innerHTML =
+    `Current: <span class="storage-value">${currentStorage.toLocaleString()} GB</span>` +
+    ` \u2192 Target: <span class="storage-value">${targetStorage.toLocaleString()} GB</span>` +
+    ` (<span class="storage-value">+${delta.toLocaleString()} GB</span>)`;
+  resultDiv.style.display = 'flex';
+}
+
 function updateTodoSummary() {
   const container = document.getElementById('todo-list');
   const summaryDiv = document.getElementById('todo-summary');
@@ -4179,8 +4377,7 @@ function updateTodoSummary() {
   });
 
   const manualCount = document.querySelectorAll('#manual-todo-list .manual-todo-item').length;
-  const totalCount = todoItems.length + manualCount;
-  countBadge.textContent = totalCount;
+  let totalCount = todoItems.length + manualCount;
 
   container.innerHTML = '';
 
@@ -4242,6 +4439,54 @@ function updateTodoSummary() {
     totalDiv.textContent = totalText;
     container.appendChild(totalDiv);
   }
+
+  // Retention change todos
+  document.querySelectorAll('.retention-change-toggle').forEach(toggle => {
+    if (toggle.value !== 'Yes') return;
+    const selId = toggle.id.replace('-change', '');
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    const targetSel = document.getElementById(selId + '-target');
+    const gbInput = document.getElementById(selId + '-change-gbday');
+    if (!targetSel || !targetSel.value) return;
+
+    const currentSel = document.getElementById(selId + '-retention');
+    const currentPeriod = currentSel ? currentSel.value : '?';
+    const targetPeriod = targetSel.value;
+    const gbday = parseFloat(gbInput?.value) || 0;
+    const currentDays = parsePeriodToDays(currentPeriod);
+    const targetDays = parsePeriodToDays(targetPeriod);
+    const delta = gbday && targetDays > currentDays ? Math.round((targetDays - currentDays) * gbday) : 0;
+    const connectorName = sel.dataset.connector;
+    const retType = sel.dataset.item || 'retention';
+
+    let text = `Change ${retType} from ${currentPeriod} to ${targetPeriod}`;
+    if (delta > 0) text += ` (+${delta.toLocaleString()} GB storage)`;
+
+    // Add to existing connector group or create new one
+    let group = container.querySelector(`[data-retention-connector="${connectorName}"]`);
+    if (!group) {
+      group = document.querySelector(`#todo-list [data-retention-connector="${connectorName}"]`);
+    }
+    if (!group) {
+      group = document.createElement('div');
+      group.className = 'todo-connector-group';
+      group.dataset.retentionConnector = connectorName;
+      const h3 = document.createElement('h3');
+      h3.textContent = connectorName;
+      group.appendChild(h3);
+      const ul = document.createElement('ul');
+      group.appendChild(ul);
+      container.appendChild(group);
+    }
+    const ul = group.querySelector('ul');
+    const li = document.createElement('li');
+    li.textContent = text;
+    ul.appendChild(li);
+    totalCount++;
+  }
+  );
+  countBadge.textContent = totalCount;
 }
 
 // ===================== GENERAL NOTES EDIT/SAVE =====================
@@ -5312,6 +5557,7 @@ function gatherState() {
     selects: {},
     comments: {},
     retentionValues: {},
+    retentionChanges: {},
     gbdayValues: {},
     tablePlanValues: {},
     thirdPartyConnectors: [],
@@ -5334,15 +5580,28 @@ function gatherState() {
   });
 
   // Save retention period selections and custom values
-  document.querySelectorAll('.retention-period-select').forEach(sel => {
+  document.querySelectorAll('.retention-period-select:not(.retention-target-select)').forEach(sel => {
     if (sel.value) state.retentionValues[sel.id] = sel.value;
   });
   document.querySelectorAll('.custom-retention-input').forEach(inp => {
     if (inp.value.trim()) state.retentionValues[inp.id] = inp.value.trim();
   });
 
+  // Save retention change toggle, target, and GB/day values
+  document.querySelectorAll('.retention-change-toggle').forEach(toggle => {
+    if (toggle.value === 'Yes') {
+      const baseId = toggle.id.replace('-change', '');
+      const entry = { change: 'Yes' };
+      const target = document.getElementById(baseId + '-target');
+      if (target && target.value) entry.target = target.value;
+      const gbday = document.getElementById(baseId + '-change-gbday');
+      if (gbday && gbday.value) entry.gbday = gbday.value;
+      state.retentionChanges[baseId] = entry;
+    }
+  });
+
   // Save GB/day estimates for "To be added" items
-  document.querySelectorAll('.gbday-input').forEach(inp => {
+  document.querySelectorAll('.gbday-input:not(.retention-change-gbday)').forEach(inp => {
     if (inp.value) state.gbdayValues[inp.id] = inp.value;
   });
   document.querySelectorAll('.gbday-plan').forEach(sel => {
@@ -5513,6 +5772,22 @@ function applyState(state) {
       if (!id.endsWith('-custom')) continue;
       const el = document.getElementById(id);
       if (el) el.value = value;
+    }
+  }
+
+  // Restore retention change toggles, targets, and GB/day values
+  if (state.retentionChanges) {
+    for (const [baseId, entry] of Object.entries(state.retentionChanges)) {
+      const toggle = document.getElementById(baseId + '-change');
+      if (toggle) {
+        toggle.value = 'Yes';
+        handleRetentionChangeToggle(baseId);
+        const target = document.getElementById(baseId + '-target');
+        if (target && entry.target) target.value = entry.target;
+        const gbday = document.getElementById(baseId + '-change-gbday');
+        if (gbday && entry.gbday) gbday.value = entry.gbday;
+        updateRetentionCalc(baseId);
+      }
     }
   }
 
