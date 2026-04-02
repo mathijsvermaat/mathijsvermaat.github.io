@@ -4302,6 +4302,9 @@ function addManualTodo(title, desc) {
 
 // ===================== ACCEPTED RISKS SUMMARY =====================
 const connectorRiskTexts = {
+  'Office 365': 'No Exchange, SharePoint, or Teams activity logs in Sentinel. Unable to detect mailbox abuse, inbox rule manipulation, unauthorized file sharing, or Teams membership changes — core M365 collaboration activity invisible to SOC.',
+  'Azure Activity Logs': 'No Azure control plane audit trail. Resource creation, deletion, RBAC changes, and policy modifications not ingested — unable to detect unauthorized infrastructure changes or privilege escalation in Azure subscriptions.',
+  'Sentinel Health': 'No Sentinel health diagnostics data. Data collection failures, connector outages, and automation rule errors go undetected — silent gaps in security monitoring may persist unnoticed.',
   'Microsoft Defender XDR': 'No advanced hunting telemetry from MDE, MDO, MDI, and MDA in Sentinel. Limits cross-workload attack reconstruction, automated investigation, and forensic analysis of endpoint, email, and identity threats.',
   'Microsoft Entra ID': 'No visibility on sign-in activity, MFA events, or directory changes. Unable to detect compromised accounts, privilege escalation, or persistence via app registrations — critical identity data missing for incident response.',
   'Windows Security Events': 'No Windows server audit trail for logons, process execution, or group membership changes. Forensic investigation of lateral movement, persistence mechanisms, and credential abuse on Windows servers not possible.',
@@ -4368,12 +4371,12 @@ function updateAcceptedRisks() {
   // Collect all connectors where the first setup item is "Not configured"
   const riskItems = [];
   document.querySelectorAll('.connector-section').forEach(section => {
-    // Skip free-only connectors (O365, Azure Activity, Sentinel Health)
-    const sectionId = section.id;
-    if (['conn-o365', 'conn-azactivity', 'conn-health'].includes(sectionId)) return;
-
     const body = section.querySelector('.connector-body');
     if (!body) return;
+    // Skip General section items (workspace, workbooks — not connectors)
+    const sectionId = section.id;
+    if (sectionId.startsWith('conn-gen-')) return;
+
     const firstGroup = body.querySelector('.check-group');
     if (!firstGroup) return;
     const firstSelect = firstGroup.querySelector('select.status-select');
