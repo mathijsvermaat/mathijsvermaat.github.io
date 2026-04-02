@@ -564,6 +564,65 @@
       font-size: 0.8rem;
     }
 
+    .connector-search {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
+      padding: 12px 0;
+      margin-bottom: 8px;
+    }
+
+    .connector-search-inner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .connector-search-inner svg {
+      flex-shrink: 0;
+      color: var(--text-light);
+    }
+
+    .connector-search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: var(--text);
+      background: transparent;
+    }
+
+    .connector-search-input::placeholder {
+      color: var(--text-light);
+    }
+
+    .connector-search-clear {
+      border: none;
+      background: none;
+      color: var(--text-light);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 0 4px;
+      line-height: 1;
+      display: none;
+    }
+
+    .connector-search-clear:hover {
+      color: var(--text);
+    }
+
+    .connector-section.search-hidden,
+    .tier-section.search-hidden {
+      display: none;
+    }
+
     .gbday-inline {
       display: inline-flex;
       align-items: center;
@@ -873,6 +932,7 @@
     @media print {
       body { background: white; }
       .toolbar, .btn { display: none !important; }
+      .connector-search { display: none !important; }
       .header { padding: 16px; }
       .tier-section.collapsed .tier-body { display: block !important; }
       .connector-section.collapsed .connector-body { display: block !important; }
@@ -1000,6 +1060,15 @@
   <div class="risk-summary" id="risk-summary" style="display: none;">
     <h2>⚠️ Not Covered — Accepted Risks <span class="risk-count" id="risk-count">0</span></h2>
     <div id="risk-list"></div>
+  </div>
+
+  <!-- Connector Search -->
+  <div class="connector-search" id="connector-search">
+    <div class="connector-search-inner">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="currentColor" stroke-width="1.5"/><line x1="10.5" y1="10.5" x2="15" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <input type="text" class="connector-search-input" id="connector-search-input" placeholder="Search connectors — e.g. Office 365, Firewall, Syslog…" oninput="filterConnectors(this.value)">
+      <button class="connector-search-clear" id="connector-search-clear" onclick="clearConnectorSearch()" title="Clear search">&times;</button>
+    </div>
   </div>
 
   <!-- ==================== GENERAL ==================== -->
@@ -3589,6 +3658,56 @@ function toggleTier(id) {
 
 function toggleConnector(id) {
   document.getElementById(id).classList.toggle('collapsed');
+}
+
+// ===================== CONNECTOR SEARCH =====================
+function filterConnectors(query) {
+  const clearBtn = document.getElementById('connector-search-clear');
+  clearBtn.style.display = query ? 'block' : 'none';
+
+  const q = query.toLowerCase().trim();
+
+  // Get all connector sections (static + dynamic)
+  const allConnectors = document.querySelectorAll('.connector-section');
+  const allTiers = document.querySelectorAll('.tier-section');
+
+  if (!q) {
+    // Clear: show everything, restore collapsed state
+    allConnectors.forEach(s => s.classList.remove('search-hidden'));
+    allTiers.forEach(t => t.classList.remove('search-hidden'));
+    return;
+  }
+
+  // Filter connectors by name (h3 text in header)
+  allConnectors.forEach(section => {
+    const header = section.querySelector('.connector-header h3');
+    const name = header ? header.textContent.toLowerCase() : '';
+    if (name.includes(q)) {
+      section.classList.remove('search-hidden', 'collapsed');
+      // Also expand parent tier
+      const tier = section.closest('.tier-section');
+      if (tier) tier.classList.remove('collapsed');
+    } else {
+      section.classList.add('search-hidden');
+    }
+  });
+
+  // Hide tiers where all connectors are hidden
+  allTiers.forEach(tier => {
+    const visible = tier.querySelectorAll('.connector-section:not(.search-hidden)');
+    if (visible.length === 0) {
+      tier.classList.add('search-hidden');
+    } else {
+      tier.classList.remove('search-hidden');
+    }
+  });
+}
+
+function clearConnectorSearch() {
+  const input = document.getElementById('connector-search-input');
+  input.value = '';
+  filterConnectors('');
+  input.focus();
 }
 
 // ===================== STATUS SELECT STYLING =====================
