@@ -1243,10 +1243,16 @@
               <label for="gen-wb-aha">Analytics Health &amp; Audit workbook deployed<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/sentinel/monitor-analytics-rule-integrity" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/AnalyticsHealthAudit.json" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
             </div>
             <div class="check-item">
+              <select class="status-select" id="gen-wb-ablr" data-tier="general" data-connector="Workbooks" data-item="Archiving, Basic Logs &amp; Retention workbook deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gen-wb-ablr">Archiving, Basic Logs &amp; Retention workbook deployed<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/procedures/retention-insights.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/ArchivingBasicLogsRetention.json" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
+            </div>
+            <div class="check-item">
               <select class="status-select" id="gen-wb-ama" data-tier="general" data-connector="Workbooks" data-item="Defender vs AMA coverage workbook deployed" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="gen-wb-ama">Defender vs AMA coverage workbook deployed<div class="check-detail"><a href="https://github.com/mathijsvermaat/Defender-AMA-coverage" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
+              <label for="gen-wb-ama">Defender vs AMA coverage workbook deployed<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/procedures/defender-ama-coverage.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a>&emsp;<a href="https://github.com/mathijsvermaat/Defender-AMA-coverage" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="gen-wb-gdpr" data-tier="general" data-connector="Workbooks" data-item="GDPR Compliance workbook deployed" onchange="onStatusChange(this)">
@@ -1288,7 +1294,7 @@
               <select class="status-select" id="gen-wb-usage" data-tier="general" data-connector="Workbooks" data-item="Workspace Usage Report workbook deployed" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="gen-wb-usage">Workspace Usage Report workbook deployed<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/sentinel/billing-monitor-costs" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/WorkspaceUsage.json" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
+              <label for="gen-wb-usage">Workspace Usage Report workbook deployed<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/procedures/workspace-usage-report.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a>&emsp;<a href="https://learn.microsoft.com/en-us/azure/sentinel/billing-monitor-costs" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/WorkspaceUsage.json" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
             </div>
           </div>
           <div class="section-comment">
