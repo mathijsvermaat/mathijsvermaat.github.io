@@ -1184,78 +1184,6 @@
         </div>
       </div>
 
-      <!-- ===== Workbooks ===== -->
-      <div class="connector-section collapsed" id="conn-gen-workbooks">
-        <div class="connector-header" onclick="toggleConnector('conn-gen-workbooks')">
-          <h3>Workbooks</h3>
-          <span class="connector-progress" id="conn-gen-workbooks-progress">0/0</span>
-          <span class="connector-chevron">▼</span>
-        </div>
-        <div class="connector-body">
-          <div class="check-group">
-            <div class="check-group-title">Deployed Workbooks&emsp;·&emsp;<a href="https://learn.microsoft.com/en-us/azure/sentinel/top-workbooks" target="_blank" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.75rem;color:var(--primary);border-bottom:1px dashed var(--primary);" onclick="event.stopPropagation()">Browse commonly used workbooks on Learn ↗</a></div>
-            <div class="check-item">
-              <select class="status-select" id="gen-wb-c1" data-tier="general" data-connector="Workbooks" data-item="Analytics Health &amp; Audit workbook deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gen-wb-c1">Analytics Health &amp; Audit workbook deployed<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/sentinel/monitor-analytics-rule-integrity" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/AnalyticsHealthAudit.json" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="gen-wb-c2" data-tier="general" data-connector="Workbooks" data-item="Workspace Usage Report workbook deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gen-wb-c2">Workspace Usage Report workbook deployed<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/sentinel/billing-monitor-costs" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/WorkspaceUsage.json" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="gen-wb-c3" data-tier="general" data-connector="Workbooks" data-item="Defender vs AMA coverage workbook deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gen-wb-c3">Defender vs AMA coverage workbook deployed</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="gen-wb-c4" data-tier="general" data-connector="Workbooks" data-item="GDPR Compliance workbook deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gen-wb-c4">GDPR Compliance workbook deployed<div class="check-detail"><a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/GDPR%20Compliance%20%26%20Data%20Security" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="gen-wb-c5" data-tier="general" data-connector="Workbooks" data-item="SOX IT Compliance workbook deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gen-wb-c5">SOX IT Compliance workbook deployed<div class="check-detail"><a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/SOX%20IT%20Compliance" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="gen-wb-c6" data-tier="general" data-connector="Workbooks" data-item="Sentinel Health workbook deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gen-wb-c6">Sentinel Health workbook deployed<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/sentinel/health-audit" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/SentinelHealth.json" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="gen-wb-c7" data-tier="general" data-connector="Workbooks" data-item="Microsoft Sentinel Optimization workbook deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gen-wb-c7">Microsoft Sentinel Optimization workbook deployed<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/sentinel/soc-optimization/soc-optimization-access" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/OptimizationWorkbook.json" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a>&emsp;Also available as built-in Defender portal feature</div></label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="gen-wb-c8" data-tier="general" data-connector="Workbooks" data-item="Microsoft Sentinel Cost workbook deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gen-wb-c8">Microsoft Sentinel Cost workbook deployed (from SOC Handbook)<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/sentinel/billing-monitor-costs" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/AzureSentinelCost.json" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="gen-wb-c9" data-tier="general" data-connector="Workbooks" data-item="Network Traffic Insights (Global Secure Access) workbook deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="gen-wb-c9">Network Traffic Insights (Global Secure Access) workbook deployed<div class="check-detail"><a href="https://learn.microsoft.com/en-us/entra/global-secure-access/how-to-view-enriched-logs" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/Global%20Secure%20Access" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
-            </div>
-          </div>
-          <div class="section-comment">
-            <label for="gen-wb-comment">Comments / Rationale — Workbooks</label>
-            <textarea id="gen-wb-comment" data-connector="Workbooks" placeholder="e.g. Additional custom workbooks deployed for SOC dashboards."></textarea>
-          </div>
-        </div>
-      </div>
-
       <!-- ===== Solutions ===== -->
       <div class="connector-section collapsed" id="conn-gen-solutions">
         <div class="connector-header" onclick="toggleConnector('conn-gen-solutions')">
@@ -1267,33 +1195,105 @@
           <div class="check-group">
             <div class="check-group-title">Content Hub Solutions&emsp;·&emsp;<a href="https://learn.microsoft.com/en-us/azure/sentinel/sentinel-solutions-catalog" target="_blank" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.75rem;color:var(--primary);border-bottom:1px dashed var(--primary);" onclick="event.stopPropagation()">Browse solutions catalog on Learn ↗</a></div>
             <div class="check-item">
-              <select class="status-select" id="gen-sol-c1" data-tier="general" data-connector="Solutions" data-item="SOC Handbook solution installed" onchange="onStatusChange(this)">
+              <select class="status-select" id="gen-sol-nse" data-tier="general" data-connector="Solutions" data-item="Network Session Essentials solution installed" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="gen-sol-c1">SOC Handbook solution installed<div class="check-detail">Includes 6 workbooks: Incident Overview, Investigation Insights, MITRE ATT&amp;CK, Security Alerts, Security Operations Efficiency, Microsoft Sentinel Cost<br><a href="https://learn.microsoft.com/en-us/azure/sentinel/top-workbooks" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/SOC%20Handbook" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
+              <label for="gen-sol-nse">Network Session Essentials solution installed<div class="check-detail">Analytics rules, hunting queries, playbooks, workbook, summary rules, and watchlists for ASIM-normalized network session data<br><a href="https://learn.microsoft.com/en-us/azure/sentinel/sentinel-solutions-catalog" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/Network%20Session%20Essentials" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
             </div>
             <div class="check-item">
-              <select class="status-select" id="gen-sol-c2" data-tier="general" data-connector="Solutions" data-item="UEBA Essentials solution installed" onchange="onStatusChange(this)">
+              <select class="status-select" id="gen-sol-soar" data-tier="general" data-connector="Solutions" data-item="Sentinel SOAR Essentials solution installed" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="gen-sol-c2">UEBA Essentials solution installed<div class="check-detail">Hunting queries and workbook for User &amp; Entity Behavior Analytics<br><a href="https://learn.microsoft.com/en-us/azure/sentinel/sentinel-solutions-catalog" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/UEBA%20Essentials" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
+              <label for="gen-sol-soar">Sentinel SOAR Essentials solution installed<div class="check-detail">Essential SOAR playbooks and workbook for automating common SOC tasks<br><a href="https://learn.microsoft.com/en-us/azure/sentinel/sentinel-solutions-catalog" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/SentinelSOARessentials" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
             </div>
             <div class="check-item">
-              <select class="status-select" id="gen-sol-c3" data-tier="general" data-connector="Solutions" data-item="Network Session Essentials solution installed" onchange="onStatusChange(this)">
+              <select class="status-select" id="gen-sol-soc" data-tier="general" data-connector="Solutions" data-item="SOC Handbook solution installed" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="gen-sol-c3">Network Session Essentials solution installed<div class="check-detail">Analytics rules, hunting queries, playbooks, workbook, summary rules, and watchlists for ASIM-normalized network session data<br><a href="https://learn.microsoft.com/en-us/azure/sentinel/sentinel-solutions-catalog" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/Network%20Session%20Essentials" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
+              <label for="gen-sol-soc">SOC Handbook solution installed<div class="check-detail">Includes 6 workbooks: Incident Overview, Investigation Insights, MITRE ATT&amp;CK, Security Alerts, Security Operations Efficiency, Microsoft Sentinel Cost<br><a href="https://learn.microsoft.com/en-us/azure/sentinel/top-workbooks" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/SOC%20Handbook" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
             </div>
             <div class="check-item">
-              <select class="status-select" id="gen-sol-c4" data-tier="general" data-connector="Solutions" data-item="Sentinel SOAR Essentials solution installed" onchange="onStatusChange(this)">
+              <select class="status-select" id="gen-sol-ueba" data-tier="general" data-connector="Solutions" data-item="UEBA Essentials solution installed" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="gen-sol-c4">Sentinel SOAR Essentials solution installed<div class="check-detail">Essential SOAR playbooks and workbook for automating common SOC tasks<br><a href="https://learn.microsoft.com/en-us/azure/sentinel/sentinel-solutions-catalog" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/SentinelSOARessentials" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
+              <label for="gen-sol-ueba">UEBA Essentials solution installed<div class="check-detail">Hunting queries and workbook for User &amp; Entity Behavior Analytics<br><a href="https://learn.microsoft.com/en-us/azure/sentinel/sentinel-solutions-catalog" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/UEBA%20Essentials" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
             </div>
           </div>
           <div class="section-comment">
             <label for="gen-sol-comment">Comments / Rationale — Solutions</label>
             <textarea id="gen-sol-comment" data-connector="Solutions" placeholder="e.g. SOC Handbook installed for workbooks. UEBA Essentials deployed for hunting queries."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Workbooks ===== -->
+      <div class="connector-section collapsed" id="conn-gen-workbooks">
+        <div class="connector-header" onclick="toggleConnector('conn-gen-workbooks')">
+          <h3>Workbooks</h3>
+          <span class="connector-progress" id="conn-gen-workbooks-progress">0/0</span>
+          <span class="connector-chevron">▼</span>
+        </div>
+        <div class="connector-body">
+          <div class="check-group">
+            <div class="check-group-title">Deployed Workbooks&emsp;·&emsp;<a href="https://learn.microsoft.com/en-us/azure/sentinel/top-workbooks" target="_blank" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.75rem;color:var(--primary);border-bottom:1px dashed var(--primary);" onclick="event.stopPropagation()">Browse commonly used workbooks on Learn ↗</a></div>
+            <div class="check-item">
+              <select class="status-select" id="gen-wb-aha" data-tier="general" data-connector="Workbooks" data-item="Analytics Health &amp; Audit workbook deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gen-wb-aha">Analytics Health &amp; Audit workbook deployed<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/sentinel/monitor-analytics-rule-integrity" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/AnalyticsHealthAudit.json" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="gen-wb-ama" data-tier="general" data-connector="Workbooks" data-item="Defender vs AMA coverage workbook deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gen-wb-ama">Defender vs AMA coverage workbook deployed<div class="check-detail"><a href="https://github.com/mathijsvermaat/Defender-AMA-coverage" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="gen-wb-gdpr" data-tier="general" data-connector="Workbooks" data-item="GDPR Compliance workbook deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gen-wb-gdpr">GDPR Compliance workbook deployed<div class="check-detail"><a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/GDPR%20Compliance%20%26%20Data%20Security" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="gen-wb-cost" data-tier="general" data-connector="Workbooks" data-item="Microsoft Sentinel Cost workbook deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gen-wb-cost">Microsoft Sentinel Cost workbook deployed (from SOC Handbook)<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/sentinel/billing-monitor-costs" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/AzureSentinelCost.json" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="gen-wb-opt" data-tier="general" data-connector="Workbooks" data-item="Microsoft Sentinel Optimization workbook deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gen-wb-opt">Microsoft Sentinel Optimization workbook deployed<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/sentinel/soc-optimization/soc-optimization-access" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/OptimizationWorkbook.json" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a>&emsp;Also available as built-in Defender portal feature</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="gen-wb-gsa" data-tier="general" data-connector="Workbooks" data-item="Network Traffic Insights (Global Secure Access) workbook deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gen-wb-gsa">Network Traffic Insights (Global Secure Access) workbook deployed<div class="check-detail"><a href="https://learn.microsoft.com/en-us/entra/global-secure-access/how-to-view-enriched-logs" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/Global%20Secure%20Access" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="gen-wb-health" data-tier="general" data-connector="Workbooks" data-item="Sentinel Health workbook deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gen-wb-health">Sentinel Health workbook deployed<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/sentinel/health-audit" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/SentinelHealth.json" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="gen-wb-sox" data-tier="general" data-connector="Workbooks" data-item="SOX IT Compliance workbook deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gen-wb-sox">SOX IT Compliance workbook deployed<div class="check-detail"><a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/SOX%20IT%20Compliance" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="gen-wb-usage" data-tier="general" data-connector="Workbooks" data-item="Workspace Usage Report workbook deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gen-wb-usage">Workspace Usage Report workbook deployed<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/sentinel/billing-monitor-costs" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/WorkspaceUsage.json" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
+            </div>
+          </div>
+          <div class="section-comment">
+            <label for="gen-wb-comment">Comments / Rationale — Workbooks</label>
+            <textarea id="gen-wb-comment" data-connector="Workbooks" placeholder="e.g. Additional custom workbooks deployed for SOC dashboards."></textarea>
           </div>
         </div>
       </div>
@@ -4041,7 +4041,7 @@ function updateProgress() {
 
   // Per connector (static)
   const connectors = [
-    'conn-gen-workspace', 'conn-gen-workbooks', 'conn-gen-solutions',
+    'conn-gen-workspace', 'conn-gen-solutions', 'conn-gen-workbooks',
     'conn-o365', 'conn-azactivity', 'conn-xdr', 'conn-entra', 'conn-winsec', 'conn-syslog', 'conn-health',
     'conn-dfc', 'conn-azfw', 'conn-waf', 'conn-vnet', 'conn-gsa', 'conn-dns', 'conn-thirdparty',
     'conn-purview', 'conn-akv', 'conn-copilot', 'conn-intune', 'conn-ti', 'conn-thirdpartyti', 'conn-aws', 'conn-gcp',
