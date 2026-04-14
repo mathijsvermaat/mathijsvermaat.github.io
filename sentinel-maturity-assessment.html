@@ -848,6 +848,42 @@
       background: #fce4ec;
     }
 
+    .manual-todo-item .btn-edit-todo {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 2px 6px;
+      border-radius: var(--radius);
+    }
+
+    .manual-todo-item .btn-edit-todo:hover {
+      color: var(--primary);
+      background: #e8f0fe;
+    }
+
+    .todo-edit {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .todo-edit-input {
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-family: inherit;
+    }
+
+    .todo-edit-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(0,120,212,0.15);
+    }
+
     .risk-summary {
       background: var(--white);
       border-radius: var(--radius);
@@ -4653,6 +4689,12 @@ function addManualTodo(title, desc) {
     textDiv.appendChild(dDiv);
   }
 
+  const editBtn = document.createElement('button');
+  editBtn.className = 'btn-edit-todo';
+  editBtn.textContent = '✎';
+  editBtn.title = 'Edit to-do';
+  editBtn.onclick = function() { editManualTodo(item); };
+
   const btn = document.createElement('button');
   btn.className = 'btn-remove-todo';
   btn.textContent = '✕';
@@ -4663,8 +4705,80 @@ function addManualTodo(title, desc) {
   };
 
   item.appendChild(textDiv);
+  item.appendChild(editBtn);
   item.appendChild(btn);
   container.appendChild(item);
+  updateTodoSummary();
+}
+
+function editManualTodo(item) {
+  const textDiv = item.querySelector('.todo-text');
+  const editBtn = item.querySelector('.btn-edit-todo');
+  if (!textDiv || !editBtn) return;
+
+  const currentTitle = item.dataset.todoTitle || '';
+  const currentDesc = item.dataset.todoDesc || '';
+
+  // Replace text with inputs
+  const editDiv = document.createElement('div');
+  editDiv.className = 'todo-edit';
+  const titleInput = document.createElement('input');
+  titleInput.type = 'text';
+  titleInput.className = 'todo-edit-input';
+  titleInput.value = currentTitle;
+  titleInput.placeholder = 'Title';
+  const descInput = document.createElement('input');
+  descInput.type = 'text';
+  descInput.className = 'todo-edit-input todo-edit-desc';
+  descInput.value = currentDesc;
+  descInput.placeholder = 'Description (optional)';
+  editDiv.appendChild(titleInput);
+  editDiv.appendChild(descInput);
+
+  textDiv.style.display = 'none';
+  item.insertBefore(editDiv, editBtn);
+  titleInput.focus();
+
+  // Change edit button to save
+  editBtn.textContent = '💾';
+  editBtn.title = 'Save changes';
+  editBtn.onclick = function() { saveManualTodoEdit(item, editDiv, titleInput, descInput, textDiv, editBtn); };
+
+  // Save on Enter from either input
+  const onEnter = function(e) { if (e.key === 'Enter') editBtn.click(); };
+  titleInput.addEventListener('keydown', onEnter);
+  descInput.addEventListener('keydown', onEnter);
+}
+
+function saveManualTodoEdit(item, editDiv, titleInput, descInput, textDiv, editBtn) {
+  const newTitle = titleInput.value.trim();
+  const newDesc = descInput.value.trim();
+  if (!newTitle) return; // don't save empty title
+
+  item.dataset.todoTitle = newTitle;
+  item.dataset.todoDesc = newDesc;
+
+  // Rebuild text display
+  textDiv.innerHTML = '';
+  const tDiv = document.createElement('div');
+  tDiv.className = 'todo-title';
+  tDiv.textContent = newTitle;
+  textDiv.appendChild(tDiv);
+  if (newDesc) {
+    const dDiv = document.createElement('div');
+    dDiv.className = 'todo-desc';
+    dDiv.textContent = newDesc;
+    textDiv.appendChild(dDiv);
+  }
+
+  textDiv.style.display = '';
+  editDiv.remove();
+
+  // Restore edit button
+  editBtn.textContent = '✎';
+  editBtn.title = 'Edit to-do';
+  editBtn.onclick = function() { editManualTodo(item); };
+
   updateTodoSummary();
 }
 
