@@ -748,7 +748,11 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      cursor: pointer;
+      user-select: none;
     }
+
+    .todo-summary h2:hover { opacity: 0.8; }
 
     .todo-summary h2::before {
       content: '';
@@ -923,7 +927,11 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      cursor: pointer;
+      user-select: none;
     }
+
+    .risk-summary h2:hover { opacity: 0.8; }
 
     .risk-summary h2::before {
       content: '';
@@ -979,7 +987,11 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      cursor: pointer;
+      user-select: none;
     }
+
+    .comments-summary h2:hover { opacity: 0.8; }
 
     .comments-summary h2::before {
       content: '';
@@ -1019,6 +1031,25 @@
       line-height: 1.5;
       white-space: pre-line;
     }
+
+    .summary-chevron {
+      font-size: 1rem;
+      color: inherit;
+      transition: transform 0.2s;
+      margin-left: auto;
+    }
+
+    .todo-summary.collapsed .summary-body,
+    .risk-summary.collapsed .summary-body,
+    .comments-summary.collapsed .summary-body { display: none; }
+
+    .todo-summary.collapsed h2,
+    .risk-summary.collapsed h2,
+    .comments-summary.collapsed h2 { margin-bottom: 0; }
+
+    .todo-summary.collapsed .summary-chevron,
+    .risk-summary.collapsed .summary-chevron,
+    .comments-summary.collapsed .summary-chevron { transform: rotate(-90deg); }
 
     .section-comment {
       margin-top: 16px;
@@ -1110,6 +1141,9 @@
       .todo-summary { break-inside: avoid; box-shadow: none; }
       .risk-summary { break-inside: avoid; box-shadow: none; }
       .comments-summary { break-inside: avoid; box-shadow: none; }
+      .todo-summary.collapsed .summary-body,
+      .risk-summary.collapsed .summary-body,
+      .comments-summary.collapsed .summary-body { display: block !important; }
       .retention-inline { display: inline-flex !important; }
     }
   </style>
@@ -1222,28 +1256,34 @@
 
   <!-- To Do Summary — items marked "To be added" + manual items -->
   <div class="todo-summary" id="todo-summary">
-    <h2>📋 To Do — Items to be Added <span class="todo-count" id="todo-count">0</span></h2>
-    <div id="todo-list"></div>
-    <div id="manual-todo-list" class="manual-todo-list"></div>
-    <div class="manual-todo-input">
-      <div class="todo-fields">
-        <input type="text" id="manual-todo-title" class="todo-title-input" placeholder="Title — e.g. Configure Syslog forwarding" onkeydown="if(event.key==='Enter')document.getElementById('manual-todo-desc').focus()">
-        <input type="text" id="manual-todo-desc" placeholder="Description (optional) — e.g. Set up rsyslog on all Linux servers to forward auth.log" onkeydown="if(event.key==='Enter')addManualTodo()">
+    <h2 onclick="toggleSummary('todo-summary')">📋 To Do — Items to be Added <span class="todo-count" id="todo-count">0</span><span class="summary-chevron">▼</span></h2>
+    <div class="summary-body">
+      <div id="todo-list"></div>
+      <div id="manual-todo-list" class="manual-todo-list"></div>
+      <div class="manual-todo-input">
+        <div class="todo-fields">
+          <input type="text" id="manual-todo-title" class="todo-title-input" placeholder="Title — e.g. Configure Syslog forwarding" onkeydown="if(event.key==='Enter')document.getElementById('manual-todo-desc').focus()">
+          <input type="text" id="manual-todo-desc" placeholder="Description (optional) — e.g. Set up rsyslog on all Linux servers to forward auth.log" onkeydown="if(event.key==='Enter')addManualTodo()">
+        </div>
+        <button class="btn-icon" onclick="addManualTodo()" title="Add to-do item">+</button>
       </div>
-      <button class="btn-icon" onclick="addManualTodo()" title="Add to-do item">+</button>
     </div>
   </div>
 
   <!-- Accepted Risks — connectors set to "Not configured" -->
   <div class="risk-summary" id="risk-summary" style="display: none;">
-    <h2>⚠️ Not Covered — Accepted Risks <span class="risk-count" id="risk-count">0</span></h2>
-    <div id="risk-list"></div>
+    <h2 onclick="toggleSummary('risk-summary')">⚠️ Not Covered — Accepted Risks <span class="risk-count" id="risk-count">0</span><span class="summary-chevron">▼</span></h2>
+    <div class="summary-body">
+      <div id="risk-list"></div>
+    </div>
   </div>
 
   <!-- Comments Summary — all connector comments in one view -->
   <div class="comments-summary" id="comments-summary" style="display: none;">
-    <h2>💬 Comments Summary <span class="comments-count" id="comments-count">0</span></h2>
-    <div id="comments-list"></div>
+    <h2 onclick="toggleSummary('comments-summary')">💬 Comments Summary <span class="comments-count" id="comments-count">0</span><span class="summary-chevron">▼</span></h2>
+    <div class="summary-body">
+      <div id="comments-list"></div>
+    </div>
   </div>
 
   <!-- Connector Search -->
@@ -3974,6 +4014,10 @@ function toggleTier(id) {
 }
 
 function toggleConnector(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+function toggleSummary(id) {
   document.getElementById(id).classList.toggle('collapsed');
 }
 
