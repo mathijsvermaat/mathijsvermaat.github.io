@@ -963,6 +963,63 @@
       line-height: 1.5;
     }
 
+    .comments-summary {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 24px;
+      border-left: 4px solid var(--primary);
+    }
+
+    .comments-summary h2 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .comments-summary h2::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 16px;
+      background: var(--primary);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .comments-summary .comments-count {
+      background: var(--primary);
+      color: var(--white);
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .comments-connector-group {
+      margin-bottom: 12px;
+    }
+
+    .comments-connector-group h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+      color: var(--text);
+    }
+
+    .comments-connector-group p {
+      font-size: 0.85rem;
+      color: var(--text);
+      margin: 0;
+      padding-left: 4px;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
     .section-comment {
       margin-top: 16px;
       padding-top: 12px;
@@ -1052,6 +1109,7 @@
       textarea { border: 1px solid #ccc !important; }
       .todo-summary { break-inside: avoid; box-shadow: none; }
       .risk-summary { break-inside: avoid; box-shadow: none; }
+      .comments-summary { break-inside: avoid; box-shadow: none; }
       .retention-inline { display: inline-flex !important; }
     }
   </style>
@@ -1180,6 +1238,12 @@
   <div class="risk-summary" id="risk-summary" style="display: none;">
     <h2>⚠️ Not Covered — Accepted Risks <span class="risk-count" id="risk-count">0</span></h2>
     <div id="risk-list"></div>
+  </div>
+
+  <!-- Comments Summary — all connector comments in one view -->
+  <div class="comments-summary" id="comments-summary" style="display: none;">
+    <h2>💬 Comments Summary <span class="comments-count" id="comments-count">0</span></h2>
+    <div id="comments-list"></div>
   </div>
 
   <!-- Connector Search -->
@@ -4967,6 +5031,43 @@ function updateAcceptedRisks() {
   });
 }
 
+// ===================== COMMENTS SUMMARY =====================
+function updateCommentsSummary() {
+  const container = document.getElementById('comments-list');
+  const summaryDiv = document.getElementById('comments-summary');
+  const countBadge = document.getElementById('comments-count');
+
+  const commentItems = [];
+  document.querySelectorAll('textarea[data-connector]').forEach(ta => {
+    const text = ta.value.trim();
+    if (!text) return;
+    const connector = ta.dataset.connector;
+    commentItems.push({ connector: connector, comment: text });
+  });
+
+  countBadge.textContent = commentItems.length;
+
+  if (commentItems.length === 0) {
+    summaryDiv.style.display = 'none';
+    return;
+  }
+
+  summaryDiv.style.display = 'block';
+  container.innerHTML = '';
+
+  commentItems.forEach(item => {
+    const group = document.createElement('div');
+    group.className = 'comments-connector-group';
+    const h3 = document.createElement('h3');
+    h3.textContent = item.connector;
+    group.appendChild(h3);
+    const p = document.createElement('p');
+    p.textContent = item.comment;
+    group.appendChild(p);
+    container.appendChild(group);
+  });
+}
+
 // ===================== THIRD-PARTY DYNAMIC CONNECTORS =====================
 let thirdPartyCounter = 0;
 
@@ -5736,6 +5837,14 @@ document.addEventListener('DOMContentLoaded', () => {
   updateProgress();
   updateTodoSummary();
   updateAcceptedRisks();
+  updateCommentsSummary();
+
+  // Live-update comments summary when any comment textarea changes
+  document.addEventListener('input', function(e) {
+    if (e.target.matches('textarea[data-connector]')) {
+      updateCommentsSummary();
+    }
+  });
 });
 
 // ===================== SAVE / LOAD JSON =====================
@@ -6079,6 +6188,7 @@ function applyState(state) {
   updateProgress();
   updateTodoSummary();
   updateAcceptedRisks();
+  updateCommentsSummary();
 }
 
 function saveToJSON() {
