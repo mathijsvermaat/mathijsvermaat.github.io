@@ -297,6 +297,29 @@
 
     .tier-header h2 { flex: 1; font-size: 1.1rem; }
     .tier-progress { font-size: 0.85rem; color: var(--text-light); }
+
+    .tier-toggle-btns {
+      display: flex;
+      gap: 4px;
+    }
+
+    .tier-toggle-btns button {
+      background: var(--secondary);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 0.7rem;
+      color: var(--text-light);
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .tier-toggle-btns button:hover {
+      background: var(--border);
+      color: var(--text);
+    }
+
     .tier-chevron { font-size: 1.2rem; color: var(--text-light); transition: transform 0.2s; }
     .tier-section.collapsed .tier-chevron { transform: rotate(-90deg); }
     .tier-section.collapsed .tier-body { display: none; }
@@ -1174,6 +1197,10 @@
       <span class="tier-badge general">General</span>
       <h2>General — Workspace, Dashboards and Tooling</h2>
       <span class="tier-progress" id="tier-general-progress">0 / 0</span>
+      <span class="tier-toggle-btns" onclick="event.stopPropagation()">
+        <button onclick="expandAllConnectors('tier-general')" title="Expand all connectors">Expand all</button>
+        <button onclick="collapseAllConnectors('tier-general')" title="Collapse all connectors">Collapse all</button>
+      </span>
       <span class="tier-chevron">▼</span>
     </div>
     <div class="tier-body" id="tier-general-body">
@@ -1370,6 +1397,10 @@
       <span class="tier-badge tier-1">Tier 1</span>
       <h2>Bare Minimum — Essential Connectors</h2>
       <span class="tier-progress" id="tier-1-progress">0 / 0</span>
+      <span class="tier-toggle-btns" onclick="event.stopPropagation()">
+        <button onclick="expandAllConnectors('tier-1')" title="Expand all connectors">Expand all</button>
+        <button onclick="collapseAllConnectors('tier-1')" title="Collapse all connectors">Collapse all</button>
+      </span>
       <span class="tier-chevron">▼</span>
     </div>
     <div class="tier-body" id="tier-1-body">
@@ -2116,6 +2147,10 @@
       <span class="tier-badge tier-2">Tier 2</span>
       <h2>Extended Visibility — Additional Connectors</h2>
       <span class="tier-progress" id="tier-2-progress">0 / 0</span>
+      <span class="tier-toggle-btns" onclick="event.stopPropagation()">
+        <button onclick="expandAllConnectors('tier-2')" title="Expand all connectors">Expand all</button>
+        <button onclick="collapseAllConnectors('tier-2')" title="Collapse all connectors">Collapse all</button>
+      </span>
       <span class="tier-chevron">▼</span>
     </div>
     <div class="tier-body">
@@ -3067,6 +3102,10 @@
       <span class="tier-badge tier-3">Tier 3</span>
       <h2>Advanced — Full-Spectrum Monitoring</h2>
       <span class="tier-progress" id="tier-3-progress">0 / 0</span>
+      <span class="tier-toggle-btns" onclick="event.stopPropagation()">
+        <button onclick="expandAllConnectors('tier-3')" title="Expand all connectors">Expand all</button>
+        <button onclick="collapseAllConnectors('tier-3')" title="Collapse all connectors">Collapse all</button>
+      </span>
       <span class="tier-chevron">▼</span>
     </div>
     <div class="tier-body">
@@ -3872,6 +3911,18 @@ function toggleTier(id) {
 
 function toggleConnector(id) {
   document.getElementById(id).classList.toggle('collapsed');
+}
+
+function expandAllConnectors(tierId) {
+  const tier = document.getElementById(tierId);
+  if (!tier) return;
+  tier.querySelectorAll('.connector-section').forEach(s => s.classList.remove('collapsed'));
+}
+
+function collapseAllConnectors(tierId) {
+  const tier = document.getElementById(tierId);
+  if (!tier) return;
+  tier.querySelectorAll('.connector-section').forEach(s => s.classList.add('collapsed'));
 }
 
 // ===================== CONNECTOR SEARCH =====================
