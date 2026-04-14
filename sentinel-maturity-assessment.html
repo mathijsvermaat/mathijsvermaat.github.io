@@ -3467,53 +3467,6 @@
       <div class="subsection-header">Collaboration &amp; Communication</div>
       <div class="subsection-description">Captures advanced collaboration platform telemetry — meeting activity, Teams admin actions, and third-party communication tool logs beyond the baseline Office 365 connector.</div>
 
-      <!-- ===== Microsoft Teams (Advanced) ===== -->
-      <div class="connector-section collapsed" id="conn-teams">
-        <div class="connector-header" onclick="toggleConnector('conn-teams')">
-          <h3>Microsoft Teams (Advanced)<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/microsoft-teams-advanced.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a></div></h3>
-          <span class="cost-badge paid">Paid</span>
-          <span class="connector-progress" id="conn-teams-progress">0/0</span>
-          <span class="connector-chevron">▼</span>
-        </div>
-        <div class="connector-body">
-          <div class="check-group">
-            <div class="check-group-title">Connector Setup</div>
-            <div class="check-item">
-              <select class="status-select" id="teams-c1" data-tier="3" data-connector="Microsoft Teams Advanced" data-item="Connector enabled in Sentinel" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="teams-c1">Connector enabled in Sentinel<div class="check-detail">Advanced Teams audit logs beyond Office 365 baseline — admin actions, meeting events, app governance</div></label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Content Hub</div>
-            <div class="check-item">
-              <select class="status-select" id="teams-ch1" data-tier="3" data-connector="Microsoft Teams Advanced" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="teams-ch1">Analytic rules deployed</label>
-            </div>
-          </div>
-          <div class="check-group retention-group" data-prefix="teams" data-connector="Microsoft Teams Advanced">
-            <div class="check-group-title">Retention</div>
-            <div class="retention-section-inline" id="teams-retention-section"></div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Validation</div>
-            <div class="check-item">
-              <select class="status-select" id="teams-v1" data-tier="3" data-connector="Microsoft Teams Advanced" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
-              </select>
-              <label for="teams-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
-            </div>
-          </div>
-          <div class="section-comment">
-            <label for="teams-comment">Comments / Rationale — Microsoft Teams (Advanced)</label>
-            <textarea id="teams-comment" data-connector="Microsoft Teams Advanced" placeholder="e.g. Advanced Teams connector enabled for admin action auditing and meeting event logs."></textarea>
-          </div>
-        </div>
-      </div>
-
       <!-- ===== Third-Party Collaboration (dynamic) ===== -->
       <div class="connector-section collapsed" id="conn-thirdpartycollab">
         <div class="connector-header" onclick="toggleConnector('conn-thirdpartycollab')">
@@ -4968,7 +4921,6 @@ const connectorRiskTexts = {
   'Microsoft Defender for Cloud Apps': 'No Cloud App Security data beyond XDR alerts. Shadow IT discovery, OAuth app governance, and session activity monitoring not correlated with other security signals.',
   'SAP': 'No SAP audit trail in Sentinel. Critical business transactions, privilege escalation within SAP, and sensitive data access in SAP systems go unmonitored — SAP-layer attacks invisible to SOC.',
   'SQL Database Audit': 'No SQL database audit logs in Sentinel. Unauthorized queries, schema changes, and privilege escalation in Azure SQL databases not visible — database-layer attacks undetected.',
-  'Microsoft Teams Advanced': 'No advanced Teams telemetry beyond Office 365 baseline. Admin actions, meeting policy changes, and Teams app governance events not monitored — collaboration platform abuse may go undetected.',
   'Azure DevOps': 'No Azure DevOps audit trail in Sentinel. Pipeline modifications, repository access changes, service connection abuse, and build artifact tampering invisible — supply chain attacks undetected.',
   'GitHub Enterprise': 'No GitHub audit logs in Sentinel. Repository permission changes, secret scanning events, branch protection modifications, and organization-level actions not monitored — code supply chain blind spot.',
   'Azure Kubernetes Service': 'No AKS control plane audit logs in Sentinel. Kubernetes API server activity, privilege escalation within clusters, and container escape attempts go undetected — container orchestration blind spot.',
