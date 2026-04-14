@@ -1170,6 +1170,33 @@
                 </select>
               </span>
             </div>
+            <div class="check-item">
+              <select class="status-select" id="gen-ws-c2" data-tier="general" data-connector="Workspace" data-item="Workspace default total retention configured" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gen-ws-c2">Workspace default total retention</label>
+              <span class="retention-inline">
+                <select class="retention-period-select workspace-retention-select" id="workspace-default-total-retention" onchange="onWorkspaceTotalRetentionChange()">
+                  <option value="90 days">90 days</option>
+                  <option value="120 days">120 days</option>
+                  <option value="180 days">180 days</option>
+                  <option value="270 days">270 days</option>
+                  <option value="365 days" selected>365 days</option>
+                  <option value="1 year">1 year</option>
+                  <option value="2 years">2 years</option>
+                  <option value="3 years">3 years</option>
+                  <option value="4 years">4 years</option>
+                  <option value="5 years">5 years</option>
+                  <option value="6 years">6 years</option>
+                  <option value="7 years">7 years</option>
+                  <option value="8 years">8 years</option>
+                  <option value="9 years">9 years</option>
+                  <option value="10 years">10 years</option>
+                  <option value="11 years">11 years</option>
+                  <option value="12 years">12 years</option>
+                </select>
+              </span>
+            </div>
           </div>
           <div class="section-comment">
             <label for="gen-ws-comment">Comments / Rationale — Workspace</label>
@@ -4113,11 +4140,11 @@ function initRetentionSection(prefix) {
   const analyticsOpts = ['30 days','60 days','90 days','120 days','180 days','270 days','365 days','2 years']
     .map(p => `<option value="${p}"${p === defaultPeriod ? ' selected' : ''}>${p}</option>`).join('');
 
-  const totalOpts = ['','1 year','2 years','3 years','4 years','5 years','6 years','7 years','8 years','9 years','10 years','11 years','12 years']
-    .map(p => p === '' ? '<option value="">\u2014 Select period \u2014</option>' : `<option value="${p}">${p}</option>`).join('');
+  const wsTotalDefault = document.getElementById('workspace-default-total-retention');
+  const defaultTotalPeriod = wsTotalDefault ? wsTotalDefault.value : '365 days';
 
-  const targetOpts = ['','120 days','180 days','270 days','365 days','1.5 years','2 years']
-    .map(p => p === '' ? '<option value="">\u2014 Select \u2014</option>' : `<option value="${p}">${p}</option>`).join('');
+  const totalOpts = ['90 days','120 days','180 days','270 days','365 days','1 year','2 years','3 years','4 years','5 years','6 years','7 years','8 years','9 years','10 years','11 years','12 years']
+    .map(p => `<option value="${p}"${p === defaultTotalPeriod ? ' selected' : ''}>${p}</option>`).join('');
 
   container.innerHTML =
     `<div class="retention-row">` +
@@ -4132,10 +4159,11 @@ function initRetentionSection(prefix) {
       `</select>` +
     `</div>` +
     `<div class="retention-row">` +
-      `<span class="retention-row-label">Archive (Data Lake):</span>` +
-      `<select class="retention-archive-toggle" id="${prefix}-ret-archive" onchange="onArchiveToggle('${prefix}')">` +
-        `<option value="No">No</option>` +
-        `<option value="Yes">Yes</option>` +
+      `<span class="retention-row-label">Total retention:</span>` +
+      `<span class="retention-inherited" id="${prefix}-ret-total-display">${defaultTotalPeriod} (Workspace default)</span>` +
+      `<select class="retention-override-toggle" id="${prefix}-ret-total-override" onchange="onTotalRetentionOverride('${prefix}')">` +
+        `<option value="inherit">Inherit workspace</option>` +
+        `<option value="override">Override</option>` +
       `</select>` +
       `<select class="retention-period-select retention-total-select" id="${prefix}-ret-total" style="display:none" onchange="onRetentionChange('${prefix}')">` +
         totalOpts +
@@ -4157,6 +4185,7 @@ function onWorkspaceRetentionChange() {
   const newPeriod = wsDefault ? wsDefault.value : '90 days';
 
   document.querySelectorAll('.retention-override-toggle').forEach(toggle => {
+    if (!toggle.id.endsWith('-ret-override')) return; // skip total-override toggles
     const prefix = toggle.id.replace('-ret-override', '');
     if (toggle.value === 'inherit') {
       const display = document.getElementById(prefix + '-ret-display');
@@ -4164,6 +4193,23 @@ function onWorkspaceRetentionChange() {
       // Also update the hidden analytics select to match
       const analyticsSel = document.getElementById(prefix + '-ret-analytics');
       if (analyticsSel) analyticsSel.value = newPeriod;
+    }
+  });
+  updateTodoSummary();
+}
+
+// When workspace default total retention changes, update all inherited total displays
+function onWorkspaceTotalRetentionChange() {
+  const wsTotalDefault = document.getElementById('workspace-default-total-retention');
+  const newPeriod = wsTotalDefault ? wsTotalDefault.value : '365 days';
+
+  document.querySelectorAll('[id$="-ret-total-override"]').forEach(toggle => {
+    const prefix = toggle.id.replace('-ret-total-override', '');
+    if (toggle.value === 'inherit') {
+      const display = document.getElementById(prefix + '-ret-total-display');
+      if (display) display.textContent = newPeriod + ' (Workspace default)';
+      const totalSel = document.getElementById(prefix + '-ret-total');
+      if (totalSel) totalSel.value = newPeriod;
     }
   });
   updateTodoSummary();
@@ -4191,14 +4237,25 @@ function onRetentionOverride(prefix) {
   updateTodoSummary();
 }
 
-// Handle archive toggle
-function onArchiveToggle(prefix) {
-  const archive = document.getElementById(prefix + '-ret-archive');
+// Handle total retention override toggle (inherit workspace / override)
+function onTotalRetentionOverride(prefix) {
+  const toggle = document.getElementById(prefix + '-ret-total-override');
+  const display = document.getElementById(prefix + '-ret-total-display');
   const totalSel = document.getElementById(prefix + '-ret-total');
-  if (!archive || !totalSel) return;
+  if (!toggle || !display || !totalSel) return;
 
-  totalSel.style.display = archive.value === 'Yes' ? '' : 'none';
-  if (archive.value === 'No') totalSel.value = '';
+  if (toggle.value === 'override') {
+    display.style.display = 'none';
+    totalSel.style.display = '';
+  } else {
+    display.style.display = '';
+    totalSel.style.display = 'none';
+    // Reset to workspace default
+    const wsTotalDefault = document.getElementById('workspace-default-total-retention');
+    const defaultPeriod = wsTotalDefault ? wsTotalDefault.value : '365 days';
+    totalSel.value = defaultPeriod;
+    display.textContent = defaultPeriod + ' (Workspace default)';
+  }
   updateTodoSummary();
 }
 
@@ -4217,6 +4274,17 @@ function getEffectiveAnalyticsPeriod(prefix) {
   }
   const wsDefault = document.getElementById('workspace-default-retention');
   return wsDefault ? wsDefault.value : '90 days';
+}
+
+// Get effective total retention period for a connector
+function getEffectiveTotalPeriod(prefix) {
+  const override = document.getElementById(prefix + '-ret-total-override');
+  if (override && override.value === 'override') {
+    const sel = document.getElementById(prefix + '-ret-total');
+    return sel ? sel.value : '365 days';
+  }
+  const wsTotalDefault = document.getElementById('workspace-default-total-retention');
+  return wsTotalDefault ? wsTotalDefault.value : '365 days';
 }
 
 // ===================== TO DO SUMMARY =====================
@@ -4358,8 +4426,7 @@ function updateRetentionCalc(prefix) {
   const tGbInput = document.getElementById(prefix + '-ret-change-gbday-total');
   const tResultDiv = document.getElementById(prefix + '-ret-change-result-total');
   if (tTargetSel && tGbInput && tResultDiv) {
-    const totalSel = document.getElementById(prefix + '-ret-total');
-    const currentTotal = totalSel && totalSel.value ? totalSel.value : getEffectiveAnalyticsPeriod(prefix);
+    const currentTotal = getEffectiveTotalPeriod(prefix);
     const currentDays = parsePeriodToDays(currentTotal);
     const targetDays = parsePeriodToDays(tTargetSel.value);
     const gbday = parseFloat(tGbInput.value) || 0;
@@ -5547,6 +5614,8 @@ function gatherState() {
   // Save workspace default retention
   const wsRetSel = document.getElementById('workspace-default-retention');
   if (wsRetSel) state.meta.workspaceRetention = wsRetSel.value;
+  const wsTotalRetSel = document.getElementById('workspace-default-total-retention');
+  if (wsTotalRetSel) state.meta.workspaceTotalRetention = wsTotalRetSel.value;
 
   // Save per-connector retention sections
   document.querySelectorAll('.retention-group[data-prefix]').forEach(group => {
@@ -5556,10 +5625,10 @@ function gatherState() {
     if (override) entry.override = override.value;
     const analytics = document.getElementById(prefix + '-ret-analytics');
     if (analytics && override && override.value === 'override') entry.analytics = analytics.value;
-    const archive = document.getElementById(prefix + '-ret-archive');
-    if (archive) entry.archive = archive.value;
+    const totalOverride = document.getElementById(prefix + '-ret-total-override');
+    if (totalOverride) entry.totalOverride = totalOverride.value;
     const total = document.getElementById(prefix + '-ret-total');
-    if (total && total.value) entry.total = total.value;
+    if (total && totalOverride && totalOverride.value === 'override') entry.total = total.value;
     const change = document.getElementById(prefix + '-ret-change');
     if (change && change.value === 'Yes') {
       entry.change = 'Yes';
@@ -5740,6 +5809,13 @@ function applyState(state) {
       onWorkspaceRetentionChange();
     }
   }
+  if (state.meta && state.meta.workspaceTotalRetention) {
+    const wsTotalSel = document.getElementById('workspace-default-total-retention');
+    if (wsTotalSel) {
+      wsTotalSel.value = state.meta.workspaceTotalRetention;
+      onWorkspaceTotalRetentionChange();
+    }
+  }
 
   // Restore per-connector retention sections
   if (state.retentionSections) {
@@ -5756,12 +5832,24 @@ function applyState(state) {
           }
         }
       }
-      // Archive
-      if (entry.archive === 'Yes') {
-        const archiveSel = document.getElementById(prefix + '-ret-archive');
-        if (archiveSel) {
-          archiveSel.value = 'Yes';
-          onArchiveToggle(prefix);
+      // Total retention override
+      if (entry.totalOverride === 'override') {
+        const totalOverrideSel = document.getElementById(prefix + '-ret-total-override');
+        if (totalOverrideSel) {
+          totalOverrideSel.value = 'override';
+          onTotalRetentionOverride(prefix);
+          if (entry.total) {
+            const totalSel = document.getElementById(prefix + '-ret-total');
+            if (totalSel) totalSel.value = entry.total;
+          }
+        }
+      }
+      // Backward compatibility: old archive=Yes → totalOverride=override
+      if (!entry.totalOverride && entry.archive === 'Yes') {
+        const totalOverrideSel = document.getElementById(prefix + '-ret-total-override');
+        if (totalOverrideSel) {
+          totalOverrideSel.value = 'override';
+          onTotalRetentionOverride(prefix);
           if (entry.total) {
             const totalSel = document.getElementById(prefix + '-ret-total');
             if (totalSel) totalSel.value = entry.total;
