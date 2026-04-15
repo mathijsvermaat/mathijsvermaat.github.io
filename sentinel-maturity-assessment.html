@@ -1525,14 +1525,36 @@
     </div>
     <div class="tier-body" id="tier-general-body">
 
-      <!-- ===== Workspace ===== -->
+      <!-- ===== Platform and Workspace configuration ===== -->
       <div class="connector-section collapsed" id="conn-gen-workspace">
         <div class="connector-header" onclick="toggleConnector('conn-gen-workspace')">
-          <h3>Workspace</h3>
+          <h3>Platform and Workspace configuration</h3>
           <span class="connector-progress" id="conn-gen-workspace-progress">0/0</span>
           <span class="connector-chevron">▼</span>
         </div>
         <div class="connector-body">
+          <div class="check-group">
+            <div class="check-group-title">Platform Configuration</div>
+            <div class="check-item">
+              <select class="status-select" id="gen-ws-c3" data-tier="general" data-connector="Workspace" data-item="Sentinel onboarded in Defender portal" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gen-ws-c3">Sentinel onboarded in Defender portal<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/sentinel/microsoft-sentinel-defender-portal" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;Standalone Sentinel portals will be retired by 31 March 2027</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="gen-ws-c4" data-tier="general" data-connector="Workspace" data-item="Data Lake enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gen-ws-c4">Data Lake enabled<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/sentinel/datalake/sentinel-lake-onboard-defender" target="_blank" onclick="event.stopPropagation()">Learn ↗</a></div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="gen-ws-c5" data-tier="general" data-connector="Workspace" data-item="MSSP" onchange="onStatusChange(this); handleMsspInput(this)">
+                <option value="">— Not assessed —</option><option value="Yes">Yes</option><option value="No">No</option>
+              </select>
+              <label for="gen-ws-c5">Managed Security Service Provider (MSSP)<div class="check-detail">Whether a third-party MSSP is engaged to monitor, manage, or co-manage the Sentinel workspace</div></label>
+              <span id="mssp-name-container"></span>
+            </div>
+          </div>
           <div class="check-group">
             <div class="check-group-title">Configuration</div>
             <div class="check-item">
@@ -1582,7 +1604,7 @@
             </div>
           </div>
           <div class="section-comment">
-            <label for="gen-ws-comment">Comments / Rationale — Workspace</label>
+            <label for="gen-ws-comment">Comments / Rationale — Platform and Workspace configuration</label>
             <textarea id="gen-ws-comment" data-connector="Workspace" placeholder="e.g. LAW retention set to 90 days. Long-term archive configured for 2 years."></textarea>
           </div>
         </div>
@@ -4552,6 +4574,25 @@ function handleGbdayInput(sel) {
   }
 }
 
+// ===================== MSSP NAME INPUT =====================
+function handleMsspInput(sel) {
+  const container = document.getElementById('mssp-name-container');
+  if (!container) return;
+  if (sel.value === 'Yes') {
+    if (!container.querySelector('.mssp-name-input')) {
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'mssp-name-input';
+      input.id = 'mssp-name';
+      input.placeholder = 'MSSP provider name';
+      input.style.cssText = 'margin-left:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.85rem;width:220px;';
+      container.appendChild(input);
+    }
+  } else {
+    container.innerHTML = '';
+  }
+}
+
 // ===================== LICENSE INGESTION BENEFIT =====================
 function updateLicenseBenefit() {
   const e5 = parseInt(document.getElementById('e5-licenses').value) || 0;
@@ -6491,6 +6532,7 @@ function gatherState() {
       totalUsers: document.getElementById('total-users').value,
       windowsWorkloads: document.getElementById('windows-workloads').value,
       linuxWorkloads: document.getElementById('linux-workloads').value,
+      msspName: (document.getElementById('mssp-name') || {}).value || '',
       notes: document.getElementById('notes-display').textContent,
     },
     selects: {},
@@ -6720,6 +6762,16 @@ function applyState(state) {
         el.value = value;
         if (el.classList.contains('status-select')) onStatusChange(el);
       }
+    }
+  }
+
+  // Restore MSSP input
+  const msspSel = document.getElementById('gen-ws-c5');
+  if (msspSel) {
+    handleMsspInput(msspSel);
+    if (state.meta && state.meta.msspName) {
+      const msspInput = document.getElementById('mssp-name');
+      if (msspInput) msspInput.value = state.meta.msspName;
     }
   }
 
