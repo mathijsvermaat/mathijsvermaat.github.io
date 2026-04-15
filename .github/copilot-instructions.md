@@ -149,7 +149,7 @@ sentinel-maturity-assessment.html
 | `{prefix}-ch{N}` | `entra-ch1` | Content Hub status select |
 | `{prefix}-v{N}` | `o365-v1` | Validation status select |
 | `{prefix}-comment` | `o365-comment` | Comments textarea |
-| `{prefix}-ret-*` | `xdr-ret-override` | Retention controls |
+| `{prefix}-ret-*` | `xdr-ret-override`, `xdr-ret-total-override` | Retention controls |
 | `{prefix}-gbday` | `xdr-c1-gbday` | GB/day input (To be added) |
 | `{prefix}-plan` | `xdr-c1-plan` | Table plan selector |
 | `conn-{prefix}` | `conn-o365` | Connector section container |
@@ -162,6 +162,23 @@ When adding a new connector, pick a short unique prefix (e.g., `akv` for Azure K
 
 ---
 
+## Summary Sections
+
+Four collapsible summary sections appear between the tier sections and the connector search. All follow the same pattern: a `.summary-body` wrapper inside a container div with a `toggleSummary()` header.
+
+| Section | CSS class | Accent | Trigger |
+|:--------|:----------|:-------|:--------|
+| **To Do — Items to be Added** | `.todo-summary` | Green (`--success`) | Items set to "To be added" or "Unhealthy" |
+| **Not Covered — Accepted Risks** | `.risk-summary` | Red (`#c0392b`) | First setup item set to "Not configured" |
+| **Configuration Warnings** | `.warnings-summary` | Amber (`#e67e22`) | Connector active but sub-items "Not configured" |
+| **Comments Summary** | `.comments-summary` | Blue (`--primary`) | Any non-empty comment textarea |
+
+### Configuration Warnings
+
+The `configWarningTexts` object maps **select element `id` values** (e.g., `syslog-f1`, `xdr-t3`) to SOC-impact warning descriptions. `updateConfigWarnings()` iterates all connector sections, checks if the first setup item is "Configured" or "To be added", then collects all sub-item selects with value "Not configured" that have a matching entry in `configWarningTexts`. Results are displayed as a bulleted list per connector.
+
+---
+
 ## JavaScript Architecture
 
 ### Inline Event Handlers
@@ -170,7 +187,8 @@ All event handlers are attached inline in HTML. Key patterns:
 
 - `onclick="toggleConnector('conn-{prefix}')"` — Collapse/expand
 - `onchange="onStatusChange(this)"` — Status select change
-- `onchange="onRetentionOverride('{prefix}')"` — Retention toggle
+- `onchange="onRetentionOverride('{prefix}')"` — Analytics retention toggle
+- `onchange="onTotalRetentionOverride('{prefix}')"` — Total retention toggle
 - `oninput="filterConnectors(this.value)"` — Search
 - `onclick="event.stopPropagation()"` — Prevent header toggle on link click
 
@@ -182,9 +200,13 @@ All event handlers are attached inline in HTML. Key patterns:
 | `updateProgress()` | Recalculate all progress bars (overall, per-tier, per-connector) |
 | `updateTodoSummary()` | Rebuild To Do section from "To be added" + "Unhealthy" items |
 | `updateAcceptedRisks()` | Rebuild Accepted Risks from "Not configured" items |
+| `updateConfigWarnings()` | Rebuild Configuration Warnings — sub-items "Not configured" while connector is active |
 | `gatherState()` | Scan DOM → return JSON-serializable state object |
 | `applyState(state)` | Receive state → populate DOM (dynamic connectors first, then selects) |
-| `initRetentionSection(prefix)` | Build retention UI (analytics, archive, change planning) |
+| `initRetentionSection(prefix)` | Build retention UI (analytics, total retention, change planning) |
+| `onTotalRetentionOverride(prefix)` | Toggle between inherited workspace total default and override |
+| `onWorkspaceTotalRetentionChange()` | Propagate workspace total retention default to all inherited connectors |
+| `getEffectiveTotalPeriod(prefix)` | Return effective total retention (override or workspace default) |
 | `handleGbdayInput(sel)` | Create/destroy GB/day input for "To be added" items |
 | `handleConnectorCollapse(sel)` | Auto-collapse subsequent groups when first setup item ≠ Configured |
 | `filterConnectors(query)` | Search by connector name, auto-expand matching tiers |
@@ -229,7 +251,7 @@ Dynamic connector IDs: `conn-{type}{N}` (e.g., `conn-thirdparty1`, `conn-thirdpa
   comments: { "textareaId": "comment text" },
   retentionSections: {
     "prefix": {
-      override, analytics, archive, total,
+      override, analytics, totalOverride, total,
       change, changeAnalyticsTarget, changeAnalyticsGbday,
       changeTotalTarget, changeTotalGbday
     }
@@ -262,6 +284,7 @@ Dynamic connector IDs: `conn-{type}{N}` (e.g., `conn-thirdparty1`, `conn-thirdpa
 6. Add header links: Guidance ↗, Learn ↗, Solution ↗, Ninja ↗ (with `onclick="event.stopPropagation()"`)
 7. Choose the correct cost badge class: `.free`, `.benefit`, or `.paid`
 8. Test: save/load round-trip, progress counting, To Do summary, search filtering
+9. If the connector has multiple toggleable sub-items (tables, facilities, categories), add entries to `configWarningTexts` keyed by the select element's `id` with a SOC-impact description
 
 ---
 
@@ -299,10 +322,18 @@ All links must include `target="_blank"` and `onclick="event.stopPropagation()"`
 Each connector gets a retention block built by `initRetentionSection(prefix)`:
 
 1. **Analytics retention**: Inherit workspace default or override with custom period
-2. **Archive (Data Lake)**: Yes/No toggle; if yes, select total retention period
+2. **Total retention**: Inherit workspace default or override with custom period (mirrors analytics pattern)
 3. **Change planning**: Yes/No toggle; if yes, target period + GB/day inputs with storage delta calculation
 
-Workspace-level default is set in the metadata section and propagated to all inherited connectors via `onWorkspaceRetentionChange()`.
+**Workspace-level defaults** (set in General > Workspace):
+- Analytics retention: `workspace-default-retention` → propagated via `onWorkspaceRetentionChange()`
+- Total retention: `workspace-default-total-retention` → propagated via `onWorkspaceTotalRetentionChange()`
+
+Both use the same inherit/override pattern: when set to "Inherit workspace", the connector displays the workspace default. When set to "Override", the connector shows a dropdown with custom period options.
+
+Key functions: `onRetentionOverride(prefix)`, `onTotalRetentionOverride(prefix)`, `getEffectiveAnalyticsPeriod(prefix)`, `getEffectiveTotalPeriod(prefix)`.
+
+**Backward compatibility**: Old save files with `archive: "Yes"` are auto-migrated to `totalOverride: "override"` in `applyState()`.
 
 ---
 
