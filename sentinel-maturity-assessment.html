@@ -369,6 +369,30 @@
 
     .connector-body { padding: 0 24px 20px; }
 
+    .connector-quick-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 4px;
+      padding: 8px 0 4px;
+    }
+
+    .connector-quick-actions button {
+      background: var(--secondary);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 0.7rem;
+      color: var(--text-light);
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .connector-quick-actions button:hover {
+      background: var(--border);
+      color: var(--text);
+    }
+
     .check-group { margin-bottom: 16px; }
     .check-group-title {
       font-size: 0.8rem;
@@ -1192,6 +1216,7 @@
     @media print {
       body { background: white; }
       .toolbar, .btn { display: none !important; }
+      .connector-quick-actions { display: none !important; }
       .connector-search { display: none !important; }
       .header { padding: 16px; box-shadow: none; border: none; }
       .tier-section.collapsed .tier-body { display: block !important; }
@@ -4131,6 +4156,35 @@ function onStatusChange(sel) {
   updateConfigWarnings();
 }
 
+// ===================== SET ALL CONFIGURED =====================
+function setAllConfigured(connectorBody) {
+  connectorBody.querySelectorAll('select.status-select').forEach(sel => {
+    // Determine the "positive" value based on available options
+    const hasHealthy = sel.querySelector('option[value="Healthy"]');
+    if (hasHealthy) {
+      sel.value = 'Healthy';
+    } else if (sel.querySelector('option[value="Configured"]')) {
+      sel.value = 'Configured';
+    } else {
+      return; // Skip non-standard selects (e.g. DCR preset, retention)
+    }
+    onStatusChange(sel);
+  });
+}
+
+function resetConnector(connectorBody) {
+  connectorBody.querySelectorAll('select.status-select').forEach(sel => {
+    sel.value = '';
+    onStatusChange(sel);
+  });
+  // Clear the comment textarea
+  const textarea = connectorBody.querySelector('textarea[data-connector]');
+  if (textarea) {
+    textarea.value = '';
+    updateCommentsSummary();
+  }
+}
+
 // ===================== CONNECTOR COLLAPSE ON N/A / NOT CONFIGURED / TO BE ADDED =====================
 function handleConnectorCollapse(sel) {
   // Only act on the first Connector Setup select (-c1) within a connector body
@@ -6089,6 +6143,26 @@ document.addEventListener('DOMContentLoaded', () => {
   updateAcceptedRisks();
   updateConfigWarnings();
   updateCommentsSummary();
+
+  // Inject quick-action buttons into every connector body
+  document.querySelectorAll('.connector-section .connector-body').forEach(body => {
+    const actions = document.createElement('div');
+    actions.className = 'connector-quick-actions';
+
+    const btnSet = document.createElement('button');
+    btnSet.textContent = 'Set all configured';
+    btnSet.title = 'Set all items to Configured / Healthy';
+    btnSet.onclick = function() { setAllConfigured(body); };
+    actions.appendChild(btnSet);
+
+    const btnReset = document.createElement('button');
+    btnReset.textContent = 'Reset';
+    btnReset.title = 'Reset all items to Not assessed';
+    btnReset.onclick = function() { resetConnector(body); };
+    actions.appendChild(btnReset);
+
+    body.insertBefore(actions, body.firstChild);
+  });
 
   // Live-update comments summary when any comment textarea changes
   document.addEventListener('input', function(e) {
