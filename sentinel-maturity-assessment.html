@@ -1163,6 +1163,106 @@
       resize: vertical;
     }
 
+    .expansion-section {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .expansion-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .expansion-toggle label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-light);
+    }
+
+    .expansion-toggle select {
+      font-size: 0.8rem;
+      padding: 2px 6px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+    }
+
+    .expansion-details {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .expansion-details input[type="text"] {
+      flex: 1;
+      min-width: 200px;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+
+    .expansion-details .gbday-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .expansion-details input[type="number"] {
+      width: 70px;
+      padding: 4px 6px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+
+    .expansion-details select {
+      font-size: 0.8rem;
+      padding: 2px 6px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+    }
+
+    .expansion-details .gbday-label {
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
+    .validation-volume {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      padding-left: 2px;
+    }
+
+    .validation-volume label {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      white-space: nowrap;
+    }
+
+    .validation-volume input[type="number"] {
+      width: 80px;
+      padding: 4px 6px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+
+    .validation-volume .gbday-label {
+      font-size: 0.8rem;
+      color: var(--text-light);
+    }
+
     .wip-overlay {
       padding: 40px 24px;
       text-align: center;
@@ -4084,6 +4184,129 @@ function collapseAllConnectors(tierId) {
   tier.querySelectorAll('.connector-section').forEach(s => s.classList.add('collapsed'));
 }
 
+// ===================== PLANNED EXPANSION =====================
+function initExpansionSections() {
+  document.querySelectorAll('.connector-section').forEach(section => {
+    if (section.id.startsWith('conn-gen-')) return;
+    const body = section.querySelector('.connector-body');
+    if (!body) return;
+
+    const prefix = section.id.replace('conn-', '');
+    const connectorName = (body.querySelector('select.status-select[data-connector]') || {}).dataset?.connector || prefix;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'expansion-section';
+    wrapper.id = prefix + '-expansion';
+
+    // Toggle row
+    const toggleRow = document.createElement('div');
+    toggleRow.className = 'expansion-toggle';
+
+    const label = document.createElement('label');
+    label.textContent = '📈 Expansion planned';
+    label.setAttribute('for', prefix + '-expansion-toggle');
+    toggleRow.appendChild(label);
+
+    const toggle = document.createElement('select');
+    toggle.id = prefix + '-expansion-toggle';
+    toggle.innerHTML = '<option value="No">No</option><option value="Yes">Yes</option>';
+    toggle.onchange = function() {
+      details.style.display = toggle.value === 'Yes' ? 'flex' : 'none';
+      updateTodoSummary();
+    };
+    toggleRow.appendChild(toggle);
+    wrapper.appendChild(toggleRow);
+
+    // Details row (hidden by default)
+    const details = document.createElement('div');
+    details.className = 'expansion-details';
+    details.style.display = 'none';
+
+    const descInput = document.createElement('input');
+    descInput.type = 'text';
+    descInput.id = prefix + '-expansion-desc';
+    descInput.placeholder = 'e.g. Onboarding 30 additional Linux servers in Q3';
+    descInput.oninput = function() { updateTodoSummary(); };
+    details.appendChild(descInput);
+
+    const gbdayWrap = document.createElement('div');
+    gbdayWrap.className = 'gbday-inline';
+
+    const gbInput = document.createElement('input');
+    gbInput.type = 'number';
+    gbInput.id = prefix + '-expansion-gbday';
+    gbInput.min = '0';
+    gbInput.step = '0.1';
+    gbInput.placeholder = '0';
+    gbInput.oninput = function() { updateTodoSummary(); };
+    gbdayWrap.appendChild(gbInput);
+
+    const gbLabel = document.createElement('span');
+    gbLabel.className = 'gbday-label';
+    gbLabel.textContent = 'GB/day';
+    gbdayWrap.appendChild(gbLabel);
+
+    const planSel = document.createElement('select');
+    planSel.id = prefix + '-expansion-plan';
+    planSel.innerHTML = '<option value="Analytics">Analytics</option><option value="Data Lake">Data Lake</option>';
+    planSel.onchange = function() { updateTodoSummary(); };
+    gbdayWrap.appendChild(planSel);
+
+    details.appendChild(gbdayWrap);
+    wrapper.appendChild(details);
+
+    // Insert before the comments section (after Validation)
+    const commentSection = body.querySelector('.section-comment');
+    if (commentSection) {
+      body.insertBefore(wrapper, commentSection);
+    } else {
+      body.appendChild(wrapper);
+    }
+  });
+}
+
+// ===================== CURRENT VOLUME INPUTS =====================
+function initVolumeInputs() {
+  document.querySelectorAll('.connector-section').forEach(section => {
+    if (section.id.startsWith('conn-gen-')) return;
+    const body = section.querySelector('.connector-body');
+    if (!body) return;
+
+    // Find the Validation check-group (last non-retention, non-comment group with a Healthy/Unhealthy select)
+    const groups = body.querySelectorAll('.check-group:not(.retention-group)');
+    let validationGroup = null;
+    groups.forEach(g => {
+      if (g.querySelector('select option[value="Healthy"]')) validationGroup = g;
+    });
+    if (!validationGroup) return;
+
+    const prefix = section.id.replace('conn-', '');
+
+    const row = document.createElement('div');
+    row.className = 'validation-volume';
+
+    const label = document.createElement('label');
+    label.setAttribute('for', prefix + '-volume');
+    label.textContent = 'Current ingestion';
+    row.appendChild(label);
+
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.id = prefix + '-volume';
+    input.min = '0';
+    input.step = '0.1';
+    input.placeholder = '0';
+    row.appendChild(input);
+
+    const unit = document.createElement('span');
+    unit.className = 'gbday-label';
+    unit.textContent = 'GB/day';
+    row.appendChild(unit);
+
+    validationGroup.appendChild(row);
+  });
+}
+
 // ===================== CONNECTOR SEARCH =====================
 function filterConnectors(query) {
   const clearBtn = document.getElementById('connector-search-clear');
@@ -4183,6 +4406,23 @@ function resetConnector(connectorBody) {
     textarea.value = '';
     updateCommentsSummary();
   }
+  // Reset expansion section
+  const expToggle = connectorBody.querySelector('[id$="-expansion-toggle"]');
+  if (expToggle && expToggle.value === 'Yes') {
+    expToggle.value = 'No';
+    const details = expToggle.closest('.expansion-section').querySelector('.expansion-details');
+    if (details) details.style.display = 'none';
+    const descInput = connectorBody.querySelector('[id$="-expansion-desc"]');
+    if (descInput) descInput.value = '';
+    const gbInput = connectorBody.querySelector('[id$="-expansion-gbday"]');
+    if (gbInput) gbInput.value = '';
+    const planSel = connectorBody.querySelector('[id$="-expansion-plan"]');
+    if (planSel) planSel.value = 'Analytics';
+    updateTodoSummary();
+  }
+  // Reset current volume
+  const volumeInput = connectorBody.querySelector('[id$="-volume"]');
+  if (volumeInput) volumeInput.value = '';
 }
 
 // ===================== CONNECTOR COLLAPSE ON N/A / NOT CONFIGURED / TO BE ADDED =====================
@@ -4874,6 +5114,50 @@ function updateTodoSummary() {
       totalCount++;
     }
   });
+
+  // Planned expansion todos
+  document.querySelectorAll('[id$="-expansion-toggle"]').forEach(toggle => {
+    if (toggle.value !== 'Yes') return;
+    const prefix = toggle.id.replace('-expansion-toggle', '');
+    const section = document.getElementById('conn-' + prefix);
+    if (!section) return;
+    const body = section.querySelector('.connector-body');
+    if (!body) return;
+    const firstSel = body.querySelector('select.status-select[data-connector]');
+    if (!firstSel) return;
+    const connectorName = firstSel.dataset.connector;
+
+    const descInput = document.getElementById(prefix + '-expansion-desc');
+    const gbInput = document.getElementById(prefix + '-expansion-gbday');
+    const planSel = document.getElementById(prefix + '-expansion-plan');
+
+    const desc = descInput ? descInput.value.trim() : '';
+    const gbday = gbInput ? (parseFloat(gbInput.value) || 0) : 0;
+    const plan = planSel ? planSel.value : 'Analytics';
+
+    let text = '📈 Expansion planned';
+    if (desc) text += ' — ' + desc;
+    if (gbday > 0) text += ` (${gbday} GB/day · ${plan})`;
+
+    // Find or create a group for this connector
+    let group = container.querySelector(`[data-expansion-connector="${connectorName}"]`);
+    if (!group) {
+      group = document.createElement('div');
+      group.className = 'todo-connector-group';
+      group.dataset.expansionConnector = connectorName;
+      const h3 = document.createElement('h3');
+      h3.textContent = connectorName;
+      group.appendChild(h3);
+      const ul = document.createElement('ul');
+      group.appendChild(ul);
+      container.appendChild(group);
+    }
+    const li = document.createElement('li');
+    li.textContent = text;
+    group.querySelector('ul').appendChild(li);
+    totalCount++;
+  });
+
   countBadge.textContent = totalCount;
 }
 
@@ -6138,6 +6422,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('assessment-date').valueAsDate = new Date();
   initRetentionSections();
+  initExpansionSections();
+  initVolumeInputs();
   updateProgress();
   updateTodoSummary();
   updateAcceptedRisks();
@@ -6294,6 +6580,27 @@ function gatherState() {
   // Save manual to-do items
   document.querySelectorAll('#manual-todo-list .manual-todo-item').forEach(item => {
     state.manualTodos.push({ title: item.dataset.todoTitle, desc: item.dataset.todoDesc || '' });
+  });
+
+  // Save planned expansions
+  state.expansions = {};
+  document.querySelectorAll('[id$="-expansion-toggle"]').forEach(toggle => {
+    if (toggle.value !== 'Yes') return;
+    const prefix = toggle.id.replace('-expansion-toggle', '');
+    const descInput = document.getElementById(prefix + '-expansion-desc');
+    const gbInput = document.getElementById(prefix + '-expansion-gbday');
+    const planSel = document.getElementById(prefix + '-expansion-plan');
+    state.expansions[prefix] = {
+      desc: descInput ? descInput.value : '',
+      gbday: gbInput ? gbInput.value : '',
+      plan: planSel ? planSel.value : 'Analytics'
+    };
+  });
+
+  // Save current volume measurements
+  state.volumes = {};
+  document.querySelectorAll('[id$="-volume"]').forEach(inp => {
+    if (inp.value) state.volumes[inp.id] = inp.value;
   });
 
   return state;
@@ -6508,6 +6815,32 @@ function applyState(state) {
         addManualTodo(item.title, item.desc);
       }
     });
+  }
+
+  // Restore planned expansions
+  if (state.expansions) {
+    for (const [prefix, data] of Object.entries(state.expansions)) {
+      const toggle = document.getElementById(prefix + '-expansion-toggle');
+      if (toggle) {
+        toggle.value = 'Yes';
+        const details = toggle.closest('.expansion-section').querySelector('.expansion-details');
+        if (details) details.style.display = 'flex';
+        const descInput = document.getElementById(prefix + '-expansion-desc');
+        if (descInput) descInput.value = data.desc || '';
+        const gbInput = document.getElementById(prefix + '-expansion-gbday');
+        if (gbInput) gbInput.value = data.gbday || '';
+        const planSel = document.getElementById(prefix + '-expansion-plan');
+        if (planSel) planSel.value = data.plan || 'Analytics';
+      }
+    }
+  }
+
+  // Restore current volume measurements
+  if (state.volumes) {
+    for (const [id, value] of Object.entries(state.volumes)) {
+      const el = document.getElementById(id);
+      if (el) el.value = value;
+    }
   }
 
   updateProgress();

@@ -201,6 +201,9 @@ All event handlers are attached inline in HTML. Key patterns:
 | `updateTodoSummary()` | Rebuild To Do section from "To be added" + "Unhealthy" items |
 | `updateAcceptedRisks()` | Rebuild Accepted Risks from "Not configured" items |
 | `updateConfigWarnings()` | Rebuild Configuration Warnings — sub-items "Not configured" while connector is active |
+| `initExpansionSections()` | Inject planned expansion toggle + description + GB/day into every connector body |
+| `setAllConfigured(body)` | Set all selects in a connector to Configured/Healthy |
+| `resetConnector(body)` | Reset all selects, comments, and expansion in a connector |
 | `gatherState()` | Scan DOM → return JSON-serializable state object |
 | `applyState(state)` | Receive state → populate DOM (dynamic connectors first, then selects) |
 | `initRetentionSection(prefix)` | Build retention UI (analytics, total retention, change planning) |
@@ -266,7 +269,10 @@ Dynamic connector IDs: `conn-{type}{N}` (e.g., `conn-thirdparty1`, `conn-thirdpa
   customAppConnectors: [...],
   thirdPartyDevOpsConnectors: [...],
   thirdPartyOTConnectors: [...],
-  manualTodos: [{ title, desc }]
+  manualTodos: [{ title, desc }],
+  expansions: {
+    "prefix": { desc, gbday, plan: "Analytics"|"Data Lake" }
+  }
 }
 ```
 
