@@ -307,7 +307,9 @@ Four link types in `.check-detail` under the `<h3>`:
 
 All links must include `target="_blank"` and `onclick="event.stopPropagation()"`.
 
----
+### Check-item Links
+
+Links inside `.check-item .check-detail` and `.check-group-title` use `var(--text-light)` with a dashed underline, turning green (`var(--primary)`) on hover. In `.check-detail`, place descriptive text **first**, then links on a **new line** using `<br>`. In `.check-group-title`, links sit inline after the title text. Never use inline `style` attributes on links — CSS rules handle all link colours. Never use bare/blue links anywhere in the assessment.
 
 ## Status Class Mapping
 

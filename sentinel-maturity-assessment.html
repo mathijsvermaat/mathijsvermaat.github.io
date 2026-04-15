@@ -408,6 +408,8 @@
       padding-bottom: 4px;
       border-bottom: 1px solid var(--border);
     }
+    .check-group-title a { color: var(--text-light); text-decoration: none; border-bottom: 1px dashed var(--text-light); text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 0.75rem; }
+    .check-group-title a:hover { color: var(--primary); border-bottom-color: var(--primary); }
 
     .check-item {
       display: flex;
@@ -427,6 +429,8 @@
       color: var(--text-light);
       margin-top: 2px;
     }
+    .check-item .check-detail a { color: var(--text-light); text-decoration: none; border-bottom: 1px dashed var(--text-light); }
+    .check-item .check-detail a:hover { color: var(--primary); border-bottom-color: var(--primary); }
 
     .subsection-header {
       padding: 10px 24px;
@@ -1539,7 +1543,7 @@
               <select class="status-select" id="gen-ws-c3" data-tier="general" data-connector="Workspace" data-item="Sentinel onboarded in Defender portal" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="gen-ws-c3">Sentinel onboarded in Defender portal<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/sentinel/microsoft-sentinel-defender-portal" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;Standalone Sentinel portals will be retired by 31 March 2027</div></label>
+              <label for="gen-ws-c3">Sentinel onboarded in Defender portal<div class="check-detail">Standalone Sentinel portals will be retired by 31 March 2027<br><a href="https://learn.microsoft.com/en-us/azure/sentinel/microsoft-sentinel-defender-portal" target="_blank" onclick="event.stopPropagation()">Learn ↗</a></div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="gen-ws-c4" data-tier="general" data-connector="Workspace" data-item="Data Lake enabled" onchange="onStatusChange(this)">
@@ -1561,7 +1565,7 @@
               <select class="status-select" id="gen-ws-c1" data-tier="general" data-connector="Workspace" data-item="Workspace default analytics retention configured" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="gen-ws-c1">Workspace default analytics retention</label>
+              <label for="gen-ws-c1">Workspace default analytics retention<div class="check-detail">Interactive retention period for KQL queries. Default is 30 days, 90 days come with the ingestion cost; extending increases cost.<br><a href="https://learn.microsoft.com/en-us/troubleshoot/azure/azure-monitor/log-analytics/billing/configure-data-retention" target="_blank" onclick="event.stopPropagation()">Learn ↗</a></div></label>
               <span class="retention-inline">
                 <select class="retention-period-select workspace-retention-select" id="workspace-default-retention" onchange="onWorkspaceRetentionChange()">
                   <option value="30 days">30 days</option>
@@ -1579,7 +1583,7 @@
               <select class="status-select" id="gen-ws-c2" data-tier="general" data-connector="Workspace" data-item="Workspace default total retention configured" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="gen-ws-c2">Workspace default total retention</label>
+              <label for="gen-ws-c2">Default retention policy<div class="check-detail">Default retention policy that should be applied to all data in the workspace</div></label>
               <span class="retention-inline">
                 <select class="retention-period-select workspace-retention-select" id="workspace-default-total-retention" onchange="onWorkspaceTotalRetentionChange()">
                   <option value="90 days">90 days</option>
@@ -1619,12 +1623,12 @@
         </div>
         <div class="connector-body">
           <div class="check-group">
-            <div class="check-group-title">Content Hub Solutions&emsp;·&emsp;<a href="https://learn.microsoft.com/en-us/azure/sentinel/sentinel-solutions-catalog" target="_blank" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.75rem;color:var(--primary);border-bottom:1px dashed var(--primary);" onclick="event.stopPropagation()">Browse solutions catalog on Learn ↗</a></div>
+            <div class="check-group-title">Content Hub Solutions&emsp;·&emsp;<a href="https://learn.microsoft.com/en-us/azure/sentinel/sentinel-solutions-catalog" target="_blank" onclick="event.stopPropagation()">Browse solutions catalog on Learn ↗</a></div>
             <div class="check-item">
               <select class="status-select" id="gen-sol-nse" data-tier="general" data-connector="Solutions" data-item="Network Session Essentials solution installed" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="gen-sol-nse">Network Session Essentials solution installed<div class="check-detail">Analytics rules, hunting queries, playbooks, workbook, summary rules, and watchlists for ASIM-normalized network session data<br><a href="https://learn.microsoft.com/en-us/azure/sentinel/sentinel-solutions-catalog" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/Network%20Session%20Essentials" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
+              <label for="gen-sol-nse">Network Session Essentials solution installed<div class="check-detail">Analytics rules, hunting queries, playbooks, workbook, summary rules, and watchlists for ASIM-normalised network session data<br><a href="https://learn.microsoft.com/en-us/azure/sentinel/sentinel-solutions-catalog" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/Network%20Session%20Essentials" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="gen-sol-soar" data-tier="general" data-connector="Solutions" data-item="Sentinel SOAR Essentials solution installed" onchange="onStatusChange(this)">
@@ -1661,7 +1665,7 @@
         </div>
         <div class="connector-body">
           <div class="check-group">
-            <div class="check-group-title">Deployed Workbooks&emsp;·&emsp;<a href="https://learn.microsoft.com/en-us/azure/sentinel/top-workbooks" target="_blank" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.75rem;color:var(--primary);border-bottom:1px dashed var(--primary);" onclick="event.stopPropagation()">Browse commonly used workbooks on Learn ↗</a></div>
+            <div class="check-group-title">Deployed Workbooks&emsp;·&emsp;<a href="https://learn.microsoft.com/en-us/azure/sentinel/top-workbooks" target="_blank" onclick="event.stopPropagation()">Browse commonly used workbooks on Learn ↗</a></div>
             <div class="check-item">
               <select class="status-select" id="gen-wb-aha" data-tier="general" data-connector="Workbooks" data-item="Analytics Health &amp; Audit workbook deployed" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
@@ -1696,7 +1700,7 @@
               <select class="status-select" id="gen-wb-opt" data-tier="general" data-connector="Workbooks" data-item="Microsoft Sentinel Optimization workbook deployed" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="gen-wb-opt">Microsoft Sentinel Optimization workbook deployed<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/sentinel/soc-optimization/soc-optimization-access" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/OptimizationWorkbook.json" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a>&emsp;Also available as built-in Defender portal feature</div></label>
+              <label for="gen-wb-opt">Microsoft Sentinel Optimization workbook deployed<div class="check-detail">Also available as built-in Defender portal feature<br><a href="https://learn.microsoft.com/en-us/azure/sentinel/soc-optimization/soc-optimization-access" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/OptimizationWorkbook.json" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="gen-wb-gsa" data-tier="general" data-connector="Workbooks" data-item="Network Traffic Insights (Global Secure Access) workbook deployed" onchange="onStatusChange(this)">
