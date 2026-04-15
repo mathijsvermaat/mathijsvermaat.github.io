@@ -2267,6 +2267,12 @@
               </select>
               <label for="entra-t9">AADUserRiskEvents</label>
             </div>
+            <div class="check-item">
+              <select class="status-select" id="entra-t10" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADRiskyServicePrincipals table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-t10">AADRiskyServicePrincipals<div class="check-detail">Requires Workload Identities Premium licence</div></label>
+            </div>
           </div>
 
           <div class="check-group">
@@ -2894,75 +2900,7 @@
 
       <!-- ~~~~~ SUBSECTION: Identity & Access (Extended) ~~~~~ -->
       <div class="subsection-header">Identity &amp; Access (Extended)</div>
-      <div class="subsection-description">Extends identity monitoring with detailed risk detection data for user and workload identities — risk events, risky service principals, and third-party identity provider logs.</div>
-
-      <!-- ===== Microsoft Entra ID Protection ===== -->
-      <div class="connector-section collapsed" id="conn-entraprotect">
-        <div class="connector-header" onclick="toggleConnector('conn-entraprotect')">
-          <h3>Microsoft Entra ID Protection<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/microsoft-entra-id-protection.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a>&emsp;<a href="https://learn.microsoft.com/en-us/azure/sentinel/data-connectors-reference#azure-active-directory-identity-protection" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/oshezaf/sentinelninja/blob/main/Solutions%20Docs/connectors/azureactivedirectoryidentityprotection.md" target="_blank" onclick="event.stopPropagation()">Ninja ↗</a></div></h3>
-          <span class="cost-badge free">Free Data Source</span>
-          <span class="connector-progress" id="conn-entraprotect-progress">0/0</span>
-          <span class="connector-chevron">▼</span>
-        </div>
-        <div class="connector-body">
-          <div class="check-group">
-            <div class="check-group-title">Connector Setup</div>
-            <div class="check-item">
-              <select class="status-select" id="entraprotect-c1" data-tier="2" data-connector="Microsoft Entra ID Protection" data-item="Connector enabled in Sentinel" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="entraprotect-c1">Risk log categories enabled in Entra ID diagnostic settings<div class="check-detail">Enable RiskyUsers, UserRiskEvents, RiskyServicePrincipals, ServicePrincipalRiskEvents</div></label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Tables</div>
-            <div class="check-item">
-              <select class="status-select" id="entraprotect-t1" data-tier="2" data-connector="Microsoft Entra ID Protection" data-item="AADRiskyUsers table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="entraprotect-t1">AADRiskyUsers table enabled</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="entraprotect-t2" data-tier="2" data-connector="Microsoft Entra ID Protection" data-item="AADUserRiskEvents table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="entraprotect-t2">AADUserRiskEvents table enabled</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="entraprotect-t3" data-tier="2" data-connector="Microsoft Entra ID Protection" data-item="AADRiskyServicePrincipals table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="entraprotect-t3">AADRiskyServicePrincipals table enabled<div class="check-detail">Requires Workload Identities Premium license</div></label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Content Hub</div>
-            <div class="check-item">
-              <select class="status-select" id="entraprotect-ch1" data-tier="2" data-connector="Microsoft Entra ID Protection" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="entraprotect-ch1">Analytic rules deployed</label>
-            </div>
-          </div>
-          <div class="check-group retention-group" data-prefix="entraprotect" data-connector="Microsoft Entra ID Protection">
-            <div class="check-group-title">Retention</div>
-            <div class="retention-section-inline" id="entraprotect-retention-section"></div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Validation</div>
-            <div class="check-item">
-              <select class="status-select" id="entraprotect-v1" data-tier="2" data-connector="Microsoft Entra ID Protection" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
-              </select>
-              <label for="entraprotect-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
-            </div>
-          </div>
-          <div class="section-comment">
-            <label for="entraprotect-comment">Comments / Rationale — Microsoft Entra ID Protection</label>
-            <textarea id="entraprotect-comment" data-connector="Microsoft Entra ID Protection" placeholder="e.g. All risk log categories enabled. Workload Identities Premium not licensed."></textarea>
-          </div>
-        </div>
-      </div>
+      <div class="subsection-description">Extends identity monitoring with third-party identity provider logs from non-Microsoft identity systems.</div>
 
       <!-- ===== Third-Party Identity (dynamic) ===== -->
       <div class="connector-section collapsed" id="conn-thirdpartyid">
@@ -4535,7 +4473,7 @@ function handleGbdayInput(sel) {
   if (!connectorBody) return;
   // Skip free data source connectors where GB/day is not relevant
   const connSection = connectorBody.closest('.connector-section');
-  if (connSection && ['conn-health', 'conn-o365', 'conn-azactivity', 'conn-entraprotect'].includes(connSection.id)) return;
+  if (connSection && ['conn-health', 'conn-o365', 'conn-azactivity'].includes(connSection.id)) return;
   const firstGroup = connectorBody.querySelector('.check-group');
   if (!firstGroup) return;
   const firstSelect = firstGroup.querySelector('select.status-select');
@@ -4651,7 +4589,7 @@ function updateProgress() {
     'conn-o365', 'conn-azactivity', 'conn-xdr', 'conn-entra', 'conn-winsec', 'conn-syslog', 'conn-health',
     'conn-dfc', 'conn-azfw', 'conn-waf', 'conn-vnet', 'conn-gsa', 'conn-dns', 'conn-thirdparty',
     'conn-purview', 'conn-akv', 'conn-copilot', 'conn-intune', 'conn-ti', 'conn-thirdpartyti', 'conn-aws', 'conn-gcp',
-    'conn-entraprotect', 'conn-thirdpartyid',
+    'conn-thirdpartyid',
     'conn-iis', 'conn-mdca', 'conn-sap', 'conn-sql', 'conn-thirdpartyapp',
     'conn-teams', 'conn-thirdpartycollab', 'conn-customapp',
     'conn-azdevops', 'conn-github', 'conn-thirdpartydevops',
@@ -5551,6 +5489,7 @@ const configWarningTexts = {
   'entra-t7': 'AADProvisioningLogs not enabled — user provisioning events not tracked.',
   'entra-t8': 'AADRiskyUsers not enabled — risky user signals from Entra ID Protection not ingested.',
   'entra-t9': 'AADUserRiskEvents not enabled — user risk event details not available for correlation.',
+  'entra-t10': 'AADRiskyServicePrincipals table not enabled — risky service principal signals not monitored.',
 
   // Office 365 workloads
   'o365-t1': 'Exchange workload not enabled — Exchange Online audit events not captured.',
@@ -5604,11 +5543,6 @@ const configWarningTexts = {
   'intune-t1': 'IntuneAuditLogs table not enabled — Intune administrative actions not tracked.',
   'intune-t2': 'IntuneOperationalLogs table not enabled — device compliance and configuration events not captured.',
   'intune-t3': 'IntuneDevices table not enabled — device inventory and state changes not available.',
-
-  // Entra ID Protection (extended)
-  'entraprotect-t1': 'AADRiskyUsers table not enabled — risky user signals not available.',
-  'entraprotect-t2': 'AADUserRiskEvents table not enabled — user risk event details not captured.',
-  'entraprotect-t3': 'AADRiskyServicePrincipals table not enabled — risky service principal signals not monitored.',
 
   // Azure WAF
   'waf-c1': 'Diagnostic settings not configured on Application Gateway — WAF logs from Application Gateway not ingested.',
