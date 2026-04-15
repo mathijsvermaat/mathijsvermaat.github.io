@@ -1032,6 +1032,66 @@
       white-space: pre-line;
     }
 
+    .warnings-summary {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin-bottom: 24px;
+      border-left: 4px solid #e67e22;
+    }
+
+    .warnings-summary h2 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: #e67e22;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .warnings-summary h2:hover { opacity: 0.8; }
+
+    .warnings-summary h2::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 16px;
+      background: #e67e22;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .warnings-summary .warnings-count {
+      background: #e67e22;
+      color: var(--white);
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .warnings-connector-group {
+      margin-bottom: 12px;
+    }
+
+    .warnings-connector-group h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+      color: var(--text);
+    }
+
+    .warnings-connector-group ul {
+      font-size: 0.85rem;
+      color: var(--text);
+      margin: 0;
+      padding-left: 20px;
+      line-height: 1.6;
+    }
+
     .summary-chevron {
       font-size: 1rem;
       color: inherit;
@@ -1041,14 +1101,17 @@
 
     .todo-summary.collapsed .summary-body,
     .risk-summary.collapsed .summary-body,
+    .warnings-summary.collapsed .summary-body,
     .comments-summary.collapsed .summary-body { display: none; }
 
     .todo-summary.collapsed h2,
     .risk-summary.collapsed h2,
+    .warnings-summary.collapsed h2,
     .comments-summary.collapsed h2 { margin-bottom: 0; }
 
     .todo-summary.collapsed .summary-chevron,
     .risk-summary.collapsed .summary-chevron,
+    .warnings-summary.collapsed .summary-chevron,
     .comments-summary.collapsed .summary-chevron { transform: rotate(-90deg); }
 
     .section-comment {
@@ -1140,9 +1203,11 @@
       textarea { border: 1px solid #ccc !important; }
       .todo-summary { break-inside: avoid; box-shadow: none; }
       .risk-summary { break-inside: avoid; box-shadow: none; }
+      .warnings-summary { break-inside: avoid; box-shadow: none; }
       .comments-summary { break-inside: avoid; box-shadow: none; }
       .todo-summary.collapsed .summary-body,
       .risk-summary.collapsed .summary-body,
+      .warnings-summary.collapsed .summary-body,
       .comments-summary.collapsed .summary-body { display: block !important; }
       .retention-inline { display: inline-flex !important; }
     }
@@ -1275,6 +1340,14 @@
     <h2 onclick="toggleSummary('risk-summary')">⚠️ Not Covered — Accepted Risks <span class="risk-count" id="risk-count">0</span><span class="summary-chevron">▼</span></h2>
     <div class="summary-body">
       <div id="risk-list"></div>
+    </div>
+  </div>
+
+  <!-- Configuration Warnings — connectors enabled but with sub-items not configured -->
+  <div class="warnings-summary" id="warnings-summary" style="display: none;">
+    <h2 onclick="toggleSummary('warnings-summary')">⚠ Configuration Warnings <span class="warnings-count" id="warnings-count">0</span><span class="summary-chevron">▼</span></h2>
+    <div class="summary-body">
+      <div id="warnings-list"></div>
     </div>
   </div>
 
@@ -4055,6 +4128,7 @@ function onStatusChange(sel) {
   updateProgress();
   updateTodoSummary();
   updateAcceptedRisks();
+  updateConfigWarnings();
 }
 
 // ===================== CONNECTOR COLLAPSE ON N/A / NOT CONFIGURED / TO BE ADDED =====================
@@ -5027,6 +5101,186 @@ function updateAcceptedRisks() {
   });
 }
 
+// ===================== CONFIGURATION WARNINGS =====================
+// Warning texts for sub-items that are "Not configured" while the connector is active
+const configWarningTexts = {
+  // Syslog facilities
+  'syslog-f1': 'auth facility not enabled — SSH logons, su/sudo, and PAM events not captured. Privilege escalation and brute-force attacks on Linux may go undetected.',
+  'syslog-f2': 'authpriv facility not enabled — private authentication messages and SSH key events not captured. Key-based authentication abuse invisible.',
+  'syslog-f3': 'kern facility not enabled — kernel messages, module loading, and iptables/nftables events not captured. Kernel-level exploits and firewall changes invisible.',
+  'syslog-f4': 'daemon facility not enabled — system daemon messages (sshd, cron, systemd) not captured. Service-level attacks and persistence mechanisms may go undetected.',
+  'syslog-f5': 'cron facility not enabled — cron job execution not captured. Scheduled task persistence and lateral movement via cron invisible.',
+  'syslog-f6': 'syslog facility not enabled — general system messages not captured. Catch-all system events unavailable for correlation.',
+  'syslog-f7': 'local0–local7 facilities not configured — custom application and network appliance logs not captured. Environment-specific telemetry missing.',
+
+  // Defender XDR tables — Endpoint
+  'xdr-t1': 'DeviceInfo table not enabled — device inventory and onboarding status not available for correlation.',
+  'xdr-t2': 'DeviceNetworkInfo table not enabled — network adapter and IP configuration changes not tracked.',
+  'xdr-t3': 'DeviceProcessEvents table not enabled — process creation and command-line activity not ingested. Critical for threat hunting.',
+  'xdr-t4': 'DeviceNetworkEvents table not enabled — outbound connections and network activity from endpoints not captured.',
+  'xdr-t5': 'DeviceFileEvents table not enabled — file creation, modification, and deletion events not ingested. Malware staging and data exfiltration invisible.',
+  'xdr-t6': 'DeviceRegistryEvents table not enabled — registry modifications not captured. Persistence mechanisms (Run keys, services) invisible.',
+  'xdr-t7': 'DeviceLogonEvents table not enabled — endpoint logon events not ingested. Lateral movement detection degraded.',
+  'xdr-t8': 'DeviceImageLoadEvents table not enabled — DLL loading events not captured. DLL sideloading and injection attacks invisible.',
+  'xdr-t9': 'DeviceEvents table not enabled — miscellaneous device events (AMSI, exploit guard, tamper protection) not ingested.',
+  'xdr-t10': 'DeviceFileCertificateInfo table not enabled — file certificate information not available for trust validation.',
+  // Defender XDR tables — Alerts
+  'xdr-t11': 'AlertInfo table not enabled — XDR alert metadata not ingested into Sentinel. Cross-workload alert correlation degraded.',
+  'xdr-t12': 'AlertEvidence table not enabled — alert evidence entities not available. Automated investigation context missing.',
+  // Defender XDR tables — Email
+  'xdr-t13': 'EmailEvents table not enabled — email delivery events not ingested. Phishing and BEC detection reliant on Defender portal only.',
+  'xdr-t14': 'EmailUrlInfo table not enabled — URLs in emails not available for correlation with click events.',
+  'xdr-t15': 'EmailAttachmentInfo table not enabled — email attachment metadata not ingested. Malware delivery via attachments not correlated in Sentinel.',
+  'xdr-t16': 'EmailPostDeliveryEvents table not enabled — post-delivery actions (ZAP) not tracked in Sentinel.',
+  // Defender XDR tables — Identity
+  'xdr-t17': 'IdentityLogonEvents table not enabled — identity-layer logon events not ingested. Multi-stage attack correlation across identity and endpoint degraded.',
+  'xdr-t18': 'IdentityQueryEvents table not enabled — LDAP/directory query events not captured. Reconnaissance detection degraded.',
+  'xdr-t19': 'IdentityDirectoryEvents table not enabled — directory changes from Defender for Identity not ingested.',
+  // Defender XDR tables — Cloud App & URL
+  'xdr-t20': 'CloudAppEvents table not enabled — cloud application activity not ingested. SaaS-layer attacks not correlated in Sentinel.',
+  'xdr-t21': 'UrlClickEvents table not enabled — Safe Links click events not available. User interaction with malicious URLs not tracked.',
+
+  // Entra ID log types
+  'entra-t1': 'SigninLogs table not enabled — interactive sign-in events not ingested.',
+  'entra-t2': 'AADNonInteractiveUserSignInLogs not enabled — automated and background sign-ins not captured. Token theft and session replay attacks invisible.',
+  'entra-t3': 'AADServicePrincipalSignInLogs not enabled — service principal authentication not monitored. Compromised app registrations undetected.',
+  'entra-t4': 'AADManagedIdentitySignInLogs not enabled — managed identity usage not tracked. Compromised Azure resources using MI invisible.',
+  'entra-t5': 'ADFSSignInLogs not enabled — ADFS sign-in events not captured. On-premises federation attacks not visible.',
+  'entra-t6': 'AuditLogs table not enabled — directory changes (user/group/app modifications) not ingested.',
+  'entra-t7': 'AADProvisioningLogs not enabled — user provisioning events not tracked.',
+  'entra-t8': 'AADRiskyUsers not enabled — risky user signals from Entra ID Protection not ingested.',
+  'entra-t9': 'AADUserRiskEvents not enabled — user risk event details not available for correlation.',
+
+  // Office 365 workloads
+  'o365-t1': 'Exchange workload not enabled — Exchange Online audit events not captured.',
+  'o365-t2': 'SharePoint workload not enabled — SharePoint and OneDrive file activity not captured. Data exfiltration via file sharing invisible.',
+  'o365-t3': 'Teams workload not enabled — Teams activity events not captured in OfficeActivity.',
+
+  // Azure Activity Log categories
+  'azact-t1': 'Administrative category not enabled — resource creation, modification and deletion events not captured.',
+  'azact-t2': 'Security category not enabled — Defender for Cloud alerts and security-related events not captured via Activity Logs.',
+  'azact-t3': 'Policy category not enabled — Azure Policy evaluation events not captured. Non-compliant resource deployments invisible.',
+  'azact-t4': 'ServiceHealth category not enabled — Azure service health events not captured.',
+  'azact-t5': 'Alert category not enabled — Azure Monitor alert events not captured.',
+  'azact-t6': 'Autoscale category not enabled — autoscale events not captured.',
+  'azact-t7': 'ResourceHealth category not enabled — resource health status changes not captured.',
+
+  // Windows Security Events
+  'winsec-dc1': 'Domain controllers not set to All Events or Custom — domain controller audit trail may be incomplete. Kerberoasting, DCSync, and AD replication attacks may not generate detectable events.',
+
+  // Azure Firewall tables
+  'azfw-t1': 'AZFWNetworkRule table not enabled — network-level allow/deny decisions not logged.',
+  'azfw-t2': 'AZFWApplicationRule table not enabled — application-level (FQDN) filtering decisions not logged.',
+  'azfw-t3': 'AZFWThreatIntel table not enabled — threat intelligence matches at the firewall not captured.',
+  'azfw-t4': 'AZFWDnsQuery table not enabled — DNS queries through Azure Firewall not logged. DNS-based C2 and exfiltration invisible.',
+  'azfw-t5': 'AZFWIdpsSignature (Premium) table not enabled — intrusion detection/prevention signature matches not logged.',
+  'azfw-t6': 'AZFWNatRule table not enabled — NAT rule processing events not logged.',
+
+  // Defender for Cloud
+  'dfc-c2': 'Bi-directional incident sync not enabled — Defender for Cloud incident status not synchronised with Sentinel.',
+  'dfc-t1': 'SecurityAlert table not enabled — Defender for Cloud alerts not ingested into Sentinel.',
+  'dfc-t2': 'SecurityRecommendation table not enabled — security posture recommendations not available in Sentinel.',
+  'dfc-t3': 'SecurityRegulatoryCompliance table not enabled — compliance assessment results not ingested.',
+
+  // AWS tables
+  'aws-t1': 'AWSCloudTrail table not enabled — AWS API activity not captured.',
+  'aws-t2': 'AWSGuardDuty table not enabled — AWS-native threat detection findings not ingested.',
+  'aws-t3': 'AWSVPCFlow table not enabled — AWS network flow data not captured.',
+
+  // DNS Security Logs
+  'dns-c1': 'Endpoint DNS collection via AMA not configured — DNS queries from endpoints not captured.',
+  'dns-c2': 'Azure DNS diagnostic settings not configured — Azure DNS zone queries not logged.',
+
+  // VNet Flow Logs
+  'vnet-c1': 'VNet Flow Logs not enabled — network flow data between Azure resources not captured.',
+  'vnet-c2': 'Traffic Analytics not enabled — aggregated east-west traffic visibility not available.',
+
+  // Microsoft Purview
+  'purview-t1': 'MicrosoftPurviewInformationProtection table not enabled — sensitivity label and DLP events not ingested.',
+  'purview-t2': 'PurviewDataSensitivityLogs table not enabled — data sensitivity scan results not available.',
+
+  // Microsoft Intune
+  'intune-t1': 'IntuneAuditLogs table not enabled — Intune administrative actions not tracked.',
+  'intune-t2': 'IntuneOperationalLogs table not enabled — device compliance and configuration events not captured.',
+  'intune-t3': 'IntuneDevices table not enabled — device inventory and state changes not available.',
+
+  // Entra ID Protection (extended)
+  'entraprotect-t1': 'AADRiskyUsers table not enabled — risky user signals not available.',
+  'entraprotect-t2': 'AADUserRiskEvents table not enabled — user risk event details not captured.',
+  'entraprotect-t3': 'AADRiskyServicePrincipals table not enabled — risky service principal signals not monitored.',
+
+  // Azure WAF
+  'waf-c1': 'Diagnostic settings not configured on Application Gateway — WAF logs from Application Gateway not ingested.',
+  'waf-c2': 'Diagnostic settings not configured on Front Door — WAF logs from Front Door not ingested.'
+};
+
+function updateConfigWarnings() {
+  const container = document.getElementById('warnings-list');
+  const summaryDiv = document.getElementById('warnings-summary');
+  const countBadge = document.getElementById('warnings-count');
+
+  const warningItems = [];
+
+  document.querySelectorAll('.connector-section').forEach(section => {
+    const sectionId = section.id;
+    if (sectionId.startsWith('conn-gen-')) return;
+
+    const body = section.querySelector('.connector-body');
+    if (!body) return;
+
+    // Check if the connector's first setup item is "Configured" or "To be added"
+    const firstGroup = body.querySelector('.check-group');
+    if (!firstGroup) return;
+    const firstSelect = firstGroup.querySelector('select.status-select');
+    if (!firstSelect) return;
+    if (firstSelect.value !== 'Configured' && firstSelect.value !== 'To be added') return;
+
+    const connectorName = firstSelect.dataset.connector;
+    const unconfigured = [];
+
+    // Check all selects in this connector for "Not configured" sub-items
+    body.querySelectorAll('select.status-select').forEach(sel => {
+      if (sel === firstSelect) return; // skip the first setup item itself
+      if (sel.value !== 'Not configured') return;
+      const itemId = sel.id;
+      const warningText = configWarningTexts[itemId];
+      if (warningText) {
+        unconfigured.push(warningText);
+      }
+    });
+
+    if (unconfigured.length > 0) {
+      warningItems.push({ connector: connectorName, warnings: unconfigured });
+    }
+  });
+
+  countBadge.textContent = warningItems.length;
+
+  if (warningItems.length === 0) {
+    summaryDiv.style.display = 'none';
+    return;
+  }
+
+  summaryDiv.style.display = 'block';
+  container.innerHTML = '';
+
+  warningItems.forEach(item => {
+    const group = document.createElement('div');
+    group.className = 'warnings-connector-group';
+    const h3 = document.createElement('h3');
+    h3.textContent = item.connector;
+    group.appendChild(h3);
+    const ul = document.createElement('ul');
+    item.warnings.forEach(w => {
+      const li = document.createElement('li');
+      li.textContent = w;
+      ul.appendChild(li);
+    });
+    group.appendChild(ul);
+    container.appendChild(group);
+  });
+}
+
 // ===================== COMMENTS SUMMARY =====================
 function updateCommentsSummary() {
   const container = document.getElementById('comments-list');
@@ -5833,6 +6087,7 @@ document.addEventListener('DOMContentLoaded', () => {
   updateProgress();
   updateTodoSummary();
   updateAcceptedRisks();
+  updateConfigWarnings();
   updateCommentsSummary();
 
   // Live-update comments summary when any comment textarea changes
@@ -6184,6 +6439,7 @@ function applyState(state) {
   updateProgress();
   updateTodoSummary();
   updateAcceptedRisks();
+  updateConfigWarnings();
   updateCommentsSummary();
 }
 
