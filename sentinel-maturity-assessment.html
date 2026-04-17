@@ -4476,7 +4476,7 @@ function handleGbdayInput(sel) {
   if (!connectorBody) return;
   // Skip free data source connectors where GB/day is not relevant
   const connSection = connectorBody.closest('.connector-section');
-  if (connSection && ['conn-health', 'conn-o365', 'conn-azactivity'].includes(connSection.id)) return;
+  if (connSection && ['conn-gen-workspace', 'conn-health', 'conn-o365', 'conn-azactivity'].includes(connSection.id)) return;
   const firstGroup = connectorBody.querySelector('.check-group');
   if (!firstGroup) return;
   const firstSelect = firstGroup.querySelector('select.status-select');
