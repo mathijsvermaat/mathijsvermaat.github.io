@@ -4412,6 +4412,9 @@ function handleConnectorCollapse(sel) {
   // Only act on the first Connector Setup select (-c1) within a connector body
   const connectorBody = sel.closest('.connector-body');
   if (!connectorBody) return;
+  // Never collapse the general workspace section — all items should always be visible
+  const connSection = connectorBody.closest('.connector-section');
+  if (connSection && connSection.id === 'conn-gen-workspace') return;
   const setupGroup = connectorBody.querySelector('.check-group');
   if (!setupGroup) return;
   const firstSetupSelect = setupGroup.querySelector('select.status-select');
