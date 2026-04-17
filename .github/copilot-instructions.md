@@ -15,6 +15,7 @@ A separate repo (`mathijsvermaat/Sentinel-Maturity`) contains the markdown guida
 3. **No frameworks**: Pure vanilla HTML/CSS/JS only.
 4. **Save format version**: Currently **version 3**. If you change the JSON schema, increment the version and handle backward compatibility in `applyState()`.
 5. **Spelling**: Use British English (organisation, defence, behaviour, specialised, etc.).
+6. **Do not redesign or restructure existing features** unless explicitly asked. When asked to add a wrapper, integration, or trigger for an existing feature, preserve the original layout, fields, and behaviour exactly as they are.
 
 ---
 

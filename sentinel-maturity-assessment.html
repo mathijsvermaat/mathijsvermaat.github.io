@@ -1320,29 +1320,52 @@
     .footer a { color: var(--primary); text-decoration: none; }
     .footer a:hover { text-decoration: underline; }
 
-    /* Print styles */
+    /* Report preview overlay */
+    .report-screen {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg); z-index: 200; overflow-y: auto;
+    }
+    .report-screen.active { display: block; }
+
+    .report-toolbar {
+      background: var(--white); border-bottom: 1px solid var(--border);
+      padding: 12px 24px; display: flex; align-items: center;
+      justify-content: space-between; position: sticky; top: 0; z-index: 100;
+      box-shadow: var(--shadow);
+    }
+    .report-toolbar-left { display: flex; align-items: center; gap: 12px; }
+    .report-toolbar-left h2 { font-size: 16px; font-weight: 600; color: var(--primary); margin: 0; }
+    .report-toolbar-right { display: flex; align-items: center; gap: 10px; }
+
+    .report-container { max-width: 1100px; margin: 24px auto 60px; padding: 0 24px; }
+
+    /* Print: A4 layout */
+    @page { size: A4; margin: 15mm; }
+
     @media print {
-      body { background: white; }
-      .toolbar, .btn { display: none !important; }
-      .connector-quick-actions { display: none !important; }
-      .connector-search { display: none !important; }
-      .header { padding: 16px; box-shadow: none; border: none; }
-      .tier-section.collapsed .tier-body { display: block !important; }
-      .connector-section.collapsed .connector-body { display: block !important; }
-      .tier-chevron, .connector-chevron { display: none; }
-      .container { max-width: 100%; padding: 0 16px; }
-      .meta-section, .tier-header, .tier-body, .overall-progress, .header { box-shadow: none; break-inside: avoid; }
-      .connector-section { break-inside: avoid; }
-      textarea { border: 1px solid #ccc !important; }
-      .todo-summary { break-inside: avoid; box-shadow: none; }
-      .risk-summary { break-inside: avoid; box-shadow: none; }
-      .warnings-summary { break-inside: avoid; box-shadow: none; }
-      .comments-summary { break-inside: avoid; box-shadow: none; }
-      .todo-summary.collapsed .summary-body,
-      .risk-summary.collapsed .summary-body,
-      .warnings-summary.collapsed .summary-body,
-      .comments-summary.collapsed .summary-body { display: block !important; }
-      .retention-inline { display: inline-flex !important; }
+      body { background: white; margin: 0; padding: 0; }
+      .container, .toolbar, .footer { display: none !important; }
+      .report-screen { position: static !important; display: block !important; }
+      .report-toolbar { display: none !important; }
+      .report-container { margin: 0; padding: 0; max-width: 100%; }
+      .report-container .header { padding: 16px 0; box-shadow: none; border: none; }
+      .report-container .meta-section,
+      .report-container .tier-header,
+      .report-container .tier-body,
+      .report-container .overall-progress { box-shadow: none; break-inside: avoid; }
+      .report-container .connector-section { break-inside: avoid; }
+      .report-container .tier-chevron,
+      .report-container .connector-chevron { display: none; }
+      .report-container textarea { border: 1px solid #ccc !important; }
+      .report-container .todo-summary,
+      .report-container .risk-summary,
+      .report-container .warnings-summary,
+      .report-container .comments-summary { break-inside: avoid; box-shadow: none; }
+      .report-container .todo-summary.collapsed .summary-body,
+      .report-container .risk-summary.collapsed .summary-body,
+      .report-container .warnings-summary.collapsed .summary-body,
+      .report-container .comments-summary.collapsed .summary-body { display: block !important; }
+      .report-container .retention-inline { display: inline-flex !important; }
     }
   </style>
 </head>
@@ -6901,8 +6924,40 @@ function loadFromJSON(event) {
 
 // ===================== EXPORT PDF =====================
 function exportToPDF() {
-  // Expand all sections for print
-  document.querySelectorAll('.tier-section, .connector-section').forEach(s => s.classList.remove('collapsed'));
+  // Clone the assessment content into the preview overlay
+  const container = document.querySelector('.container');
+  const clone = container.cloneNode(true);
+
+  // Expand all collapsed sections in the clone
+  clone.querySelectorAll('.tier-section.collapsed').forEach(s => s.classList.remove('collapsed'));
+  clone.querySelectorAll('.connector-section.collapsed').forEach(s => s.classList.remove('collapsed'));
+
+  // Remove interactive elements from the clone (toolbar, search, buttons)
+  clone.querySelectorAll('.toolbar, .connector-search, .connector-quick-actions, .btn, .btn-icon, .manual-todo-input').forEach(el => el.remove());
+
+  // Copy textarea/input values into the clone (cloneNode doesn't copy .value)
+  const origTextareas = container.querySelectorAll('textarea');
+  const cloneTextareas = clone.querySelectorAll('textarea');
+  origTextareas.forEach((orig, i) => { if (cloneTextareas[i]) cloneTextareas[i].value = orig.value; });
+  const origInputs = container.querySelectorAll('input');
+  const cloneInputs = clone.querySelectorAll('input');
+  origInputs.forEach((orig, i) => { if (cloneInputs[i]) cloneInputs[i].value = orig.value; });
+  const origSelects = container.querySelectorAll('select');
+  const cloneSelects = clone.querySelectorAll('select');
+  origSelects.forEach((orig, i) => { if (cloneSelects[i]) cloneSelects[i].value = orig.value; });
+
+  document.getElementById('report-content').innerHTML = '';
+  document.getElementById('report-content').appendChild(clone);
+  document.getElementById('report-screen').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function closeReport() {
+  document.getElementById('report-screen').classList.remove('active');
+  document.getElementById('report-content').innerHTML = '';
+}
+
+function printReport() {
   window.print();
 }
 
@@ -6989,6 +7044,26 @@ function exportToExcel() {
   XLSX.writeFile(wb, filename);
 }
 </script>
+
+<!-- Report Preview Overlay -->
+<div class="report-screen" id="report-screen">
+  <div class="report-toolbar">
+    <div class="report-toolbar-left">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 23 23">
+        <rect x="0" y="0" width="11" height="11" fill="#f25022"/>
+        <rect x="12" y="0" width="11" height="11" fill="#7fba00"/>
+        <rect x="0" y="12" width="11" height="11" fill="#00a4ef"/>
+        <rect x="12" y="12" width="11" height="11" fill="#ffb900"/>
+      </svg>
+      <h2>Report Preview — Sentinel Maturity Model</h2>
+    </div>
+    <div class="report-toolbar-right">
+      <button class="btn" onclick="closeReport()">← Back to Assessment</button>
+      <button class="btn btn-primary" onclick="printReport()">🖨️ Print / Save PDF</button>
+    </div>
+  </div>
+  <div id="report-content" class="report-container"></div>
+</div>
 
 </body>
 </html>
