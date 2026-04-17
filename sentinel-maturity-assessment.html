@@ -432,6 +432,10 @@
     .check-item .check-detail a { color: var(--text-light); text-decoration: none; border-bottom: 1px dashed var(--text-light); }
     .check-item .check-detail a:hover { color: var(--primary); border-bottom-color: var(--primary); }
 
+    .field .check-detail { font-size: 0.8rem; color: var(--text-light); margin-top: 4px; }
+    .field .check-detail a { color: var(--text-light); text-decoration: none; border-bottom: 1px dashed var(--text-light); }
+    .field .check-detail a:hover { color: var(--primary); border-bottom-color: var(--primary); }
+
     .subsection-header {
       padding: 10px 24px;
       background: var(--secondary);
@@ -1444,10 +1448,12 @@
       <div class="field">
         <label for="e5-licenses">Number of E5 Licenses</label>
         <input type="number" id="e5-licenses" placeholder="0" min="0" step="1" oninput="updateLicenseBenefit()">
+        <div class="check-detail"><a href="https://learn.microsoft.com/microsoft-365/admin/manage/assign-licenses-to-users" target="_blank">How to check E5 license count ↗</a></div>
       </div>
       <div class="field">
         <label for="p2-licenses">Number of Defender for Servers P2 Licenses</label>
         <input type="number" id="p2-licenses" placeholder="0" min="0" step="1" oninput="updateLicenseBenefit()">
+        <div class="check-detail"><a href="https://github.com/mathijsvermaat/DefenderForServersP2Count" target="_blank">How to check Defender for Servers P2 license count ↗</a></div>
       </div>
       <div class="benefit-result" id="license-benefit-result" style="display: none;">
         <div class="benefit-item">
