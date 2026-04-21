@@ -2877,10 +2877,10 @@
       </div>
       <div class="lite-ama-shared-checks">
         <div class="lite-ama-check">
-          <input type="checkbox" id="lite-ama-workbook" onchange="onLiteAmaChange()">
-          <label for="lite-ama-workbook">AMA Migration Tracker workbook deployed</label>
+          <input type="checkbox" id="lite-ama-workbook" onchange="onLiteAmaWorkbookChange()">
+          <label for="lite-ama-workbook">Defender vs AMA coverage workbook deployed</label>
         </div>
-        <p class="sub-desc" style="margin-top:4px;">Recommended for tracking MMA-to-AMA migration, DCR coverage, and configuration drift. Available from the Content Hub.</p>
+        <p class="sub-desc" style="margin-top:4px;">Community workbook comparing AMA and MDE inventory to surface uncovered workloads and DCR gaps. Import from the GitHub source linked in the header above.</p>
       </div>
       <div class="lite-ama-grid">
         <div class="lite-ama-sub" id="lite-ama-win">
@@ -7356,6 +7356,7 @@ function applyState(state) {
 
   // Sync Lite workspace retention selects from the restored Full values
   if (typeof syncLiteWsRetFromFull === 'function') syncLiteWsRetFromFull();
+  if (typeof syncLiteAmaWorkbookFromFull === 'function') syncLiteAmaWorkbookFromFull();
   if (typeof refreshLiteAma === 'function') refreshLiteAma();
 
   // Refresh Lite XDR segmented controls/totals after selects & gbday values load
@@ -7663,6 +7664,23 @@ function updateLiteXdrProgress() {
 
 function onLiteAmaChange() { refreshLiteAma(); }
 
+// Lite <-> Full mapping for the "Defender vs AMA coverage workbook deployed" check.
+// Full uses the gen-wb-ama status-select (Configured / Not configured / N/A).
+function onLiteAmaWorkbookChange() {
+  const cb = document.getElementById('lite-ama-workbook');
+  const full = document.getElementById('gen-wb-ama');
+  if (cb && full) {
+    full.value = cb.checked ? 'Configured' : 'Not configured';
+    if (typeof onStatusChange === 'function') onStatusChange(full);
+  }
+  refreshLiteAma();
+}
+function syncLiteAmaWorkbookFromFull() {
+  const cb = document.getElementById('lite-ama-workbook');
+  const full = document.getElementById('gen-wb-ama');
+  if (cb && full) cb.checked = (full.value === 'Configured');
+}
+
 function refreshLiteAma() {
   const winTotalMeta = Math.max(0, +((document.getElementById('windows-workloads') || {}).value || 0));
   const linTotalMeta = Math.max(0, +((document.getElementById('linux-workloads')   || {}).value || 0));
@@ -7897,6 +7915,7 @@ function setAssessmentMode(mode) {
 document.addEventListener('DOMContentLoaded', () => {
   renderLiteXdr();
   syncLiteWsRetFromFull();
+  syncLiteAmaWorkbookFromFull();
   refreshLiteAma();
   populateLiteAddDropdown();
 
@@ -7905,6 +7924,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', refreshLiteAma);
   });
+
+  // Keep Lite AMA-workbook checkbox in sync when the Full select changes
+  const fullWbAma = document.getElementById('gen-wb-ama');
+  if (fullWbAma) fullWbAma.addEventListener('change', syncLiteAmaWorkbookFromFull);
 
   try {
     const saved = localStorage.getItem(LITE_MODE_STORAGE_KEY);
