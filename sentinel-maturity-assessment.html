@@ -2438,83 +2438,87 @@
               </select>
               <label for="entra-c1">Connector enabled in Sentinel<div class="check-detail">Data connectors → Microsoft Entra ID → Connect</div></label>
             </div>
-            <div class="check-item">
-              <select class="status-select" id="entra-c2" data-tier="1" data-connector="Microsoft Entra ID" data-item="All sign-in log types enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="entra-c2">All sign-in log types enabled<div class="check-detail">Non-interactive and service principal logs are often overlooked</div></label>
-            </div>
           </div>
 
           <div class="check-group">
-            <div class="check-group-title">Tables — Authentication</div>
+            <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="entra-t1" data-tier="1" data-connector="Microsoft Entra ID" data-item="SigninLogs table enabled" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="entra-t1">SigninLogs</label>
+              <label for="entra-t1">Sign-In Logs<div class="check-detail">SigninLogs</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="entra-t6" data-tier="1" data-connector="Microsoft Entra ID" data-item="AuditLogs table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-t6">Audit Logs<div class="check-detail">AuditLogs</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="entra-t2" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADNonInteractiveUserSignInLogs table enabled" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="entra-t2">AADNonInteractiveUserSignInLogs</label>
+              <label for="entra-t2">Non-Interactive User Sign-In Logs<div class="check-detail">AADNonInteractiveUserSignInLogs</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="entra-t3" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADServicePrincipalSignInLogs table enabled" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="entra-t3">AADServicePrincipalSignInLogs</label>
+              <label for="entra-t3">Service Principal Sign-In Logs<div class="check-detail">AADServicePrincipalSignInLogs</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="entra-t4" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADManagedIdentitySignInLogs table enabled" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="entra-t4">AADManagedIdentitySignInLogs</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="entra-t5" data-tier="1" data-connector="Microsoft Entra ID" data-item="ADFSSignInLogs table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="entra-t5">ADFSSignInLogs</label>
-            </div>
-          </div>
-
-          <div class="check-group">
-            <div class="check-group-title">Tables — Directory and Audit</div>
-            <div class="check-item">
-              <select class="status-select" id="entra-t6" data-tier="1" data-connector="Microsoft Entra ID" data-item="AuditLogs table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="entra-t6">AuditLogs</label>
+              <label for="entra-t4">Managed Identity Sign-In Logs<div class="check-detail">AADManagedIdentitySignInLogs</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="entra-t7" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADProvisioningLogs table enabled" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="entra-t7">AADProvisioningLogs</label>
+              <label for="entra-t7">Provisioning Logs<div class="check-detail">AADProvisioningLogs</div></label>
             </div>
-          </div>
-
-          <div class="check-group">
-            <div class="check-group-title">Tables — Risk (Entra ID P2)</div>
             <div class="check-item">
-              <select class="status-select" id="entra-t8" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADRiskyUsers table enabled" onchange="onStatusChange(this)">
+              <select class="status-select" id="entra-t5" data-tier="1" data-connector="Microsoft Entra ID" data-item="ADFSSignInLogs table enabled" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="entra-t8">AADRiskyUsers</label>
+              <label for="entra-t5">ADFS Sign-In Logs<div class="check-detail">ADFSSignInLogs</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="entra-t9" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADUserRiskEvents table enabled" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="entra-t9">AADUserRiskEvents</label>
+              <label for="entra-t9">User Risk Events<div class="check-detail">AADUserRiskEvents — requires Entra ID P2</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="entra-t8" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADRiskyUsers table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-t8">Risky Users<div class="check-detail">AADRiskyUsers — requires Entra ID P2</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="entra-t10" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADRiskyServicePrincipals table enabled" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="entra-t10">AADRiskyServicePrincipals<div class="check-detail">Requires Workload Identities Premium licence</div></label>
+              <label for="entra-t10">Risky Service Principals<div class="check-detail">AADRiskyServicePrincipals — requires Workload Identities Premium licence</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="entra-t11" data-tier="1" data-connector="Microsoft Entra ID" data-item="AADServicePrincipalRiskEvents table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-t11">Service Principal Risk Events<div class="check-detail">AADServicePrincipalRiskEvents — requires Workload Identities Premium licence</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="entra-t12" data-tier="1" data-connector="Microsoft Entra ID" data-item="MicrosoftGraphActivityLogs table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-t12">Microsoft Graph Activity Logs<div class="check-detail">MicrosoftGraphActivityLogs — API requests to Microsoft Graph, basic log</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="entra-t13" data-tier="1" data-connector="Microsoft Entra ID" data-item="EnrichedOffice365AuditLogs table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="entra-t13">Enriched Office 365 Audit Logs<div class="check-detail">EnrichedOffice365AuditLogs — requires opt-in in the Defender portal</div></label>
             </div>
           </div>
 
