@@ -1371,6 +1371,216 @@
       .report-container .comments-summary.collapsed .summary-body { display: block !important; }
       .report-container .retention-inline { display: inline-flex !important; }
     }
+
+    /* ==================== LITE MODE ==================== */
+    /* Mode switch in the header */
+    .mode-switch {
+      display: inline-flex;
+      background: var(--secondary);
+      border-radius: 999px;
+      padding: 3px;
+      border: 1px solid var(--border);
+      margin-left: auto;
+    }
+    .mode-switch button {
+      border: 0;
+      padding: 6px 18px;
+      font: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-light);
+      background: transparent;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .mode-switch button.active {
+      background: var(--white);
+      color: var(--primary);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+    .mode-switch button:hover:not(.active) { color: var(--text); }
+
+    /* Lake status for Defender XDR tables */
+    .status-select.status-configured-lake {
+      background: #f0e6fa;
+      border-color: var(--accent, #8764b8);
+      color: #5c2d91;
+    }
+
+    /* Elements visible only in Lite mode */
+    .lite-only { display: none; }
+    body.lite-mode .lite-only { display: block; }
+    body.lite-mode .full-only { display: none; }
+
+    /* In Lite mode, hide Tier 1, Tier 2, Tier 3, the General tier (Workspace/
+       dashboards/tooling), the manual-todo/risk/warnings summaries, and the
+       connector search. Workspace + table retention is surfaced through the
+       dedicated Lite retention section below. Everything else in the Full
+       layout is preserved untouched. */
+    body.lite-mode #tier-general,
+    body.lite-mode #tier-1,
+    body.lite-mode #tier-2,
+    body.lite-mode #tier-3,
+    body.lite-mode .todo-summary,
+    body.lite-mode .risk-summary,
+    body.lite-mode .warnings-summary,
+    body.lite-mode .connector-search {
+      display: none !important;
+    }
+
+    /* In Lite mode, the XDR connector's Tables check groups are driven via
+       the Lite XDR section below. Hide them inside the Full connector body
+       so data authoring happens in one place. */
+    body.lite-mode #conn-xdr .check-group:has(select[id^="xdr-t"]) { display: none; }
+
+    /* ---------- Lite: XDR tri-state table view ---------- */
+    .lite-xdr-group { padding: 14px 24px 4px; border-top: 1px solid var(--border); }
+    .lite-xdr-group:first-child { border-top: 0; }
+    .lite-xdr-group h3 {
+      font-size: 0.8rem; font-weight: 600; color: var(--text-light);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .lite-xdr-group h3 .chip {
+      background: var(--accent, #8764b8); color: #fff;
+      padding: 1px 8px; border-radius: 999px; font-size: 0.68rem;
+      text-transform: none; letter-spacing: 0;
+    }
+    .lite-xdr-row {
+      display: grid; grid-template-columns: 1fr auto;
+      align-items: center; gap: 12px; padding: 6px 0;
+    }
+    .lite-xdr-row .tbl-name {
+      font-family: Consolas, Menlo, monospace;
+      background: var(--secondary); padding: 1px 8px;
+      border-radius: 4px; font-size: 0.82rem;
+    }
+    .lite-xdr-controls {
+      display: flex; align-items: center; gap: 10px;
+      flex-wrap: wrap; justify-content: flex-end;
+    }
+    .lite-seg {
+      display: inline-flex; border: 1px solid var(--border);
+      border-radius: 6px; overflow: hidden; background: var(--white);
+    }
+    .lite-seg button {
+      border: 0; padding: 4px 12px; font: inherit; font-size: 0.78rem;
+      color: var(--text-light); background: transparent; cursor: pointer;
+      border-right: 1px solid var(--border);
+    }
+    .lite-seg button:last-child { border-right: 0; }
+    .lite-seg button.active[data-v="off"]       { background: var(--secondary); color: var(--text); }
+    .lite-seg button.active[data-v="analytics"] { background: var(--primary); color: #fff; }
+    .lite-seg button.active[data-v="lake"]      { background: var(--accent, #8764b8); color: #fff; }
+    .lite-gbday-inline {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 0.78rem; color: var(--text-light);
+    }
+    .lite-gbday-input {
+      width: 68px; padding: 4px 6px; border: 1px solid var(--border);
+      border-radius: 4px; font: inherit; font-size: 0.8rem;
+      text-align: right; background: var(--white);
+    }
+    .lite-gbday-label { font-size: 0.72rem; color: var(--text-light); }
+    .lite-ingest-totals {
+      font-size: 0.85rem; color: var(--text-light); padding: 10px 0 4px;
+    }
+    .lite-ingest-totals strong { color: var(--primary); font-size: 1rem; }
+
+    /* ---------- Lite: AMA coverage ---------- */
+    .lite-ama-body { padding: 18px 24px 8px; }
+    .lite-ama-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 16px;
+    }
+    .lite-ama-sub {
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 16px; background: #fafafa;
+    }
+    .lite-ama-sub h3 {
+      font-size: 0.95rem; font-weight: 600; margin-bottom: 4px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .lite-ama-sub .tag {
+      font-size: 0.68rem; background: var(--secondary);
+      padding: 2px 8px; border-radius: 999px;
+      color: var(--text-light); font-weight: 500;
+    }
+    .lite-ama-sub p.sub-desc {
+      font-size: 0.78rem; color: var(--text-light); margin-bottom: 10px;
+    }
+    .lite-ama-counts {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 8px 10px; margin: 8px 0;
+    }
+    .lite-ama-counts label {
+      font-size: 0.75rem; color: var(--text-light);
+      display: block; margin-bottom: 2px;
+      text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600;
+    }
+    .lite-ama-counts input {
+      width: 100%; padding: 6px 10px; font-size: 0.9rem;
+      border: 1px solid var(--border); border-radius: 6px; background: var(--white);
+    }
+    .lite-ama-total-display {
+      width: 100%; padding: 6px 10px; font-size: 0.95rem; font-weight: 600;
+      border: 1px solid var(--border); border-radius: 6px;
+      background: var(--secondary); color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+    .lite-ama-derived { font-size: 0.82rem; color: var(--text-light); margin-top: 6px; }
+    .lite-ama-derived .num { font-weight: 600; color: var(--text); }
+    .lite-ama-derived .warn { color: var(--danger); }
+    .lite-ama-bars {
+      margin-top: 10px; display: flex; flex-direction: column; gap: 6px;
+    }
+    .lite-ama-bar-row {
+      display: grid; grid-template-columns: 110px 1fr 44px;
+      align-items: center; gap: 8px;
+      font-size: 0.78rem; color: var(--text-light);
+    }
+    .lite-ama-bar-lbl { font-weight: 600; color: var(--text); }
+    .lite-ama-bar-pct {
+      text-align: right; font-weight: 600;
+      color: var(--text); font-variant-numeric: tabular-nums;
+    }
+    .lite-ama-bar {
+      height: 8px; background: var(--secondary);
+      border-radius: 999px; overflow: hidden;
+    }
+    .lite-ama-bar-fill { height: 100%; transition: width 0.3s; width: 0%; }
+    .lite-ama-bar-fill.both { background: var(--success); }
+    .lite-ama-bar-fill.ama  { background: var(--primary); }
+    .lite-ama-bar-fill.mde  { background: var(--accent, #8764b8); }
+    .lite-ama-shared-checks {
+      background: #f0f7ff; border: 1px solid #cfe4f8;
+      border-radius: 6px; padding: 10px 14px; margin-bottom: 14px;
+    }
+    .lite-ama-shared-checks .sub-desc {
+      font-size: 0.78rem; color: var(--text-light); margin-top: 4px;
+    }
+    /* Bare .check-detail inside a Lite tier body (e.g. intro paragraphs) should
+       match the compact helper-text styling used elsewhere in the document. */
+    .tier-section.lite-only .tier-body > .check-detail {
+      font-size: 0.8rem; color: var(--text-light);
+    }
+    .lite-ama-checks { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .lite-ama-check { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; padding: 4px 0; }
+    .lite-ama-check input[type=checkbox] { transform: scale(1.1); cursor: pointer; }
+    .lite-ama-sub textarea {
+      width: 100%; padding: 8px 10px; border: 1px solid var(--border);
+      border-radius: 6px; font: inherit; font-size: 0.85rem;
+      resize: vertical; min-height: 44px; margin-top: 10px;
+    }
+
+    /* Lite mode badge variant */
+    .tier-badge.lite-xdr       { background: #f0e6fa; color: #5c2d91; }
+    .tier-badge.lite-ama       { background: #e6f4ea; color: var(--success); }
+
+    @media (max-width: 720px) {
+      body.lite-mode .lite-xdr-row { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -1390,6 +1600,10 @@
   <div class="header-text">
     <h1>Sentinel Maturity Model — Assessment Checklist</h1>
     <p>Data connector onboarding, retention, and detection readiness assessment</p>
+  </div>
+  <div class="mode-switch" role="tablist" aria-label="Assessment mode">
+    <button type="button" id="mode-full" class="active" onclick="setAssessmentMode('full')" title="Complete assessment with every tier and connector">Full</button>
+    <button type="button" id="mode-lite" onclick="setAssessmentMode('lite')" title="Quick check — Tier 1 connectors, XDR tables, and AMA coverage only">⚡ Lite</button>
   </div>
 </div>
 
@@ -2028,61 +2242,61 @@
             <div class="check-group-title">Tables — Endpoint (MDE)</div>
             <div class="check-item">
               <select class="status-select" id="xdr-t1" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceInfo table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t1">DeviceInfo</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="xdr-t2" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceNetworkInfo table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t2">DeviceNetworkInfo</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="xdr-t3" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceProcessEvents table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t3">DeviceProcessEvents</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="xdr-t4" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceNetworkEvents table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t4">DeviceNetworkEvents</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="xdr-t5" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceFileEvents table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t5">DeviceFileEvents</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="xdr-t6" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceRegistryEvents table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t6">DeviceRegistryEvents</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="xdr-t7" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceLogonEvents table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t7">DeviceLogonEvents</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="xdr-t8" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceImageLoadEvents table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t8">DeviceImageLoadEvents</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="xdr-t9" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceEvents table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t9">DeviceEvents</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="xdr-t10" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceFileCertificateInfo table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t10">DeviceFileCertificateInfo</label>
             </div>
@@ -2092,13 +2306,13 @@
             <div class="check-group-title">Tables — Alerts</div>
             <div class="check-item">
               <select class="status-select" id="xdr-t11" data-tier="1" data-connector="Microsoft Defender XDR" data-item="AlertInfo table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t11">AlertInfo</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="xdr-t12" data-tier="1" data-connector="Microsoft Defender XDR" data-item="AlertEvidence table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t12">AlertEvidence</label>
             </div>
@@ -2108,25 +2322,25 @@
             <div class="check-group-title">Tables — Email (MDO)</div>
             <div class="check-item">
               <select class="status-select" id="xdr-t13" data-tier="1" data-connector="Microsoft Defender XDR" data-item="EmailEvents table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t13">EmailEvents</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="xdr-t14" data-tier="1" data-connector="Microsoft Defender XDR" data-item="EmailUrlInfo table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t14">EmailUrlInfo</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="xdr-t15" data-tier="1" data-connector="Microsoft Defender XDR" data-item="EmailAttachmentInfo table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t15">EmailAttachmentInfo</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="xdr-t16" data-tier="1" data-connector="Microsoft Defender XDR" data-item="EmailPostDeliveryEvents table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t16">EmailPostDeliveryEvents</label>
             </div>
@@ -2136,19 +2350,19 @@
             <div class="check-group-title">Tables — Identity (MDI)</div>
             <div class="check-item">
               <select class="status-select" id="xdr-t17" data-tier="1" data-connector="Microsoft Defender XDR" data-item="IdentityLogonEvents table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t17">IdentityLogonEvents</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="xdr-t18" data-tier="1" data-connector="Microsoft Defender XDR" data-item="IdentityQueryEvents table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t18">IdentityQueryEvents</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="xdr-t19" data-tier="1" data-connector="Microsoft Defender XDR" data-item="IdentityDirectoryEvents table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t19">IdentityDirectoryEvents</label>
             </div>
@@ -2158,7 +2372,7 @@
             <div class="check-group-title">Tables — Cloud Apps (MDA)</div>
             <div class="check-item">
               <select class="status-select" id="xdr-t20" data-tier="1" data-connector="Microsoft Defender XDR" data-item="CloudAppEvents table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t20">CloudAppEvents</label>
             </div>
@@ -2168,7 +2382,7 @@
             <div class="check-group-title">Tables — Other</div>
             <div class="check-item">
               <select class="status-select" id="xdr-t21" data-tier="1" data-connector="Microsoft Defender XDR" data-item="UrlClickEvents table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="xdr-t21">UrlClickEvents</label>
             </div>
@@ -2519,6 +2733,204 @@
       </div>
 
 
+    </div>
+  </div>
+
+  <!-- ==================== LITE-ONLY: Workspace & table retention ==================== -->
+  <div class="tier-section lite-only" id="lite-tier-retention">
+    <div class="tier-header" onclick="toggleTier('lite-tier-retention')">
+      <span class="tier-badge lite-ama">Check 1</span>
+      <h2>Workspace and Table Retention</h2>
+      <span class="tier-chevron">▼</span>
+    </div>
+    <div class="tier-body">
+      <div class="connector-section" id="lite-conn-retention" style="border-top:0;">
+        <div class="connector-header" style="cursor:default;">
+          <h3>Workspace and table retention<div class="check-detail">Defaults inherited by every table unless overridden in the Full view. <a href="https://learn.microsoft.com/en-us/azure/azure-monitor/logs/data-retention-configure" target="_blank" rel="noopener" onclick="event.stopPropagation()">Learn ↗</a></div></h3>
+          <span class="cost-badge free">Workspace</span>
+        </div>
+        <div class="connector-body" style="display:block;">
+          <div class="check-group">
+            <div class="check-group-title">Workspace defaults</div>
+            <div class="check-item">
+              <select class="retention-period-select workspace-retention-select" id="lite-workspace-default-retention" onchange="onLiteWsRetention()">
+                <option value="30 days">30 days</option>
+                <option value="60 days">60 days</option>
+                <option value="90 days" selected>90 days</option>
+                <option value="120 days">120 days</option>
+                <option value="180 days">180 days</option>
+                <option value="270 days">270 days</option>
+                <option value="365 days">365 days</option>
+                <option value="2 years">2 years</option>
+              </select>
+              <label for="lite-workspace-default-retention">Workspace default <strong>analytics</strong> retention<div class="check-detail">Interactive retention period for KQL queries. 90 days included with ingestion; extending increases cost.</div></label>
+            </div>
+            <div class="check-item">
+              <select class="retention-period-select workspace-retention-select" id="lite-workspace-default-total-retention" onchange="onLiteWsTotalRetention()">
+                <option value="90 days">90 days</option>
+                <option value="120 days">120 days</option>
+                <option value="180 days">180 days</option>
+                <option value="270 days">270 days</option>
+                <option value="365 days" selected>365 days</option>
+                <option value="1 year">1 year</option>
+                <option value="2 years">2 years</option>
+                <option value="3 years">3 years</option>
+                <option value="4 years">4 years</option>
+                <option value="5 years">5 years</option>
+                <option value="6 years">6 years</option>
+                <option value="7 years">7 years</option>
+                <option value="8 years">8 years</option>
+                <option value="9 years">9 years</option>
+                <option value="10 years">10 years</option>
+                <option value="11 years">11 years</option>
+                <option value="12 years">12 years</option>
+              </select>
+              <label for="lite-workspace-default-total-retention">Workspace default <strong>total</strong> retention<div class="check-detail">Total retention (archive) policy applied to all tables unless overridden.</div></label>
+            </div>
+          </div>
+          <div class="section-comment">
+            <label for="lite-ws-comment">Comments / Rationale — Platform and Workspace configuration</label>
+            <textarea id="lite-ws-comment" data-connector="Workspace" placeholder="e.g. LAW retention set to 90 days. Long-term archive configured for 2 years."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tier 1 connectors are moved here in Lite mode (see setAssessmentMode).
+           Each connector keeps its own per-table retention controls, so this is
+           where the "retention per connector / per table" workflow lives. -->
+      <div id="lite-tier1-host"></div>
+
+      <!-- Additional (third-party) connectors — host is moved here in Lite mode
+           so any added connector appears inline below Tier 1. The add widget
+           below calls Full's addThirdPartyConnector(name) directly. -->
+      <div id="lite-thirdparty-host"></div>
+
+      <!-- Pulled-in Tier 2 / Tier 3 connector sections live here in Lite mode. -->
+      <div id="lite-extra-host"></div>
+
+      <div class="add-connector" style="border-top:1px solid var(--border); padding: 18px 24px; background: #fafafa;">
+        <h3 style="font-size:.8rem; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px;">➕ Add Additional Connector (Tier 2 / Tier 3 or Custom)</h3>
+        <div class="add-row" style="display:flex; gap:10px; margin-bottom:10px;">
+          <select id="lite-add-tier-select" style="flex:1; padding:6px 10px; border:1px solid var(--border); border-radius:6px; font:inherit; font-size:0.85rem;">
+            <option value="">— Pick a Tier 2 / Tier 3 connector —</option>
+            <optgroup label="Tier 2" id="lite-add-tier2-group"></optgroup>
+            <optgroup label="Tier 3" id="lite-add-tier3-group"></optgroup>
+          </select>
+          <button class="btn btn-primary" onclick="liteAddTierConnector()">Add</button>
+        </div>
+        <div class="add-row" style="display:flex; gap:10px;">
+          <input type="text" id="lite-add-custom-name" placeholder="Custom / third-party connector name (e.g. CrowdStrike, Zscaler)" style="flex:1; padding:6px 10px; border:1px solid var(--border); border-radius:6px; font:inherit; font-size:0.85rem;" onkeydown="if(event.key==='Enter')liteAddCustomConnector()">
+          <button class="btn" onclick="liteAddCustomConnector()">+ Add custom</button>
+        </div>
+        <div class="check-detail" style="margin-top:8px; font-size:0.8rem; color:var(--text-light);">
+          Picked connectors show up inline with their full set of checks, retention and validation controls. Custom connectors are added as third-party entries — they carry over unchanged when you switch to Full.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== LITE-ONLY: Defender XDR tables ==================== -->
+  <div class="tier-section lite-only" id="lite-tier-xdr">
+    <div class="tier-header" onclick="toggleTier('lite-tier-xdr')">
+      <span class="tier-badge lite-xdr">Check 2</span>
+      <h2>Defender XDR — Per-Table Ingestion</h2>
+      <span class="tier-progress" id="lite-tier-xdr-progress">0 / 21</span>
+      <span class="tier-chevron">▼</span>
+    </div>
+    <div class="tier-body" id="lite-tier-xdr-body">
+      <div class="connector-section" id="lite-conn-xdr" style="border-top:0;">
+        <div class="connector-header" style="cursor:default;">
+          <h3>Defender XDR advanced-hunting tables<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/microsoft-defender-xdr.md" target="_blank" rel="noopener" onclick="event.stopPropagation()">Guidance ↗</a>&emsp;<a href="https://learn.microsoft.com/en-us/azure/sentinel/connect-microsoft-365-defender" target="_blank" rel="noopener" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/mathijsvermaat/DefenderIngestToSentinel" target="_blank" rel="noopener" onclick="event.stopPropagation()">Ingestion calc ↗</a>&emsp;<a href="https://github.com/mathijsvermaat/DefenderIngestToSentinelKQL" target="_blank" rel="noopener" onclick="event.stopPropagation()">KQL calc ↗</a></div></h3>
+          <span class="cost-badge benefit">Ingestion Benefit (E5)</span>
+        </div>
+      </div>
+      <div id="lite-xdr-groups"></div>
+      <div class="lite-ingest-totals" style="padding: 4px 24px 14px;">
+        Analytics total: <strong id="lite-xdr-sum-an">0</strong> GB/day
+        &nbsp;·&nbsp;
+        Lake total: <strong id="lite-xdr-sum-lk">0</strong> GB/day
+      </div>
+      <div class="section-comment" style="padding: 0 24px 20px;">
+        <label for="lite-xdr-comment">Comments / Rationale — Defender XDR tables</label>
+        <textarea id="lite-xdr-comment" data-connector="Microsoft Defender XDR (Lite)" placeholder="e.g. Analytics tables cover endpoint + identity. Email & cloud-app telemetry routed to Lake for cost optimisation."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== LITE-ONLY: AMA coverage ==================== -->
+  <div class="tier-section lite-only" id="lite-tier-ama">
+    <div class="tier-header" onclick="toggleTier('lite-tier-ama')">
+      <span class="tier-badge lite-ama">Check 3</span>
+      <h2>Gap analysis — Defender vs AMA Coverage</h2>
+      <span class="tier-chevron">▼</span>
+    </div>
+    <div class="tier-body lite-ama-body" id="lite-tier-ama-body">
+      <div class="connector-section" id="lite-conn-ama" style="border-top:0; margin: -18px -24px 18px;">
+        <div class="connector-header" style="cursor:default;">
+          <h3>Defender vs AMA coverage<div class="check-detail"><a href="https://github.com/mathijsvermaat/Defender-AMA-coverage" target="_blank" rel="noopener" onclick="event.stopPropagation()">Workbook ↗</a>&emsp;<a href="https://www.linkedin.com/pulse/closing-telemetry-gap-how-we-built-kql-query-workbook-mathijs-vermaat-rzfbe/" target="_blank" rel="noopener" onclick="event.stopPropagation()">Blog ↗</a></div></h3>
+        </div>
+      </div>
+      <div class="check-detail" style="margin: 0 0 14px;">
+        ℹ Totals are taken from <strong>Number of Windows / Linux workloads</strong> in Assessment Details.
+        Fill the Both / AMA only / MDE only counts from the Defender vs AMA coverage workbook —
+        <em>Uncovered</em> is derived automatically.
+      </div>
+      <div class="lite-ama-shared-checks">
+        <div class="lite-ama-check">
+          <input type="checkbox" id="lite-ama-workbook" onchange="onLiteAmaChange()">
+          <label for="lite-ama-workbook">AMA Migration Tracker workbook deployed</label>
+        </div>
+        <p class="sub-desc" style="margin-top:4px;">Recommended for tracking MMA-to-AMA migration, DCR coverage, and configuration drift. Available from the Content Hub.</p>
+      </div>
+      <div class="lite-ama-grid">
+        <div class="lite-ama-sub" id="lite-ama-win">
+          <h3>Windows <span class="tag">AMA + MDE</span></h3>
+          <p class="sub-desc">Total comes from <em>Number of Windows workloads</em> above. Count each workload once: use <em>Both</em> for overlap.</p>
+          <div class="lite-ama-counts">
+            <div><label>Total workloads</label><div class="lite-ama-total-display" id="lite-ama-win-total-display">0</div></div>
+            <div><label for="lite-ama-win-both">On AMA &amp; MDE</label><input type="number" min="0" id="lite-ama-win-both" value="0" onchange="onLiteAmaChange()"></div>
+            <div><label for="lite-ama-win-ama">AMA only</label><input type="number" min="0" id="lite-ama-win-ama" value="0" onchange="onLiteAmaChange()"></div>
+            <div><label for="lite-ama-win-mde">MDE only</label><input type="number" min="0" id="lite-ama-win-mde" value="0" onchange="onLiteAmaChange()"></div>
+          </div>
+          <div class="lite-ama-derived" id="lite-ama-win-derived">Uncovered: <span class="num">0</span></div>
+          <div class="lite-ama-bars">
+            <div class="lite-ama-bar-row"><span class="lite-ama-bar-lbl">Both</span><div class="lite-ama-bar"><div class="lite-ama-bar-fill both" id="lite-ama-win-bar-both"></div></div><span class="lite-ama-bar-pct" id="lite-ama-win-pct-both">0%</span></div>
+            <div class="lite-ama-bar-row"><span class="lite-ama-bar-lbl">AMA only</span><div class="lite-ama-bar"><div class="lite-ama-bar-fill ama" id="lite-ama-win-bar-ama"></div></div><span class="lite-ama-bar-pct" id="lite-ama-win-pct-ama">0%</span></div>
+            <div class="lite-ama-bar-row"><span class="lite-ama-bar-lbl">MDE only</span><div class="lite-ama-bar"><div class="lite-ama-bar-fill mde" id="lite-ama-win-bar-mde"></div></div><span class="lite-ama-bar-pct" id="lite-ama-win-pct-mde">0%</span></div>
+          </div>
+          <div class="lite-ama-checks">
+            <div class="lite-ama-check">
+              <input type="checkbox" id="lite-ama-win-dcr" onchange="onLiteAmaChange()">
+              <label for="lite-ama-win-dcr">Windows DCR configured (Security Events / Application / System)</label>
+            </div>
+          </div>
+          <textarea id="lite-ama-win-comment" data-connector="AMA Coverage — Windows (Lite)" placeholder="e.g. 48 out of 60 Windows servers onboarded. 12 pending migration from MMA."></textarea>
+        </div>
+
+        <div class="lite-ama-sub" id="lite-ama-lin">
+          <h3>Linux <span class="tag">AMA + MDE</span></h3>
+          <p class="sub-desc">Total comes from <em>Number of Linux workloads</em> above. Count each workload once: use <em>Both</em> for overlap.</p>
+          <div class="lite-ama-counts">
+            <div><label>Total workloads</label><div class="lite-ama-total-display" id="lite-ama-lin-total-display">0</div></div>
+            <div><label for="lite-ama-lin-both">On AMA &amp; MDE</label><input type="number" min="0" id="lite-ama-lin-both" value="0" onchange="onLiteAmaChange()"></div>
+            <div><label for="lite-ama-lin-ama">AMA only</label><input type="number" min="0" id="lite-ama-lin-ama" value="0" onchange="onLiteAmaChange()"></div>
+            <div><label for="lite-ama-lin-mde">MDE only</label><input type="number" min="0" id="lite-ama-lin-mde" value="0" onchange="onLiteAmaChange()"></div>
+          </div>
+          <div class="lite-ama-derived" id="lite-ama-lin-derived">Uncovered: <span class="num">0</span></div>
+          <div class="lite-ama-bars">
+            <div class="lite-ama-bar-row"><span class="lite-ama-bar-lbl">Both</span><div class="lite-ama-bar"><div class="lite-ama-bar-fill both" id="lite-ama-lin-bar-both"></div></div><span class="lite-ama-bar-pct" id="lite-ama-lin-pct-both">0%</span></div>
+            <div class="lite-ama-bar-row"><span class="lite-ama-bar-lbl">AMA only</span><div class="lite-ama-bar"><div class="lite-ama-bar-fill ama" id="lite-ama-lin-bar-ama"></div></div><span class="lite-ama-bar-pct" id="lite-ama-lin-pct-ama">0%</span></div>
+            <div class="lite-ama-bar-row"><span class="lite-ama-bar-lbl">MDE only</span><div class="lite-ama-bar"><div class="lite-ama-bar-fill mde" id="lite-ama-lin-bar-mde"></div></div><span class="lite-ama-bar-pct" id="lite-ama-lin-pct-mde">0%</span></div>
+          </div>
+          <div class="lite-ama-checks">
+            <div class="lite-ama-check">
+              <input type="checkbox" id="lite-ama-lin-dcr" onchange="onLiteAmaChange()">
+              <label for="lite-ama-lin-dcr">Linux DCR configured (Syslog facilities)</label>
+            </div>
+          </div>
+          <textarea id="lite-ama-lin-comment" data-connector="AMA Coverage — Linux (Lite)" placeholder="e.g. 18 of 22 Linux hosts onboarded. Syslog local0..local7 enabled."></textarea>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -4199,6 +4611,8 @@ function collapseAllConnectors(tierId) {
 function initExpansionSections() {
   document.querySelectorAll('.connector-section').forEach(section => {
     if (section.id.startsWith('conn-gen-')) return;
+    // Skip Lite-mode sections — they are curated widgets, not real connectors
+    if (section.closest('.lite-only')) return;
     const body = section.querySelector('.connector-body');
     if (!body) return;
 
@@ -4370,8 +4784,9 @@ function clearConnectorSearch() {
 
 // ===================== STATUS SELECT STYLING =====================
 function onStatusChange(sel) {
-  sel.classList.remove('status-configured', 'status-not-configured', 'status-na', 'status-to-be-added', 'status-healthy', 'status-unhealthy');
+  sel.classList.remove('status-configured', 'status-configured-lake', 'status-not-configured', 'status-na', 'status-to-be-added', 'status-healthy', 'status-unhealthy');
   if (sel.value === 'Configured') sel.classList.add('status-configured');
+  else if (sel.value === 'Configured (Lake)') sel.classList.add('status-configured-lake');
   else if (sel.value === 'Not configured') sel.classList.add('status-not-configured');
   else if (sel.value === 'To be added') sel.classList.add('status-to-be-added');
   else if (sel.value === 'N/A') sel.classList.add('status-na');
@@ -4383,6 +4798,11 @@ function onStatusChange(sel) {
 
   // Handle connector collapse when first setup item is N/A, Not configured, or To be added
   handleConnectorCollapse(sel);
+
+  // Keep the Lite XDR tri-state view in sync when a Full xdr-t* select changes
+  if (typeof syncLiteXdrFromSelect === 'function' && sel.id && sel.id.startsWith('xdr-t')) {
+    syncLiteXdrFromSelect(sel);
+  }
 
   updateProgress();
   updateTodoSummary();
@@ -6461,6 +6881,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Inject quick-action buttons into every connector body
   document.querySelectorAll('.connector-section .connector-body').forEach(body => {
+    // Skip Lite-mode sections — they don't need quick actions
+    if (body.closest('.lite-only')) return;
     const actions = document.createElement('div');
     actions.className = 'connector-quick-actions';
 
@@ -6566,6 +6988,10 @@ function gatherState() {
   document.querySelectorAll('.gbday-input:not(.retention-change-gbday)').forEach(inp => {
     if (inp.value) state.gbdayValues[inp.id] = inp.value;
   });
+  // Save Lite-mode per-table GB/day inputs (Defender XDR tri-state view)
+  document.querySelectorAll('.lite-gbday-input').forEach(inp => {
+    if (inp.value) state.gbdayValues[inp.id] = inp.value;
+  });
   document.querySelectorAll('.gbday-plan').forEach(sel => {
     if (sel.value !== 'Analytics') state.tablePlanValues[sel.id] = sel.value;
   });
@@ -6635,6 +7061,25 @@ function gatherState() {
   document.querySelectorAll('[id$="-volume"]').forEach(inp => {
     if (inp.value) state.volumes[inp.id] = inp.value;
   });
+
+  // Save Lite-mode AMA coverage widgets (workbook flag + Windows/Linux counts & DCR flags)
+  state.lite = {
+    ama: {
+      workbook: !!(document.getElementById('lite-ama-workbook') || {}).checked,
+      win: {
+        both:  (document.getElementById('lite-ama-win-both')  || {}).value || '',
+        ama:   (document.getElementById('lite-ama-win-ama')   || {}).value || '',
+        mde:   (document.getElementById('lite-ama-win-mde')   || {}).value || '',
+        dcr:   !!(document.getElementById('lite-ama-win-dcr') || {}).checked
+      },
+      lin: {
+        both:  (document.getElementById('lite-ama-lin-both')  || {}).value || '',
+        ama:   (document.getElementById('lite-ama-lin-ama')   || {}).value || '',
+        mde:   (document.getElementById('lite-ama-lin-mde')   || {}).value || '',
+        dcr:   !!(document.getElementById('lite-ama-lin-dcr') || {}).checked
+      }
+    }
+  };
 
   return state;
 }
@@ -6889,6 +7334,29 @@ function applyState(state) {
     }
   }
 
+  // Restore Lite-mode AMA coverage widgets
+  if (state.lite && state.lite.ama) {
+    const a = state.lite.ama;
+    const wb = document.getElementById('lite-ama-workbook');
+    if (wb) wb.checked = !!a.workbook;
+    ['win', 'lin'].forEach(k => {
+      const g = a[k] || {};
+      ['both', 'ama', 'mde'].forEach(f => {
+        const el = document.getElementById(`lite-ama-${k}-${f}`);
+        if (el && g[f] !== undefined && g[f] !== '') el.value = g[f];
+      });
+      const dcr = document.getElementById(`lite-ama-${k}-dcr`);
+      if (dcr) dcr.checked = !!g.dcr;
+    });
+  }
+
+  // Sync Lite workspace retention selects from the restored Full values
+  if (typeof syncLiteWsRetFromFull === 'function') syncLiteWsRetFromFull();
+  if (typeof refreshLiteAma === 'function') refreshLiteAma();
+
+  // Refresh Lite XDR segmented controls/totals after selects & gbday values load
+  if (typeof renderLiteXdr === 'function') renderLiteXdr();
+
   updateProgress();
   updateTodoSummary();
   updateAcceptedRisks();
@@ -7049,6 +7517,396 @@ function exportToExcel() {
 
   XLSX.writeFile(wb, filename);
 }
+
+// ==================== LITE MODE ====================
+// Table catalogue (grouped by Defender XDR source) used to render the Lite
+// per-table tri-state list. IDs mirror the Full xdr-t* selects so both views
+// stay in sync via state.selects.
+const LITE_XDR_GROUPS = [
+  { name: 'Microsoft Defender for Endpoint (MDE)', tables: [
+    { id: 'xdr-t1',  label: 'DeviceInfo' },
+    { id: 'xdr-t2',  label: 'DeviceNetworkInfo' },
+    { id: 'xdr-t3',  label: 'DeviceProcessEvents' },
+    { id: 'xdr-t4',  label: 'DeviceNetworkEvents' },
+    { id: 'xdr-t5',  label: 'DeviceFileEvents' },
+    { id: 'xdr-t6',  label: 'DeviceRegistryEvents' },
+    { id: 'xdr-t7',  label: 'DeviceLogonEvents' },
+    { id: 'xdr-t8',  label: 'DeviceImageLoadEvents' },
+    { id: 'xdr-t9',  label: 'DeviceEvents' },
+    { id: 'xdr-t10', label: 'DeviceFileCertificateInfo' },
+  ]},
+  { name: 'Alerts', tables: [
+    { id: 'xdr-t11', label: 'AlertInfo' },
+    { id: 'xdr-t12', label: 'AlertEvidence' },
+  ]},
+  { name: 'Microsoft Defender for Office 365 (MDO)', tables: [
+    { id: 'xdr-t13', label: 'EmailEvents' },
+    { id: 'xdr-t14', label: 'EmailUrlInfo' },
+    { id: 'xdr-t15', label: 'EmailAttachmentInfo' },
+    { id: 'xdr-t16', label: 'EmailPostDeliveryEvents' },
+  ]},
+  { name: 'Microsoft Defender for Identity (MDI)', tables: [
+    { id: 'xdr-t17', label: 'IdentityLogonEvents' },
+    { id: 'xdr-t18', label: 'IdentityQueryEvents' },
+    { id: 'xdr-t19', label: 'IdentityDirectoryEvents' },
+  ]},
+  { name: 'Microsoft Defender for Cloud Apps (MDA)', tables: [
+    { id: 'xdr-t20', label: 'CloudAppEvents' },
+  ]},
+  { name: 'Other', tables: [
+    { id: 'xdr-t21', label: 'UrlClickEvents' },
+  ]},
+];
+
+// Map between the Full select value (for xdr-t* selects only) and the Lite
+// tri-state segmented control: off / analytics / lake.
+function liteValueFromFull(v) {
+  if (v === 'Configured') return 'analytics';
+  if (v === 'Configured (Lake)') return 'lake';
+  return 'off';
+}
+function fullValueFromLite(v) {
+  if (v === 'analytics') return 'Configured';
+  if (v === 'lake') return 'Configured (Lake)';
+  return '';
+}
+
+function renderLiteXdr() {
+  const root = document.getElementById('lite-xdr-groups');
+  if (!root) return;
+  root.innerHTML = LITE_XDR_GROUPS.map(group => {
+    const rows = group.tables.map(t => `
+      <div class="lite-xdr-row" data-id="${t.id}">
+        <span class="tbl-name">${t.label}</span>
+        <div class="lite-xdr-controls">
+          <div class="lite-seg" role="group" aria-label="${t.label} ingestion">
+            <button type="button" data-v="off"       onclick="setLiteXdr('${t.id}','off')">Not ingested</button>
+            <button type="button" data-v="analytics" onclick="setLiteXdr('${t.id}','analytics')">Analytics</button>
+            <button type="button" data-v="lake"      onclick="setLiteXdr('${t.id}','lake')">Lake</button>
+          </div>
+          <span class="lite-gbday-inline">
+            <input type="number" min="0" step="0.1" class="lite-gbday-input"
+                   id="${t.id}-gbday" placeholder="0"
+                   oninput="onLiteXdrGbday('${t.id}', this.value)">
+            <span class="lite-gbday-label">GB/day</span>
+          </span>
+        </div>
+      </div>`).join('');
+    return `<div class="lite-xdr-group"><h3>${group.name} <span class="chip">${group.tables.length}</span></h3>${rows}</div>`;
+  }).join('');
+
+  // Prime each row's segmented control from the current Full select value
+  LITE_XDR_GROUPS.forEach(g => g.tables.forEach(t => {
+    const sel = document.getElementById(t.id);
+    if (sel) applyLiteXdrSegState(t.id, liteValueFromFull(sel.value));
+  }));
+  updateLiteXdrTotals();
+  updateLiteXdrProgress();
+}
+
+function applyLiteXdrSegState(id, v) {
+  const row = document.querySelector(`.lite-xdr-row[data-id="${id}"]`);
+  if (!row) return;
+  row.querySelectorAll('.lite-seg button').forEach(b => {
+    b.classList.toggle('active', b.dataset.v === v);
+  });
+}
+
+function setLiteXdr(id, v) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  sel.value = fullValueFromLite(v);
+  onStatusChange(sel); // cascades progress/warnings + calls syncLiteXdrFromSelect
+}
+
+// Called from onStatusChange when a Full xdr-t* select changes, to keep the
+// Lite segmented control visually in sync (bidirectional binding).
+function syncLiteXdrFromSelect(sel) {
+  applyLiteXdrSegState(sel.id, liteValueFromFull(sel.value));
+  updateLiteXdrTotals();
+  updateLiteXdrProgress();
+}
+
+function onLiteXdrGbday(_id, _v) {
+  updateLiteXdrTotals();
+}
+
+function updateLiteXdrTotals() {
+  let an = 0, lk = 0;
+  LITE_XDR_GROUPS.forEach(g => g.tables.forEach(t => {
+    const sel = document.getElementById(t.id);
+    const gb = +((document.getElementById(t.id + '-gbday') || {}).value || 0);
+    if (!sel || !gb) return;
+    if (sel.value === 'Configured')        an += gb;
+    else if (sel.value === 'Configured (Lake)') lk += gb;
+  }));
+  const anEl = document.getElementById('lite-xdr-sum-an');
+  const lkEl = document.getElementById('lite-xdr-sum-lk');
+  if (anEl) anEl.textContent = an.toFixed(1).replace(/\.0$/, '');
+  if (lkEl) lkEl.textContent = lk.toFixed(1).replace(/\.0$/, '');
+}
+
+function updateLiteXdrProgress() {
+  let done = 0, total = 0;
+  LITE_XDR_GROUPS.forEach(g => g.tables.forEach(t => {
+    total++;
+    const sel = document.getElementById(t.id);
+    if (sel && sel.value) done++;
+  }));
+  const prog = document.getElementById('lite-tier-xdr-progress');
+  if (prog) prog.textContent = `${done} / ${total}`;
+}
+
+function onLiteAmaChange() { refreshLiteAma(); }
+
+function refreshLiteAma() {
+  const winTotalMeta = Math.max(0, +((document.getElementById('windows-workloads') || {}).value || 0));
+  const linTotalMeta = Math.max(0, +((document.getElementById('linux-workloads')   || {}).value || 0));
+  const totals = { win: winTotalMeta, lin: linTotalMeta };
+
+  ['win', 'lin'].forEach(k => {
+    const total = totals[k];
+    const both  = Math.max(0, +((document.getElementById(`lite-ama-${k}-both`)  || {}).value || 0));
+    const ama   = Math.max(0, +((document.getElementById(`lite-ama-${k}-ama`)   || {}).value || 0));
+    const mde   = Math.max(0, +((document.getElementById(`lite-ama-${k}-mde`)   || {}).value || 0));
+    const sum   = both + ama + mde;
+    const uncovered = Math.max(0, total - sum);
+    const over = sum > total;
+
+    const disp = document.getElementById(`lite-ama-${k}-total-display`);
+    if (disp) disp.textContent = total;
+
+    const derived = document.getElementById(`lite-ama-${k}-derived`);
+    if (derived) {
+      if (total === 0) {
+        derived.innerHTML = `<span class="warn">Set <em>Number of ${k === 'win' ? 'Windows' : 'Linux'} workloads</em> in Assessment Details to compute coverage.</span>`;
+      } else if (over) {
+        derived.innerHTML = `<span class="warn">Sum (${sum}) exceeds total (${total}). Check your counts.</span>`;
+      } else {
+        derived.innerHTML = `Uncovered: <span class="num">${uncovered}</span> of ${total}`;
+      }
+    }
+
+    const denom = total > 0 ? total : 1;
+    const pctBoth = total > 0 ? Math.round((both / denom) * 100) : 0;
+    const pctAma  = total > 0 ? Math.round((ama  / denom) * 100) : 0;
+    const pctMde  = total > 0 ? Math.round((mde  / denom) * 100) : 0;
+
+    const setBar = (name, pct) => {
+      const bar = document.getElementById(`lite-ama-${k}-bar-${name}`);
+      const lbl = document.getElementById(`lite-ama-${k}-pct-${name}`);
+      if (bar) bar.style.width = Math.min(100, pct) + '%';
+      if (lbl) lbl.textContent = pct + '%';
+    };
+    setBar('both', pctBoth);
+    setBar('ama',  pctAma);
+    setBar('mde',  pctMde);
+  });
+}
+
+// ---------- Lite workspace retention (bidirectional sync with Full) ----------
+function onLiteWsRetention() {
+  const lite = document.getElementById('lite-workspace-default-retention');
+  const full = document.getElementById('workspace-default-retention');
+  if (!lite || !full) return;
+  full.value = lite.value;
+  if (typeof onWorkspaceRetentionChange === 'function') onWorkspaceRetentionChange();
+}
+function onLiteWsTotalRetention() {
+  const lite = document.getElementById('lite-workspace-default-total-retention');
+  const full = document.getElementById('workspace-default-total-retention');
+  if (!lite || !full) return;
+  full.value = lite.value;
+  if (typeof onWorkspaceTotalRetentionChange === 'function') onWorkspaceTotalRetentionChange();
+}
+function syncLiteWsRetFromFull() {
+  const pairs = [
+    ['workspace-default-retention', 'lite-workspace-default-retention'],
+    ['workspace-default-total-retention', 'lite-workspace-default-total-retention'],
+  ];
+  pairs.forEach(([fullId, liteId]) => {
+    const full = document.getElementById(fullId);
+    const lite = document.getElementById(liteId);
+    if (full && lite) lite.value = full.value;
+  });
+}
+
+// ---------- Mode switch ----------
+const LITE_MODE_STORAGE_KEY = 'sentinel-assessment-mode';
+
+// Tracks the original parent/next-sibling of #tier-1-body so we can restore
+// the Full-view DOM when switching back. Lite mode moves the Tier 1 body
+// under Check 1 so the "retention per connector / per table" workflow is
+// together with the workspace defaults.
+let _tier1OriginalParent = null;
+let _tier1OriginalNext = null;
+let _tpOriginalParent = null;
+let _tpOriginalNext = null;
+
+function moveTier1ToLite() {
+  const body = document.getElementById('tier-1-body');
+  const host = document.getElementById('lite-tier1-host');
+  if (body && host && !host.contains(body)) {
+    _tier1OriginalParent = body.parentNode;
+    _tier1OriginalNext = body.nextSibling;
+    host.appendChild(body);
+  }
+  const tp = document.getElementById('thirdparty-connectors');
+  const tpHost = document.getElementById('lite-thirdparty-host');
+  if (tp && tpHost && !tpHost.contains(tp)) {
+    _tpOriginalParent = tp.parentNode;
+    _tpOriginalNext = tp.nextSibling;
+    tpHost.appendChild(tp);
+  }
+}
+
+function restoreTier1ToFull() {
+  const body = document.getElementById('tier-1-body');
+  if (body && _tier1OriginalParent && !_tier1OriginalParent.contains(body)) {
+    _tier1OriginalParent.insertBefore(body, _tier1OriginalNext);
+  }
+  const tp = document.getElementById('thirdparty-connectors');
+  if (tp && _tpOriginalParent && !_tpOriginalParent.contains(tp)) {
+    _tpOriginalParent.insertBefore(tp, _tpOriginalNext);
+  }
+  // Put any relocated Tier 2/3 connectors back where they came from
+  Array.from(_liteRelocatedConnectors.keys()).forEach(id => liteRemoveTierConnector(id));
+}
+
+// Invoked by the Lite "Add additional connector" widget. Reads the Lite input,
+// populates Full's hidden input, and invokes Full's addThirdPartyConnector()
+// so the new connector renders inside #thirdparty-connectors — which in Lite
+// mode is re-parented under Check 1.
+function liteAddCustomConnector() {
+  const liteInput = document.getElementById('lite-add-custom-name');
+  const name = liteInput ? liteInput.value.trim() : '';
+  if (!name) { alert('Enter a connector name first.'); return; }
+  if (typeof addThirdPartyConnector === 'function') {
+    addThirdPartyConnector(name);
+  }
+  if (liteInput) liteInput.value = '';
+}
+
+// Tracks relocated Tier 2 / Tier 3 connector sections so we can put them back
+// when switching to Full or removing them from Lite.
+const _liteRelocatedConnectors = new Map(); // id -> { parent, next }
+
+function liteAddTierConnector() {
+  const sel = document.getElementById('lite-add-tier-select');
+  if (!sel || !sel.value) { alert('Pick a connector from the dropdown.'); return; }
+  const id = sel.value;
+  const section = document.getElementById(id);
+  const host = document.getElementById('lite-extra-host');
+  if (!section || !host) return;
+  if (!_liteRelocatedConnectors.has(id)) {
+    _liteRelocatedConnectors.set(id, { parent: section.parentNode, next: section.nextSibling });
+  }
+  // Inject a "Remove from Lite" bar if not present
+  if (!section.querySelector('.lite-remove-bar')) {
+    const bar = document.createElement('div');
+    bar.className = 'lite-remove-bar';
+    bar.style.cssText = 'text-align:right; padding: 0 24px 14px;';
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.type = 'button';
+    btn.textContent = 'Remove from Lite';
+    btn.onclick = function () { liteRemoveTierConnector(id); };
+    bar.appendChild(btn);
+    section.appendChild(bar);
+  }
+  section.classList.remove('collapsed');
+  host.appendChild(section);
+  sel.value = '';
+  populateLiteAddDropdown();
+}
+
+function liteRemoveTierConnector(id) {
+  const section = document.getElementById(id);
+  const origin = _liteRelocatedConnectors.get(id);
+  if (!section || !origin) return;
+  // Remove the injected Remove-from-Lite bar
+  const bar = section.querySelector(':scope > .lite-remove-bar');
+  if (bar) bar.remove();
+  origin.parent.insertBefore(section, origin.next);
+  _liteRelocatedConnectors.delete(id);
+  populateLiteAddDropdown();
+}
+
+// Populates the Tier 2/3 dropdown from the actual DOM — uses every
+// .connector-section under #tier-2 / #tier-3, minus anything already relocated.
+function populateLiteAddDropdown() {
+  const g2 = document.getElementById('lite-add-tier2-group');
+  const g3 = document.getElementById('lite-add-tier3-group');
+  if (!g2 || !g3) return;
+  const build = (tierId, group) => {
+    const tier = document.getElementById(tierId);
+    if (!tier) { group.innerHTML = ''; return; }
+    const items = Array.from(tier.querySelectorAll(':scope .connector-section[id]'))
+      .filter(s => !_liteRelocatedConnectors.has(s.id))
+      .map(s => {
+        const h3 = s.querySelector('.connector-header h3');
+        // Take only the first text node of the h3 (ignore nested links/details)
+        let name = '';
+        if (h3) {
+          const first = h3.childNodes[0];
+          name = first && first.nodeType === 3 ? first.nodeValue.trim() : h3.textContent.trim();
+        }
+        return { id: s.id, name: name || s.id };
+      });
+    group.innerHTML = items.map(it => `<option value="${it.id}">${it.name}</option>`).join('');
+  };
+  build('tier-2', g2);
+  build('tier-3', g3);
+}
+
+function setAssessmentMode(mode) {
+  const lite = mode === 'lite';
+  document.body.classList.toggle('lite-mode', lite);
+  const fullBtn = document.getElementById('mode-full');
+  const liteBtn = document.getElementById('mode-lite');
+  if (fullBtn) fullBtn.classList.toggle('active', !lite);
+  if (liteBtn) liteBtn.classList.toggle('active',  lite);
+  try { localStorage.setItem(LITE_MODE_STORAGE_KEY, mode); } catch (_) { /* storage unavailable */ }
+
+  if (lite) {
+    moveTier1ToLite();
+  } else {
+    restoreTier1ToFull();
+  }
+
+  // When switching into Lite, expand the Lite tier sections so the user
+  // immediately sees what matters; don't touch Full sections either way.
+  if (lite) {
+    const ret = document.getElementById('lite-tier-retention');
+    const xdr = document.getElementById('lite-tier-xdr');
+    const ama = document.getElementById('lite-tier-ama');
+    if (ret) ret.classList.remove('collapsed');
+    if (xdr) xdr.classList.remove('collapsed');
+    if (ama) ama.classList.remove('collapsed');
+    refreshLiteAma();
+    updateLiteXdrTotals();
+    updateLiteXdrProgress();
+  }
+}
+
+// ---------- Init & state hooks ----------
+document.addEventListener('DOMContentLoaded', () => {
+  renderLiteXdr();
+  syncLiteWsRetFromFull();
+  refreshLiteAma();
+  populateLiteAddDropdown();
+
+  // Mirror workload counts from Assessment Details into the Lite AMA cards
+  ['windows-workloads', 'linux-workloads'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', refreshLiteAma);
+  });
+
+  try {
+    const saved = localStorage.getItem(LITE_MODE_STORAGE_KEY);
+    if (saved === 'lite') setAssessmentMode('lite');
+  } catch (_) { /* storage unavailable */ }
+});
 </script>
 
 <!-- Report Preview Overlay -->
