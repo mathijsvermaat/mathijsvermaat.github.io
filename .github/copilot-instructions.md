@@ -393,9 +393,15 @@ For each decorated item it:
 
 1. Adds `.xdr-tbl-item` class (sets the 4-col grid: `minmax(220px,1fr) auto auto auto`) and `data-id` = select id.
 2. Hides the native `<select>` via `.check-item.xdr-tbl-item > select.status-select { display: none }`.
-3. Injects `.lite-seg` segmented pill (writes through to the select).
-4. If `isLakeCapable(id)`: injects `.xdr-tc-inline` switch + `.xdr-tc-details-wrap` details block. Otherwise: injects a muted `.tc-analytics-only` badge ("Analytics only" + tooltip) that occupies the same grid columns.
-5. Adds `.xdr-tbl-hdr` column-header row once per group (also adds `.xdr-tbl-group` class for CSS).
+3. **Resolves the table name** from the existing `<label>`. The primary label text and any nested `.check-detail` are inspected; whichever looks like a single identifier (regex `^[A-Za-z][A-Za-z0-9_]+$`) wins. The other string (if any) becomes a `title` tooltip on the label. Works for all three shapes currently in use:
+   - `<label>DeviceInfo</label>` (XDR)
+   - `<label>Sign-In Logs<div class="check-detail">SigninLogs</div></label>` (Entra — display name + raw table name)
+   - `<label>AZFWDnsQuery<div class="check-detail">High-volume …</div></label>` (Azure FW — raw table name + annotation)
+4. Injects `.lite-seg` segmented pill (writes through to the select).
+5. If `isLakeCapable(id)`: injects `.xdr-tc-inline` switch + `.xdr-tc-details-wrap` details block. Otherwise: injects a muted `.tc-analytics-only` badge ("Analytics only" + tooltip) that occupies the same grid columns.
+6. Adds `.xdr-tbl-hdr` column-header row once per group (also adds `.xdr-tbl-group` class for CSS).
+
+`onStatusChange()` calls `syncLiteXdrFromSelect(sel)` for any select whose `.check-item` is `.xdr-tbl-item` (not just `xdr-t*`), so the segmented pill stays in sync for every decorated connector.
 
 ### Lake-capability registry
 

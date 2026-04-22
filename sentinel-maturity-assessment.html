@@ -3643,41 +3643,41 @@
               <label for="azfw-c1">Diagnostic settings configured (resource-specific mode)<div class="check-detail">Must use resource-specific tables, not legacy AzureDiagnostics</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="azfw-t1" data-tier="2" data-connector="Azure Firewall" data-item="AZFWNetworkRule table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="azfw-t1">AZFWNetworkRule</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="azfw-t2" data-tier="2" data-connector="Azure Firewall" data-item="AZFWApplicationRule table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="azfw-t2">AZFWApplicationRule</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="azfw-t3" data-tier="2" data-connector="Azure Firewall" data-item="AZFWThreatIntel table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="azfw-t3">AZFWThreatIntel</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="azfw-t4" data-tier="2" data-connector="Azure Firewall" data-item="AZFWDnsQuery table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="azfw-t4">AZFWDnsQuery<div class="check-detail">High-volume — consider Data Lake tier</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="azfw-t5" data-tier="2" data-connector="Azure Firewall" data-item="AZFWIdpsSignature table enabled (Premium)" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="azfw-t5">AZFWIdpsSignature<div class="check-detail">Requires Azure Firewall Premium</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="azfw-t6" data-tier="2" data-connector="Azure Firewall" data-item="AZFWNatRule table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="azfw-t6">AZFWNatRule</label>
             </div>
@@ -7799,6 +7799,10 @@ const TIER_CAPABILITY = {
   'entra-t9':  { lakeCapable: true }, 'entra-t10': { lakeCapable: true },
   'entra-t11': { lakeCapable: true }, 'entra-t12': { lakeCapable: true },
   'entra-t13': { lakeCapable: true },
+  // Azure Firewall — all AZFW* tables are Yes/Yes
+  'azfw-t1':  { lakeCapable: true }, 'azfw-t2':  { lakeCapable: true },
+  'azfw-t3':  { lakeCapable: true }, 'azfw-t4':  { lakeCapable: true },
+  'azfw-t5':  { lakeCapable: true }, 'azfw-t6':  { lakeCapable: true },
 };
 function isLakeCapable(id) { return !!(TIER_CAPABILITY[id] && TIER_CAPABILITY[id].lakeCapable); }
 
@@ -8038,18 +8042,34 @@ function initXdrTierChangeControls() {
       const sel = item.querySelector('select.status-select[id]');
       const id = sel.id;
       const labelEl = item.querySelector('label');
-      // If the label has a nested .check-detail (typical outside XDR), that holds the raw
-      // table name — prefer it so decorated rows render just the table name (matches XDR).
+      // Pick the raw table name. Different connectors structure the label differently:
+      //   - XDR:      <label>DeviceInfo</label>
+      //   - Entra:    <label>Sign-In Logs<div class="check-detail">SigninLogs</div></label>
+      //   - Azure FW: <label>AZFWDnsQuery<div class="check-detail">High-volume ...</div></label>
+      // Strategy: prefer whichever candidate looks like a single identifier (no spaces).
       let labelText = id;
+      let annotation = '';
       if (labelEl) {
         const detail = labelEl.querySelector('.check-detail');
-        if (detail) {
-          labelText = (detail.textContent || '').split('\u2014')[0].trim() || (detail.textContent || '').trim();
-          // Replace the label content with just the table name, preserving the 'for' attribute.
-          labelEl.textContent = labelText;
+        const detailText = detail ? (detail.textContent || '').trim() : '';
+        // Clone label and strip the check-detail to get the primary text only.
+        const clone = labelEl.cloneNode(true);
+        const cd = clone.querySelector('.check-detail');
+        if (cd) cd.remove();
+        const primary = (clone.textContent || '').trim();
+        const looksLikeId = s => /^[A-Za-z][A-Za-z0-9_]+$/.test(s);
+        const detailFirstToken = detailText.split(/\s+/)[0] || '';
+        if (looksLikeId(primary)) {
+          labelText = primary;
+          annotation = detailText;
+        } else if (looksLikeId(detailFirstToken)) {
+          labelText = detailFirstToken;
+          annotation = detailText.slice(detailFirstToken.length).replace(/^\s*[—\-–:]\s*/, '').trim();
         } else {
-          labelText = (labelEl.textContent || '').trim().split('\n')[0];
+          labelText = primary || detailText || id;
         }
+        labelEl.textContent = labelText;
+        if (annotation) labelEl.title = annotation;
       }
       const lakeOk = isLakeCapable(id);
 
