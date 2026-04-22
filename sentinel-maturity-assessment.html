@@ -1448,13 +1448,95 @@
       text-transform: none; letter-spacing: 0;
     }
     .lite-xdr-row {
-      display: grid; grid-template-columns: 1fr auto;
-      align-items: center; gap: 12px; padding: 6px 0;
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto auto auto;
+      align-items: center; gap: 14px; padding: 6px 0;
     }
+    .lite-xdr-row.hdr {
+      padding: 4px 0 6px; margin-bottom: 2px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.7rem; color: var(--text-light);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .lite-xdr-row.hdr .hdr-cell { display: inline-flex; align-items: center; gap: 6px; }
     .lite-xdr-row .tbl-name {
       font-family: Consolas, Menlo, monospace;
       background: var(--secondary); padding: 1px 8px;
       border-radius: 4px; font-size: 0.82rem;
+    }
+    /* Lite change-tier switch */
+    .lite-xdr-switch {
+      position: relative; display: inline-flex; align-items: center;
+      width: 34px; height: 18px; cursor: pointer;
+    }
+    .lite-xdr-switch input { position: absolute; opacity: 0; pointer-events: none; }
+    .lite-xdr-switch .slider {
+      position: absolute; inset: 0; background: #c8c6c4;
+      border-radius: 10px; transition: background 0.15s;
+    }
+    .lite-xdr-switch .slider::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 14px; height: 14px; background: #fff; border-radius: 50%;
+      transition: left 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .lite-xdr-switch input:checked + .slider { background: var(--warning); }
+    .lite-xdr-switch input:checked + .slider::after { left: 18px; }
+    /* Lite change-tier target + gbday */
+    .lite-xdr-tc-details {
+      display: none; align-items: center; gap: 6px;
+      font-size: 0.78rem; color: var(--text-light);
+    }
+    .lite-xdr-row.tc-on .lite-xdr-tc-details { display: inline-flex; }
+    .lite-xdr-tc-details select {
+      padding: 3px 6px; font: inherit; font-size: 0.78rem;
+      border: 1px solid var(--border); border-radius: 4px; background: var(--white);
+    }
+    .lite-xdr-tc-details select.analytics { background: #e6f4ea; border-color: var(--success); color: var(--success); }
+    .lite-xdr-tc-details select.lake      { background: #f0e6fa; border-color: #8764b8;      color: #5c2d91; }
+    .lite-xdr-tc-details input[type=number] {
+      width: 62px; padding: 3px 6px; font: inherit; font-size: 0.78rem;
+      border: 1px solid var(--border); border-radius: 4px; text-align: right;
+    }
+    /* Info tooltip (ⓘ) */
+    .info-ico {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--border); color: var(--text-light);
+      font-size: 0.65rem; font-weight: 700; font-family: Georgia, serif;
+      font-style: italic; cursor: help; position: relative;
+    }
+    .info-ico:hover { background: var(--primary); color: #fff; }
+    .info-ico::after {
+      content: attr(data-tip);
+      position: absolute; bottom: calc(100% + 6px); left: 50%;
+      transform: translateX(-50%);
+      background: #323130; color: #fff; padding: 6px 10px; border-radius: 4px;
+      font: inherit; font-size: 0.72rem; font-style: normal;
+      text-transform: none; letter-spacing: 0; line-height: 1.4;
+      white-space: normal; width: 240px; text-align: left;
+      opacity: 0; pointer-events: none; transition: opacity 0.15s;
+      z-index: 10;
+    }
+    .info-ico:hover::after, .info-ico:focus::after { opacity: 1; }
+
+    /* Full-mode per-table change-tier inline row */
+    .xdr-tc-inline {
+      grid-column: 2 / -1; display: flex; align-items: center; gap: 10px;
+      font-size: 0.8rem; color: var(--text-light);
+      margin-top: 4px;
+    }
+    .xdr-tc-inline label.tc-lbl { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+    .xdr-tc-inline .xdr-tc-details { display: none; align-items: center; gap: 6px; }
+    .xdr-tc-inline.tc-on .xdr-tc-details { display: inline-flex; }
+    .xdr-tc-inline select {
+      padding: 3px 6px; font: inherit; font-size: 0.78rem;
+      border: 1px solid var(--border); border-radius: 4px; background: var(--white);
+    }
+    .xdr-tc-inline select.analytics { background: #e6f4ea; border-color: var(--success); color: var(--success); }
+    .xdr-tc-inline select.lake      { background: #f0e6fa; border-color: #8764b8;      color: #5c2d91; }
+    .xdr-tc-inline input[type=number] {
+      width: 62px; padding: 3px 6px; font: inherit; font-size: 0.78rem;
+      border: 1px solid var(--border); border-radius: 4px; text-align: right;
     }
     .lite-xdr-controls {
       display: flex; align-items: center; gap: 10px;
@@ -1580,6 +1662,7 @@
 
     @media (max-width: 720px) {
       body.lite-mode .lite-xdr-row { grid-template-columns: 1fr; }
+      body.lite-mode .lite-xdr-row.hdr { display: none; }
     }
   </style>
 </head>
@@ -2850,9 +2933,11 @@
       </div>
       <div id="lite-xdr-groups"></div>
       <div class="lite-ingest-totals" style="padding: 4px 24px 14px;">
-        Analytics total: <strong id="lite-xdr-sum-an">0</strong> GB/day
+        Planned Analytics: <strong id="lite-xdr-sum-an">0</strong> GB/day
         &nbsp;·&nbsp;
-        Lake total: <strong id="lite-xdr-sum-lk">0</strong> GB/day
+        Planned Lake: <strong id="lite-xdr-sum-lk">0</strong> GB/day
+        &nbsp;·&nbsp;
+        <span id="lite-xdr-sum-n">0 tables planned</span>
       </div>
       <div class="section-comment" style="padding: 0 24px 20px;">
         <label for="lite-xdr-comment">Comments / Rationale — Defender XDR tables</label>
@@ -6996,10 +7081,13 @@ function gatherState() {
   document.querySelectorAll('.gbday-input:not(.retention-change-gbday)').forEach(inp => {
     if (inp.value) state.gbdayValues[inp.id] = inp.value;
   });
-  // Save Lite-mode per-table GB/day inputs (Defender XDR tri-state view)
-  document.querySelectorAll('.lite-gbday-input').forEach(inp => {
-    if (inp.value) state.gbdayValues[inp.id] = inp.value;
-  });
+  // Save per-table XDR tier-change planning (Lite + Full share this state)
+  state.xdrTierChange = {};
+  for (const id in xdrTierChangeState) {
+    const s = xdrTierChangeState[id];
+    if (!s) continue;
+    state.xdrTierChange[id] = { tier: s.tier || 'Analytics', gbday: s.gbday || '' };
+  }
   document.querySelectorAll('.gbday-plan').forEach(sel => {
     if (sel.value !== 'Analytics') state.tablePlanValues[sel.id] = sel.value;
   });
@@ -7342,6 +7430,19 @@ function applyState(state) {
     }
   }
 
+  // Restore per-table XDR tier-change planning
+  // Clear first (so loading a save clears any stale entries from a prior load)
+  for (const k in xdrTierChangeState) delete xdrTierChangeState[k];
+  if (state.xdrTierChange) {
+    for (const [id, data] of Object.entries(state.xdrTierChange)) {
+      if (!isXdrId(id) || !data) continue;
+      xdrTierChangeState[id] = {
+        tier: data.tier === 'Lake' ? 'Lake' : 'Analytics',
+        gbday: data.gbday || ''
+      };
+    }
+  }
+
   // Restore Lite-mode AMA coverage widgets
   if (state.lite && state.lite.ama) {
     const a = state.lite.ama;
@@ -7365,6 +7466,10 @@ function applyState(state) {
 
   // Refresh Lite XDR segmented controls/totals after selects & gbday values load
   if (typeof renderLiteXdr === 'function') renderLiteXdr();
+  // Push restored tier-change state into Full inline controls too
+  if (typeof syncXdrTierChangeRow === 'function') {
+    for (const id in xdrTierChangeState) syncXdrTierChangeRow(id);
+  }
 
   updateProgress();
   updateTodoSummary();
@@ -7580,28 +7685,128 @@ function fullValueFromLite(v) {
   return '';
 }
 
+// ---- Central XDR tier-change state (per-table migration planning) ----
+// Shape: { 'xdr-t1': { tier: 'Analytics'|'Lake', gbday: '1.2' }, ... }
+// Presence of an entry = change planned. Used by both Lite and Full UIs.
+const xdrTierChangeState = {};
+
+function isXdrId(id) { return typeof id === 'string' && /^xdr-t\d+$/.test(id); }
+
+function getXdrTierChange(id) { return xdrTierChangeState[id] || null; }
+
+function setXdrTierChangePlanned(id, planned) {
+  if (planned) {
+    if (!xdrTierChangeState[id]) {
+      xdrTierChangeState[id] = { tier: 'Analytics', gbday: '' };
+    }
+  } else {
+    delete xdrTierChangeState[id];
+  }
+  syncXdrTierChangeRow(id);
+  updateLiteXdrTotals();
+  if (typeof updateTodoSummary === 'function') updateTodoSummary();
+}
+
+function setXdrTierChangeTier(id, tier) {
+  if (!xdrTierChangeState[id]) xdrTierChangeState[id] = { tier: 'Analytics', gbday: '' };
+  xdrTierChangeState[id].tier = (tier === 'Lake') ? 'Lake' : 'Analytics';
+  syncXdrTierChangeRow(id);
+  updateLiteXdrTotals();
+  if (typeof updateTodoSummary === 'function') updateTodoSummary();
+}
+
+function setXdrTierChangeGbday(id, v) {
+  if (!xdrTierChangeState[id]) xdrTierChangeState[id] = { tier: 'Analytics', gbday: '' };
+  xdrTierChangeState[id].gbday = v;
+  syncXdrTierChangeRow(id);
+  updateLiteXdrTotals();
+  if (typeof updateTodoSummary === 'function') updateTodoSummary();
+}
+
+// Push current xdrTierChangeState[id] to both Lite row and Full inline controls.
+function syncXdrTierChangeRow(id) {
+  const s = xdrTierChangeState[id];
+  const planned = !!s;
+  const tier = planned ? s.tier : 'Analytics';
+  const gbday = planned ? (s.gbday || '') : '';
+
+  // Lite row
+  const liteRow = document.querySelector(`.lite-xdr-row[data-id="${id}"]`);
+  if (liteRow) {
+    liteRow.classList.toggle('tc-on', planned);
+    const cb = liteRow.querySelector('.lite-xdr-switch input[type=checkbox]');
+    if (cb) cb.checked = planned;
+    const sel = liteRow.querySelector('.lite-xdr-tc-details select');
+    if (sel) {
+      sel.value = tier;
+      sel.classList.toggle('analytics', tier === 'Analytics');
+      sel.classList.toggle('lake', tier === 'Lake');
+    }
+    const gb = liteRow.querySelector('.lite-xdr-tc-details input[type=number]');
+    if (gb) gb.value = gbday;
+  }
+
+  // Full inline row
+  const fullInline = document.getElementById(id + '-tc-inline');
+  if (fullInline) {
+    fullInline.classList.toggle('tc-on', planned);
+    const cb = document.getElementById(id + '-tc-toggle');
+    if (cb) cb.checked = planned;
+    const sel = document.getElementById(id + '-tc-tier');
+    if (sel) {
+      sel.value = tier;
+      sel.classList.toggle('analytics', tier === 'Analytics');
+      sel.classList.toggle('lake', tier === 'Lake');
+    }
+    const gb = document.getElementById(id + '-tc-gbday');
+    if (gb) gb.value = gbday;
+  }
+}
+
 function renderLiteXdr() {
   const root = document.getElementById('lite-xdr-groups');
   if (!root) return;
+  const tipText = 'Flip the toggle to plan a tier change for this table. When enabled, pick the target tier and estimated GB/day — these are captured in the Planned Analytics / Planned Lake totals below.';
   root.innerHTML = LITE_XDR_GROUPS.map(group => {
-    const rows = group.tables.map(t => `
-      <div class="lite-xdr-row" data-id="${t.id}">
+    const header = `
+      <div class="lite-xdr-row hdr" aria-hidden="true">
+        <span class="hdr-cell">Table</span>
+        <span class="hdr-cell">Current tier</span>
+        <span class="hdr-cell">Change tier
+          <span class="info-ico" tabindex="0" data-tip="${tipText}">i</span>
+        </span>
+        <span class="hdr-cell"></span>
+      </div>`;
+    const rows = group.tables.map(t => {
+      const s = xdrTierChangeState[t.id];
+      const planned = !!s;
+      const tier = planned ? s.tier : 'Analytics';
+      const gbday = planned ? (s.gbday || '') : '';
+      return `
+      <div class="lite-xdr-row ${planned ? 'tc-on' : ''}" data-id="${t.id}">
         <span class="tbl-name">${t.label}</span>
-        <div class="lite-xdr-controls">
-          <div class="lite-seg" role="group" aria-label="${t.label} ingestion">
-            <button type="button" data-v="off"       onclick="setLiteXdr('${t.id}','off')">Not ingested</button>
-            <button type="button" data-v="analytics" onclick="setLiteXdr('${t.id}','analytics')">Analytics</button>
-            <button type="button" data-v="lake"      onclick="setLiteXdr('${t.id}','lake')">Lake</button>
-          </div>
-          <span class="lite-gbday-inline">
-            <input type="number" min="0" step="0.1" class="lite-gbday-input"
-                   id="${t.id}-gbday" placeholder="0"
-                   oninput="onLiteXdrGbday('${t.id}', this.value)">
-            <span class="lite-gbday-label">GB/day</span>
-          </span>
+        <div class="lite-seg" role="group" aria-label="${t.label} current tier">
+          <button type="button" data-v="off"       onclick="setLiteXdr('${t.id}','off')">Not ingested</button>
+          <button type="button" data-v="analytics" onclick="setLiteXdr('${t.id}','analytics')">Analytics</button>
+          <button type="button" data-v="lake"      onclick="setLiteXdr('${t.id}','lake')">Lake</button>
         </div>
-      </div>`).join('');
-    return `<div class="lite-xdr-group"><h3>${group.name} <span class="chip">${group.tables.length}</span></h3>${rows}</div>`;
+        <label class="lite-xdr-switch" title="Plan a tier change for this table">
+          <input type="checkbox" ${planned ? 'checked' : ''} onchange="setXdrTierChangePlanned('${t.id}', this.checked)">
+          <span class="slider"></span>
+        </label>
+        <div class="lite-xdr-tc-details">
+          <span>&rarr;</span>
+          <select class="${tier === 'Lake' ? 'lake' : 'analytics'}" onchange="setXdrTierChangeTier('${t.id}', this.value)">
+            <option value="Analytics" ${tier === 'Analytics' ? 'selected' : ''}>Analytics</option>
+            <option value="Lake"      ${tier === 'Lake' ? 'selected' : ''}>Lake</option>
+          </select>
+          <input type="number" min="0" step="0.1" value="${gbday}" placeholder="0"
+                 oninput="setXdrTierChangeGbday('${t.id}', this.value)">
+          <span>GB/day</span>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="lite-xdr-group"><h3>${group.name} <span class="chip">${group.tables.length}</span></h3>${header}${rows}</div>`;
   }).join('');
 
   // Prime each row's segmented control from the current Full select value
@@ -7636,23 +7841,23 @@ function syncLiteXdrFromSelect(sel) {
   updateLiteXdrProgress();
 }
 
-function onLiteXdrGbday(_id, _v) {
-  updateLiteXdrTotals();
-}
-
 function updateLiteXdrTotals() {
-  let an = 0, lk = 0;
-  LITE_XDR_GROUPS.forEach(g => g.tables.forEach(t => {
-    const sel = document.getElementById(t.id);
-    const gb = +((document.getElementById(t.id + '-gbday') || {}).value || 0);
-    if (!sel || !gb) return;
-    if (sel.value === 'Configured')        an += gb;
-    else if (sel.value === 'Configured (Lake)') lk += gb;
-  }));
+  let an = 0, lk = 0, n = 0;
+  for (const id in xdrTierChangeState) {
+    const s = xdrTierChangeState[id];
+    if (!s) continue;
+    n++;
+    const gb = +(s.gbday || 0);
+    if (s.tier === 'Analytics') an += gb;
+    else if (s.tier === 'Lake') lk += gb;
+  }
+  const f = x => x.toFixed(1).replace(/\.0$/, '');
   const anEl = document.getElementById('lite-xdr-sum-an');
   const lkEl = document.getElementById('lite-xdr-sum-lk');
-  if (anEl) anEl.textContent = an.toFixed(1).replace(/\.0$/, '');
-  if (lkEl) lkEl.textContent = lk.toFixed(1).replace(/\.0$/, '');
+  const nEl  = document.getElementById('lite-xdr-sum-n');
+  if (anEl) anEl.textContent = f(an);
+  if (lkEl) lkEl.textContent = f(lk);
+  if (nEl)  nEl.textContent  = `${n} table${n === 1 ? '' : 's'} planned`;
 }
 
 function updateLiteXdrProgress() {
@@ -7664,6 +7869,39 @@ function updateLiteXdrProgress() {
   }));
   const prog = document.getElementById('lite-tier-xdr-progress');
   if (prog) prog.textContent = `${done} / ${total}`;
+}
+
+// Inject a compact "Change tier" control into every Full-mode xdr-t* .check-item.
+function initXdrTierChangeControls() {
+  LITE_XDR_GROUPS.forEach(g => g.tables.forEach(t => {
+    const sel = document.getElementById(t.id);
+    if (!sel) return;
+    const item = sel.closest('.check-item');
+    if (!item || item.querySelector('.xdr-tc-inline')) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'xdr-tc-inline';
+    wrap.id = t.id + '-tc-inline';
+    wrap.innerHTML = `
+      <label class="tc-lbl" title="Plan a tier change for this table">
+        <input type="checkbox" id="${t.id}-tc-toggle"
+               onchange="setXdrTierChangePlanned('${t.id}', this.checked)">
+        Change tier
+      </label>
+      <span class="xdr-tc-details">
+        <span>&rarr;</span>
+        <select id="${t.id}-tc-tier" class="analytics"
+                onchange="setXdrTierChangeTier('${t.id}', this.value)">
+          <option value="Analytics">Analytics</option>
+          <option value="Lake">Lake</option>
+        </select>
+        <input type="number" id="${t.id}-tc-gbday" min="0" step="0.1" placeholder="0"
+               oninput="setXdrTierChangeGbday('${t.id}', this.value)">
+        <span>GB/day</span>
+      </span>`;
+    item.appendChild(wrap);
+    syncXdrTierChangeRow(t.id);
+  }));
 }
 
 function onLiteAmaChange() { refreshLiteAma(); }
@@ -7917,6 +8155,7 @@ function setAssessmentMode(mode) {
 
 // ---------- Init & state hooks ----------
 document.addEventListener('DOMContentLoaded', () => {
+  initXdrTierChangeControls();
   renderLiteXdr();
   syncLiteWsRetFromFull();
   syncLiteAmaWorkbookFromFull();
