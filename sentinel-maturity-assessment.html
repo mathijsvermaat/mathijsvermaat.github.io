@@ -2995,19 +2995,28 @@
       <div class="add-connector" style="border-top:1px solid var(--border); padding: 18px 24px; background: #fafafa;">
         <h3 style="font-size:.8rem; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px;">➕ Add Additional Connector (Tier 2 / Tier 3 or Custom)</h3>
         <div class="add-row" style="display:flex; gap:10px; margin-bottom:10px;">
-          <select id="lite-add-tier-select" style="flex:1; padding:6px 10px; border:1px solid var(--border); border-radius:6px; font:inherit; font-size:0.85rem;">
-            <option value="">— Pick a Tier 2 / Tier 3 connector —</option>
+          <select id="lite-add-tier-select" onchange="onLiteAddSelectChange()" style="flex:1; padding:6px 10px; border:1px solid var(--border); border-radius:6px; font:inherit; font-size:0.85rem;">
+            <option value="">— Pick a Tier 2 / Tier 3 connector or Custom category —</option>
             <optgroup label="Tier 2" id="lite-add-tier2-group"></optgroup>
             <optgroup label="Tier 3" id="lite-add-tier3-group"></optgroup>
+            <optgroup label="Custom (third-party)">
+              <option value="__custom:tp">Custom — Network &amp; Proxy Appliance</option>
+              <option value="__custom:ti">Custom — Threat Intelligence</option>
+              <option value="__custom:id">Custom — Identity Provider</option>
+              <option value="__custom:app">Custom — Application</option>
+              <option value="__custom:collab">Custom — Collaboration Platform</option>
+              <option value="__custom:customapp">Custom — Custom Application</option>
+              <option value="__custom:devops">Custom — DevOps Platform</option>
+              <option value="__custom:ot">Custom — OT / ICS</option>
+            </optgroup>
           </select>
           <button class="btn btn-primary" onclick="liteAddTierConnector()">Add</button>
         </div>
-        <div class="add-row" style="display:flex; gap:10px;">
-          <input type="text" id="lite-add-custom-name" placeholder="Custom / third-party connector name (e.g. CrowdStrike, Zscaler)" style="flex:1; padding:6px 10px; border:1px solid var(--border); border-radius:6px; font:inherit; font-size:0.85rem;" onkeydown="if(event.key==='Enter')liteAddCustomConnector()">
-          <button class="btn" onclick="liteAddCustomConnector()">+ Add custom</button>
+        <div class="add-row" id="lite-add-custom-row" style="display:none; gap:10px;">
+          <input type="text" id="lite-add-custom-name" placeholder="Connector name (e.g. CrowdStrike, Zscaler)" style="flex:1; padding:6px 10px; border:1px solid var(--border); border-radius:6px; font:inherit; font-size:0.85rem;" onkeydown="if(event.key==='Enter')liteAddTierConnector()">
         </div>
         <div class="check-detail" style="margin-top:8px; font-size:0.8rem; color:var(--text-light);">
-          Picked connectors show up inline with their full set of checks, retention and validation controls. Custom connectors are added as third-party entries — they carry over unchanged when you switch to Full.
+          Picked connectors show up inline with their full set of checks, retention and validation controls. Custom connectors are added to the chosen third-party category — pick the dropdown again to add more.
         </div>
       </div>
     </div>
@@ -8517,17 +8526,38 @@ function restoreTier1ToFull() {
 }
 
 // Invoked by the Lite "Add additional connector" widget. Reads the Lite input,
-// populates Full's hidden input, and invokes Full's addThirdPartyConnector()
-// so the new connector renders inside #thirdparty-connectors — which in Lite
-// mode is re-parented under Check 1.
-function liteAddCustomConnector() {
+// populates Full's hidden input, and invokes the appropriate add*Connector()
+// function based on the dropdown's Custom category selection.
+function liteAddCustomConnector(categoryKey) {
   const liteInput = document.getElementById('lite-add-custom-name');
   const name = liteInput ? liteInput.value.trim() : '';
-  if (!name) { alert('Enter a connector name first.'); return; }
-  if (typeof addThirdPartyConnector === 'function') {
-    addThirdPartyConnector(name);
-  }
+  if (!name) { alert('Enter a connector name first.'); liteInput && liteInput.focus(); return; }
+  const dispatch = {
+    tp:        typeof addThirdPartyConnector        === 'function' ? addThirdPartyConnector        : null,
+    ti:        typeof addThirdPartyTIConnector      === 'function' ? addThirdPartyTIConnector      : null,
+    id:        typeof addThirdPartyIdConnector      === 'function' ? addThirdPartyIdConnector      : null,
+    app:       typeof addThirdPartyAppConnector     === 'function' ? addThirdPartyAppConnector     : null,
+    collab:    typeof addThirdPartyCollabConnector  === 'function' ? addThirdPartyCollabConnector  : null,
+    customapp: typeof addCustomAppConnector         === 'function' ? addCustomAppConnector         : null,
+    devops:    typeof addThirdPartyDevOpsConnector  === 'function' ? addThirdPartyDevOpsConnector  : null,
+    ot:        typeof addThirdPartyOTConnector      === 'function' ? addThirdPartyOTConnector      : null,
+  };
+  const fn = dispatch[categoryKey] || dispatch.tp;
+  if (fn) fn(name);
   if (liteInput) liteInput.value = '';
+}
+
+// Show the name input only when a Custom category is picked.
+function onLiteAddSelectChange() {
+  const sel = document.getElementById('lite-add-tier-select');
+  const row = document.getElementById('lite-add-custom-row');
+  if (!sel || !row) return;
+  const isCustom = typeof sel.value === 'string' && sel.value.startsWith('__custom:');
+  row.style.display = isCustom ? 'flex' : 'none';
+  if (isCustom) {
+    const inp = document.getElementById('lite-add-custom-name');
+    if (inp) inp.focus();
+  }
 }
 
 // Tracks relocated Tier 2 / Tier 3 connector sections so we can put them back
@@ -8536,7 +8566,16 @@ const _liteRelocatedConnectors = new Map(); // id -> { parent, next }
 
 function liteAddTierConnector() {
   const sel = document.getElementById('lite-add-tier-select');
-  if (!sel || !sel.value) { alert('Pick a connector from the dropdown.'); return; }
+  if (!sel || !sel.value) { alert('Pick a connector or a Custom category from the dropdown.'); return; }
+  // Custom-category path: call the matching third-party add function.
+  if (sel.value.startsWith('__custom:')) {
+    const key = sel.value.slice('__custom:'.length);
+    liteAddCustomConnector(key);
+    // Reset the dropdown so the next add starts with a fresh selection
+    sel.value = '';
+    onLiteAddSelectChange();
+    return;
+  }
   const id = sel.value;
   const section = document.getElementById(id);
   const host = document.getElementById('lite-extra-host');
