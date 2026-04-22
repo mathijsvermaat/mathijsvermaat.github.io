@@ -1422,7 +1422,6 @@
     body.lite-mode #tier-1,
     body.lite-mode #tier-2,
     body.lite-mode #tier-3,
-    body.lite-mode .todo-summary,
     body.lite-mode .risk-summary,
     body.lite-mode .warnings-summary,
     body.lite-mode .connector-search {
@@ -1519,13 +1518,16 @@
     }
     .info-ico:hover::after, .info-ico:focus::after { opacity: 1; }
 
-    /* Full-mode per-table change-tier inline row */
+    /* Full-mode per-table change-tier inline row
+       (visually matches the Lite switch toggle + details) */
     .xdr-tc-inline {
       grid-column: 2 / -1; display: flex; align-items: center; gap: 10px;
-      font-size: 0.8rem; color: var(--text-light);
+      font-size: 0.78rem; color: var(--text-light);
       margin-top: 4px;
     }
-    .xdr-tc-inline label.tc-lbl { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+    .xdr-tc-inline .tc-lbl {
+      display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+    }
     .xdr-tc-inline .xdr-tc-details { display: none; align-items: center; gap: 6px; }
     .xdr-tc-inline.tc-on .xdr-tc-details { display: inline-flex; }
     .xdr-tc-inline select {
@@ -7925,8 +7927,11 @@ function initXdrTierChangeControls() {
     wrap.id = t.id + '-tc-inline';
     wrap.innerHTML = `
       <label class="tc-lbl" title="Plan a tier change for this table">
-        <input type="checkbox" id="${t.id}-tc-toggle"
-               onchange="setXdrTierChangePlanned('${t.id}', this.checked)">
+        <span class="lite-xdr-switch">
+          <input type="checkbox" id="${t.id}-tc-toggle"
+                 onchange="setXdrTierChangePlanned('${t.id}', this.checked)">
+          <span class="slider"></span>
+        </span>
         Change tier
       </label>
       <span class="xdr-tc-details">
