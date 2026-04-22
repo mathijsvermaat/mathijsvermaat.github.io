@@ -1518,12 +1518,36 @@
     }
     .info-ico:hover::after, .info-ico:focus::after { opacity: 1; }
 
+    /* ---------- Full-mode XDR table rows (match Lite visual) ---------- */
+    .check-item.xdr-tbl-item {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto auto auto;
+      align-items: center; gap: 14px; padding: 6px 0;
+    }
+    .check-item.xdr-tbl-item > select.status-select { display: none; }
+    .check-item.xdr-tbl-item > label {
+      font-family: Consolas, Menlo, monospace;
+      background: var(--secondary); padding: 1px 8px;
+      border-radius: 4px; font-size: 0.82rem;
+      flex: 0 1 auto;
+    }
+    .check-group.xdr-tbl-group .xdr-tbl-hdr {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto auto auto;
+      align-items: center; gap: 14px;
+      padding: 4px 0 6px; margin-bottom: 2px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.7rem; color: var(--text-light);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .check-group.xdr-tbl-group .xdr-tbl-hdr .hdr-cell {
+      display: inline-flex; align-items: center; gap: 6px;
+    }
     /* Full-mode per-table change-tier inline row
        (visually matches the Lite switch toggle + details) */
     .xdr-tc-inline {
-      grid-column: 2 / -1; display: flex; align-items: center; gap: 10px;
+      display: flex; align-items: center; gap: 10px;
       font-size: 0.78rem; color: var(--text-light);
-      margin-top: 4px;
     }
     .xdr-tc-inline .tc-lbl {
       display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
@@ -7790,9 +7814,9 @@ function syncXdrTierChangeRow(id) {
   }
 
   // Full inline row
-  const fullInline = document.getElementById(id + '-tc-inline');
-  if (fullInline) {
-    fullInline.classList.toggle('tc-on', planned);
+  const fullItem = document.querySelector(`.check-item.xdr-tbl-item[data-id="${id}"]`);
+  if (fullItem) {
+    fullItem.classList.toggle('tc-on', planned);
     const cb = document.getElementById(id + '-tc-toggle');
     if (cb) cb.checked = planned;
     const sel = document.getElementById(id + '-tc-tier');
@@ -7803,6 +7827,8 @@ function syncXdrTierChangeRow(id) {
     }
     const gb = document.getElementById(id + '-tc-gbday');
     if (gb) gb.value = gbday;
+    const detailsWrap = fullItem.querySelector('.xdr-tc-details-wrap');
+    if (detailsWrap) detailsWrap.classList.toggle('tc-on', planned);
   }
 }
 
@@ -7862,11 +7888,20 @@ function renderLiteXdr() {
 }
 
 function applyLiteXdrSegState(id, v) {
-  const row = document.querySelector(`.lite-xdr-row[data-id="${id}"]`);
-  if (!row) return;
-  row.querySelectorAll('.lite-seg button').forEach(b => {
-    b.classList.toggle('active', b.dataset.v === v);
-  });
+  // Lite row
+  const liteRow = document.querySelector(`.lite-xdr-row[data-id="${id}"]`);
+  if (liteRow) {
+    liteRow.querySelectorAll('.lite-seg button').forEach(b => {
+      b.classList.toggle('active', b.dataset.v === v);
+    });
+  }
+  // Full row (check-item converted to Lite-style layout)
+  const fullItem = document.querySelector(`.check-item.xdr-tbl-item[data-id="${id}"]`);
+  if (fullItem) {
+    fullItem.querySelectorAll('.lite-seg button').forEach(b => {
+      b.classList.toggle('active', b.dataset.v === v);
+    });
+  }
 }
 
 function setLiteXdr(id, v) {
@@ -7914,14 +7949,53 @@ function updateLiteXdrProgress() {
   if (prog) prog.textContent = `${done} / ${total}`;
 }
 
-// Inject a compact "Change tier" control into every Full-mode xdr-t* .check-item.
+// Inject Lite-style layout (segmented pill + change-tier switch) into every
+// Full-mode xdr-t* .check-item. Original <select> remains as state backing.
 function initXdrTierChangeControls() {
+  const tipText = 'Flip the toggle to plan a tier change for this table. When enabled, pick the target tier and estimated GB/day — these are captured in the planned totals.';
+  const groupsSeen = new Set();
+
   LITE_XDR_GROUPS.forEach(g => g.tables.forEach(t => {
     const sel = document.getElementById(t.id);
     if (!sel) return;
     const item = sel.closest('.check-item');
-    if (!item || item.querySelector('.xdr-tc-inline')) return;
+    if (!item || item.classList.contains('xdr-tbl-item')) return;
 
+    item.classList.add('xdr-tbl-item');
+    item.dataset.id = t.id;
+
+    // Insert column header once per check-group (for the Full layout)
+    const group = item.closest('.check-group');
+    if (group && !groupsSeen.has(group)) {
+      groupsSeen.add(group);
+      group.classList.add('xdr-tbl-group');
+      const hdr = document.createElement('div');
+      hdr.className = 'xdr-tbl-hdr';
+      hdr.innerHTML = `
+        <span class="hdr-cell">Table</span>
+        <span class="hdr-cell">Current tier</span>
+        <span class="hdr-cell">Change tier
+          <span class="info-ico" tabindex="0" data-tip="${tipText}">i</span>
+        </span>
+        <span class="hdr-cell"></span>`;
+      // Insert after the group title (if any), otherwise at the start of group
+      const title = group.querySelector('.check-group-title');
+      if (title) title.insertAdjacentElement('afterend', hdr);
+      else group.insertBefore(hdr, group.firstChild);
+    }
+
+    // Segmented pill (mirrors Lite) — writes through to the Full <select>
+    const seg = document.createElement('div');
+    seg.className = 'lite-seg';
+    seg.setAttribute('role', 'group');
+    seg.setAttribute('aria-label', t.label + ' current tier');
+    seg.innerHTML = `
+      <button type="button" data-v="off"       onclick="setLiteXdr('${t.id}','off')">Not ingested</button>
+      <button type="button" data-v="analytics" onclick="setLiteXdr('${t.id}','analytics')">Analytics</button>
+      <button type="button" data-v="lake"      onclick="setLiteXdr('${t.id}','lake')">Lake</button>`;
+    item.appendChild(seg);
+
+    // Switch toggle + change-tier details
     const wrap = document.createElement('div');
     wrap.className = 'xdr-tc-inline';
     wrap.id = t.id + '-tc-inline';
@@ -7932,8 +8006,12 @@ function initXdrTierChangeControls() {
                  onchange="setXdrTierChangePlanned('${t.id}', this.checked)">
           <span class="slider"></span>
         </span>
-        Change tier
-      </label>
+      </label>`;
+    item.appendChild(wrap);
+
+    const details = document.createElement('div');
+    details.className = 'xdr-tc-inline xdr-tc-details-wrap';
+    details.innerHTML = `
       <span class="xdr-tc-details">
         <span>&rarr;</span>
         <select id="${t.id}-tc-tier" class="analytics"
@@ -7945,7 +8023,10 @@ function initXdrTierChangeControls() {
                oninput="setXdrTierChangeGbday('${t.id}', this.value)">
         <span>GB/day</span>
       </span>`;
-    item.appendChild(wrap);
+    item.appendChild(details);
+
+    // Prime segmented pill from existing <select> value
+    applyLiteXdrSegState(t.id, liteValueFromFull(sel.value));
     syncXdrTierChangeRow(t.id);
   }));
 }
