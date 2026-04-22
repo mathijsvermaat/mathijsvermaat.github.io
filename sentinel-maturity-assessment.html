@@ -1531,6 +1531,27 @@
       border-radius: 4px; font-size: 0.82rem;
       flex: 0 1 auto;
     }
+    /* Editable table-name input used by third-party connector rows */
+    .check-item.xdr-tbl-item > label.tp-tbl-label {
+      padding: 0; background: transparent;
+    }
+    .check-item.xdr-tbl-item > label.tp-tbl-label > input.tp-tbl-name {
+      font: inherit;
+      font-family: Consolas, Menlo, monospace;
+      font-size: 0.82rem;
+      background: var(--secondary);
+      border: 1px dashed var(--border);
+      border-radius: 4px;
+      padding: 1px 8px;
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+    .check-item.xdr-tbl-item > label.tp-tbl-label > input.tp-tbl-name:focus {
+      border-style: solid;
+      border-color: var(--accent, #0078d4);
+      outline: none;
+    }
     .check-group.xdr-tbl-group .xdr-tbl-hdr {
       display: grid;
       grid-template-columns: minmax(220px, 1fr) auto auto auto;
@@ -6395,6 +6416,19 @@ function addThirdPartyConnector(name) {
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
       </div>
+      <div class="check-group" data-tier-enabled>
+        <div class="check-group-title">Target Table</div>
+        <div class="check-item" data-custom-label>
+          <select class="status-select" id="${prefix}-tbl" data-tier="2" data-connector="${safeName}" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
+            <option value="">— Not assessed —</option>
+            <option value="Configured">Configured</option>
+            <option value="Configured (Lake)">Configured (Lake)</option>
+            <option value="Not configured">Not configured</option>
+            <option value="N/A">N/A</option>
+          </select>
+          <label for="${prefix}-tbl" class="tp-tbl-label"><input type="text" id="${prefix}-tbl-name" data-tp-table class="tp-tbl-name" placeholder="Table name — e.g. CommonSecurityLog, CrowdStrikeLogs_CL" oninput="onThirdPartyTableNameChange(this)"></label>
+        </div>
+      </div>
       <div class="check-group retention-group" data-prefix="${prefix}" data-connector="${safeName}">
         <div class="check-group-title">Retention</div>
         <div class="retention-section-inline" id="${prefix}-retention-section"></div>
@@ -6417,9 +6451,25 @@ function addThirdPartyConnector(name) {
 
   document.getElementById('thirdparty-connectors').appendChild(section);
   initRetentionSection(prefix);
+  if (typeof initXdrTierChangeControls === 'function') initXdrTierChangeControls();
   updateProgress();
   updateTodoSummary();
   updateAcceptedRisks();
+}
+
+// Update the aria-label and tooltip on the Target Table segmented pill when
+// the user edits the table name in a third-party connector.
+function onThirdPartyTableNameChange(input) {
+  const item = input.closest('.check-item');
+  if (!item) return;
+  const sel = item.querySelector('select.status-select[id]');
+  if (!sel) return;
+  const seg = item.querySelector('.lite-seg');
+  const name = (input.value || '').trim();
+  const label = name || 'Target table';
+  if (seg) seg.setAttribute('aria-label', label + ' current tier');
+  sel.setAttribute('data-item', name ? (name + ' tier') : 'Target table tier');
+  updateTodoSummary();
 }
 
 function removeThirdPartyConnector(id) {
@@ -7171,6 +7221,7 @@ function gatherState() {
     customAppConnectors: [],
     thirdPartyDevOpsConnectors: [],
     thirdPartyOTConnectors: [],
+    thirdPartyTables: {},
     manualTodos: [],
   };
 
@@ -7233,6 +7284,11 @@ function gatherState() {
   // Save third-party dynamic connectors
   document.querySelectorAll('#thirdparty-connectors > .connector-section').forEach(section => {
     state.thirdPartyConnectors.push(section.dataset.tpName);
+  });
+
+  // Save third-party connector table names (editable input per section)
+  document.querySelectorAll('input[data-tp-table]').forEach(inp => {
+    if (inp.value) state.thirdPartyTables[inp.id] = inp.value;
   });
 
   // Save third-party TI dynamic connectors
@@ -7342,6 +7398,17 @@ function applyState(state) {
     document.getElementById('thirdparty-connectors').innerHTML = '';
     thirdPartyCounter = 0;
     state.thirdPartyConnectors.forEach(name => addThirdPartyConnector(name));
+  }
+
+  // Restore third-party connector table names (after sections are recreated)
+  if (state.thirdPartyTables) {
+    for (const [id, value] of Object.entries(state.thirdPartyTables)) {
+      const inp = document.getElementById(id);
+      if (inp) {
+        inp.value = value;
+        onThirdPartyTableNameChange(inp);
+      }
+    }
   }
 
   // Restore third-party TI dynamic connectors
@@ -7876,7 +7943,13 @@ const TIER_CAPABILITY = {
   'gsa-tbl': { lakeCapable: true },       // NetworkAccessTraffic
   'azact-tbl': { lakeCapable: true },     // AzureActivity
 };
-function isLakeCapable(id) { return !!(TIER_CAPABILITY[id] && TIER_CAPABILITY[id].lakeCapable); }
+function isLakeCapable(id) {
+  if (TIER_CAPABILITY[id] && TIER_CAPABILITY[id].lakeCapable) return true;
+  // Dynamic rows (e.g. third-party connectors) opt in via data-lake-capable="true"
+  // on the <select> itself, so the capability registry doesn't need to track them.
+  const el = document.getElementById(id);
+  return !!(el && el.dataset && el.dataset.lakeCapable === 'true');
+}
 
 function isXdrId(id) { return typeof id === 'string' && /^xdr-t\d+$/.test(id); }
 
@@ -8140,7 +8213,11 @@ function initXdrTierChangeControls() {
         } else {
           labelText = primary || detailText || id;
         }
-        labelEl.textContent = labelText;
+        // Items marked with data-custom-label render their own label content
+        // (e.g. third-party rows with an editable table-name input) — don't overwrite.
+        if (!item.dataset.customLabel) {
+          labelEl.textContent = labelText;
+        }
         if (annotation) labelEl.title = annotation;
       }
       const lakeOk = isLakeCapable(id);
