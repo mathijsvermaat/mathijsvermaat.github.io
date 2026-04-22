@@ -2155,6 +2155,16 @@
             </div>
           </div>
 
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Target Table</div>
+            <div class="check-item">
+              <select class="status-select" id="o365-tbl" data-tier="1" data-connector="Office 365" data-item="OfficeActivity table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="o365-tbl">OfficeActivity<div class="check-detail">All Office 365 workloads route to this single table</div></label>
+            </div>
+          </div>
+
           <div class="check-group">
             <div class="check-group-title">Content Hub</div>
             <div class="check-item">
@@ -2699,6 +2709,16 @@
             </div>
           </div>
 
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Target Table</div>
+            <div class="check-item">
+              <select class="status-select" id="winsec-tbl" data-tier="1" data-connector="Windows Security Events" data-item="SecurityEvent table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="winsec-tbl">SecurityEvent<div class="check-detail">Target table for all Windows Security Events via AMA</div></label>
+            </div>
+          </div>
+
           <div class="check-group">
             <div class="check-group-title">DCR Preset Configuration</div>
             <div class="check-item">
@@ -2774,6 +2794,16 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="syslog-c2">Data Collection Rules (DCRs) configured and associated<div class="check-detail">DCR must specify which facilities and severity levels to collect</div></label>
+            </div>
+          </div>
+
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Target Table</div>
+            <div class="check-item">
+              <select class="status-select" id="syslog-tbl" data-tier="1" data-connector="Syslog for Linux" data-item="Syslog table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="syslog-tbl">Syslog<div class="check-detail">Target table for all Linux syslog facilities</div></label>
             </div>
           </div>
 
@@ -3790,6 +3820,15 @@
               <label for="dns-c2">Azure DNS diagnostic settings<div class="check-detail">Private DNS zones / DNS Resolver</div></label>
             </div>
           </div>
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Target Table</div>
+            <div class="check-item">
+              <select class="status-select" id="dns-tbl" data-tier="2" data-connector="DNS Security Logs" data-item="DnsEvents table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="dns-tbl">DnsEvents<div class="check-detail">Primary DNS logs target table</div></label>
+            </div>
+          </div>
           <div class="check-group">
             <div class="check-group-title">Content Hub</div>
             <div class="check-item">
@@ -3836,6 +3875,15 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="gsa-c1">Connector enabled in Sentinel</label>
+            </div>
+          </div>
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Target Table</div>
+            <div class="check-item">
+              <select class="status-select" id="gsa-tbl" data-tier="2" data-connector="Global Secure Access" data-item="NetworkAccessTraffic table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gsa-tbl">NetworkAccessTraffic<div class="check-detail">Global Secure Access network traffic logs</div></label>
             </div>
           </div>
           <div class="check-group">
@@ -7810,6 +7858,12 @@ const TIER_CAPABILITY = {
   'gcp-t1': { lakeCapable: true },
   // Microsoft Purview — both Purview tables Yes/Yes
   'purview-t1': { lakeCapable: true }, 'purview-t2': { lakeCapable: true },
+  // Single-table connectors — one target table per connector, all Lake-capable per Learn matrix
+  'o365-tbl': { lakeCapable: true },      // OfficeActivity
+  'winsec-tbl': { lakeCapable: true },    // SecurityEvent
+  'syslog-tbl': { lakeCapable: true },    // Syslog
+  'dns-tbl': { lakeCapable: true },       // DnsEvents
+  'gsa-tbl': { lakeCapable: true },       // NetworkAccessTraffic
 };
 function isLakeCapable(id) { return !!(TIER_CAPABILITY[id] && TIER_CAPABILITY[id].lakeCapable); }
 
