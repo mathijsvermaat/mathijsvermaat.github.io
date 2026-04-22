@@ -387,24 +387,38 @@ Current tier is derived from `liteValueFromFull(sel.value)` → `'Not ingested' 
 
 ### Full-mode layout reuse
 
-`initXdrTierChangeControls()` restructures every Full-mode `xdr-t*` `.check-item` into the Lite layout at load:
+`initXdrTierChangeControls()` is **DOM-driven**: it iterates every `.check-group[data-tier-enabled]` and decorates every `.check-item` inside that has a `select.status-select[id]`. Opt a connector in by adding the `data-tier-enabled` attribute to its table `check-group` — no JS change needed.
+
+For each decorated item it:
 
 1. Adds `.xdr-tbl-item` class (sets the 4-col grid: `minmax(220px,1fr) auto auto auto`) and `data-id` = select id.
 2. Hides the native `<select>` via `.check-item.xdr-tbl-item > select.status-select { display: none }`.
 3. Injects `.lite-seg` segmented pill (writes through to the select).
-4. Injects `.xdr-tc-inline` switch + `.xdr-tc-details-wrap` details block.
-5. Adds `.xdr-tbl-hdr` column-header row once per `.check-group.xdr-tbl-group`.
+4. If `isLakeCapable(id)`: injects `.xdr-tc-inline` switch + `.xdr-tc-details-wrap` details block. Otherwise: injects a muted `.tc-analytics-only` badge ("Analytics only" + tooltip) that occupies the same grid columns.
+5. Adds `.xdr-tbl-hdr` column-header row once per group (also adds `.xdr-tbl-group` class for CSS).
+
+### Lake-capability registry
+
+```javascript
+const TIER_CAPABILITY = {
+  'xdr-t1': { lakeCapable: true }, ...  // keyed by <select> id
+};
+```
+
+- Authoritative source: https://learn.microsoft.com/en-us/azure/sentinel/sentinel-tables-connectors-reference (column "Lake-only ingestion" = Yes).
+- `isLakeCapable(id)` returns true only when present with `lakeCapable: true`.
+- `setXdrTierChangePlanned(id, true)` is a no-op for non-capable IDs, and state restore in `applyState()` filters them out — so a later change from No→Yes in the registry simply makes the switch appear.
 
 ### Adding this pattern to a new Lake-capable connector
 
 When a connector exposes tables that support direct Lake ingestion (e.g., `MicrosoftGraphActivityLogs`, `EnrichedOffice365AuditLogs`, Defender for Cloud tables):
 
 1. **Status options** on each table `<select>` must include `Configured (Lake)` in addition to `Configured`, `Not configured`, `N/A`. `liteValueFromFull()` / `fullValueFromLite()` map this to the `lake` segmented-pill state.
-2. **Register the tables** in a group catalogue (today: `LITE_XDR_GROUPS`). For a new connector, either extend this catalogue or generalise it — the same data structure (`{ name, tables: [{ id, label }] }`) is consumed by `renderLiteXdr()`, `initXdrTierChangeControls()`, `updateLiteXdrProgress()`, and the todo iteration.
-3. **Keep IDs stable** (`{prefix}-t{N}`). Saved `xdrTierChange` entries are keyed by select id, so renaming breaks state round-trip.
-4. **Do not duplicate state**: the segmented pill is a view over the native `<select>`; the tier-change entry is the only new state.
-5. **Both modes in sync**: after any change, ensure `syncXdrTierChangeRow(id)` and `updateLiteXdrTotals()` run (the existing setters already do).
-6. **Lite catalogue rendering** is optional for connectors that don't get their own Lite-mode section — Full-mode injection alone is enough.
+2. **Mark the group**: add `data-tier-enabled` to the `<div class="check-group">` containing the table rows. `initXdrTierChangeControls()` will pick it up automatically.
+3. **Register capability** in `TIER_CAPABILITY` for each table id: `{ lakeCapable: true }` if the Learn matrix says Yes, omit/false otherwise. Non-capable rows render the muted "Analytics only" badge instead of the switch — do **not** hide the row, alignment must stay intact.
+4. **Keep IDs stable** (`{prefix}-t{N}`). Saved `xdrTierChange` entries are keyed by select id, so renaming breaks state round-trip.
+5. **Lite catalogue (optional)**: only connectors that get their own Lite-mode section need to appear in `LITE_XDR_GROUPS` (or a sibling catalogue). Full-mode decoration is driven entirely by `data-tier-enabled` + `TIER_CAPABILITY`.
+6. **Don't duplicate state**: the segmented pill is a view over the native `<select>`; the tier-change entry is the only new state.
 
 ### Don'ts
 

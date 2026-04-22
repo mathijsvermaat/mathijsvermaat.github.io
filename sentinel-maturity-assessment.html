@@ -1564,6 +1564,16 @@
       width: 62px; padding: 3px 6px; font: inherit; font-size: 0.78rem;
       border: 1px solid var(--border); border-radius: 4px; text-align: right;
     }
+    /* Muted "Analytics only" indicator for tables that don't support Lake-only ingestion yet.
+       Rendered in place of the change-tier switch + details; keeps column alignment intact. */
+    .tc-analytics-only {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 2px 8px; border-radius: 10px;
+      background: var(--secondary); color: var(--text-light);
+      font-size: 0.72rem; letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+    .tc-analytics-only .info-ico { width: 12px; height: 12px; font-size: 0.6rem; }
     .lite-xdr-controls {
       display: flex; align-items: center; gap: 10px;
       flex-wrap: wrap; justify-content: flex-end;
@@ -2347,7 +2357,7 @@
             </div>
           </div>
 
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables — Endpoint (MDE)</div>
             <div class="check-item">
               <select class="status-select" id="xdr-t1" data-tier="1" data-connector="Microsoft Defender XDR" data-item="DeviceInfo table enabled" onchange="onStatusChange(this)">
@@ -2411,7 +2421,7 @@
             </div>
           </div>
 
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables — Alerts</div>
             <div class="check-item">
               <select class="status-select" id="xdr-t11" data-tier="1" data-connector="Microsoft Defender XDR" data-item="AlertInfo table enabled" onchange="onStatusChange(this)">
@@ -2427,7 +2437,7 @@
             </div>
           </div>
 
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables — Email (MDO)</div>
             <div class="check-item">
               <select class="status-select" id="xdr-t13" data-tier="1" data-connector="Microsoft Defender XDR" data-item="EmailEvents table enabled" onchange="onStatusChange(this)">
@@ -2455,7 +2465,7 @@
             </div>
           </div>
 
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables — Identity (MDI)</div>
             <div class="check-item">
               <select class="status-select" id="xdr-t17" data-tier="1" data-connector="Microsoft Defender XDR" data-item="IdentityLogonEvents table enabled" onchange="onStatusChange(this)">
@@ -2477,7 +2487,7 @@
             </div>
           </div>
 
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables — Cloud Apps (MDA)</div>
             <div class="check-item">
               <select class="status-select" id="xdr-t20" data-tier="1" data-connector="Microsoft Defender XDR" data-item="CloudAppEvents table enabled" onchange="onStatusChange(this)">
@@ -2487,7 +2497,7 @@
             </div>
           </div>
 
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables — Other</div>
             <div class="check-item">
               <select class="status-select" id="xdr-t21" data-tier="1" data-connector="Microsoft Defender XDR" data-item="UrlClickEvents table enabled" onchange="onStatusChange(this)">
@@ -7502,7 +7512,9 @@ function applyState(state) {
   for (const k in xdrTierChangeState) delete xdrTierChangeState[k];
   if (state.xdrTierChange) {
     for (const [id, data] of Object.entries(state.xdrTierChange)) {
-      if (!isXdrId(id) || !data) continue;
+      if (!data) continue;
+      // Drop entries for tables that don't (or no longer) support Lake-only ingestion.
+      if (!isLakeCapable(id)) continue;
       xdrTierChangeState[id] = {
         tier: data.tier === 'Lake' ? 'Lake' : 'Analytics',
         gbday: data.gbday || ''
@@ -7752,16 +7764,40 @@ function fullValueFromLite(v) {
   return '';
 }
 
-// ---- Central XDR tier-change state (per-table migration planning) ----
+// ---- Central per-table tier-change state (migration planning) ----
 // Shape: { 'xdr-t1': { tier: 'Analytics'|'Lake', gbday: '1.2' }, ... }
 // Presence of an entry = change planned. Used by both Lite and Full UIs.
+// Key is still 'xdrTierChange*' for JSON backward-compat (XDR was the first adopter).
 const xdrTierChangeState = {};
+
+// ---- Per-table Lake-ingestion capability ----
+// Source of truth: https://learn.microsoft.com/en-us/azure/sentinel/sentinel-tables-connectors-reference
+// Presence with lakeCapable=true -> row shows the change-tier switch.
+// Absence (or lakeCapable=false) -> row shows a muted "Analytics only" indicator and
+// the switch cannot be enabled (state is filtered out on load).
+const TIER_CAPABILITY = {
+  // Microsoft Defender XDR — all advanced hunting tables are Yes/Yes
+  'xdr-t1':  { lakeCapable: true }, 'xdr-t2':  { lakeCapable: true },
+  'xdr-t3':  { lakeCapable: true }, 'xdr-t4':  { lakeCapable: true },
+  'xdr-t5':  { lakeCapable: true }, 'xdr-t6':  { lakeCapable: true },
+  'xdr-t7':  { lakeCapable: true }, 'xdr-t8':  { lakeCapable: true },
+  'xdr-t9':  { lakeCapable: true }, 'xdr-t10': { lakeCapable: true },
+  'xdr-t11': { lakeCapable: true }, 'xdr-t12': { lakeCapable: true },
+  'xdr-t13': { lakeCapable: true }, 'xdr-t14': { lakeCapable: true },
+  'xdr-t15': { lakeCapable: true }, 'xdr-t16': { lakeCapable: true },
+  'xdr-t17': { lakeCapable: true }, 'xdr-t18': { lakeCapable: true },
+  'xdr-t19': { lakeCapable: true }, 'xdr-t20': { lakeCapable: true },
+  'xdr-t21': { lakeCapable: true },
+};
+function isLakeCapable(id) { return !!(TIER_CAPABILITY[id] && TIER_CAPABILITY[id].lakeCapable); }
 
 function isXdrId(id) { return typeof id === 'string' && /^xdr-t\d+$/.test(id); }
 
 function getXdrTierChange(id) { return xdrTierChangeState[id] || null; }
 
 function setXdrTierChangePlanned(id, planned) {
+  // Guard: can't plan a tier change for a table that doesn't support Lake ingestion.
+  if (planned && !isLakeCapable(id)) return;
   if (planned) {
     if (!xdrTierChangeState[id]) {
       xdrTierChangeState[id] = { tier: 'Analytics', gbday: '' };
@@ -7847,18 +7883,12 @@ function renderLiteXdr() {
         <span class="hdr-cell"></span>
       </div>`;
     const rows = group.tables.map(t => {
-      const s = xdrTierChangeState[t.id];
+      const lakeOk = isLakeCapable(t.id);
+      const s = lakeOk ? xdrTierChangeState[t.id] : null;
       const planned = !!s;
       const tier = planned ? s.tier : 'Analytics';
       const gbday = planned ? (s.gbday || '') : '';
-      return `
-      <div class="lite-xdr-row ${planned ? 'tc-on' : ''}" data-id="${t.id}">
-        <span class="tbl-name">${t.label}</span>
-        <div class="lite-seg" role="group" aria-label="${t.label} current tier">
-          <button type="button" data-v="off"       onclick="setLiteXdr('${t.id}','off')">Not ingested</button>
-          <button type="button" data-v="analytics" onclick="setLiteXdr('${t.id}','analytics')">Analytics</button>
-          <button type="button" data-v="lake"      onclick="setLiteXdr('${t.id}','lake')">Lake</button>
-        </div>
+      const tcCells = lakeOk ? `
         <label class="lite-xdr-switch" title="Plan a tier change for this table">
           <input type="checkbox" ${planned ? 'checked' : ''} onchange="setXdrTierChangePlanned('${t.id}', this.checked)">
           <span class="slider"></span>
@@ -7872,7 +7902,20 @@ function renderLiteXdr() {
           <input type="number" min="0" step="0.1" value="${gbday}" placeholder="0"
                  oninput="setXdrTierChangeGbday('${t.id}', this.value)">
           <span>GB/day</span>
-        </div>
+        </div>` : `
+        <span class="tc-analytics-only" title="This table doesn't currently support Lake-only ingestion.">
+          Analytics only
+          <span class="info-ico" tabindex="0" data-tip="This table doesn't currently support Lake-only ingestion. If that changes, a tier-change switch will appear here.">i</span>
+        </span>
+        <span></span>`;
+      return `
+      <div class="lite-xdr-row ${planned ? 'tc-on' : ''}" data-id="${t.id}">
+        <span class="tbl-name">${t.label}</span>
+        <div class="lite-seg" role="group" aria-label="${t.label} current tier">
+          <button type="button" data-v="off"       onclick="setLiteXdr('${t.id}','off')">Not ingested</button>
+          <button type="button" data-v="analytics" onclick="setLiteXdr('${t.id}','analytics')">Analytics</button>
+          <button type="button" data-v="lake"      onclick="setLiteXdr('${t.id}','lake')">Lake</button>
+        </div>${tcCells}
       </div>`;
     }).join('');
     return `<div class="lite-xdr-group"><h3>${group.name} <span class="chip">${group.tables.length}</span></h3>${header}${rows}</div>`;
@@ -7949,26 +7992,23 @@ function updateLiteXdrProgress() {
   if (prog) prog.textContent = `${done} / ${total}`;
 }
 
-// Inject Lite-style layout (segmented pill + change-tier switch) into every
-// Full-mode xdr-t* .check-item. Original <select> remains as state backing.
+// Inject Lite-style layout (segmented pill + change-tier switch OR "Analytics only" indicator)
+// into every .check-item inside a .check-group[data-tier-enabled]. Opt-in via markup so the
+// pattern can be rolled out connector-by-connector. Original <select> remains as state backing.
 function initXdrTierChangeControls() {
   const tipText = 'Flip the toggle to plan a tier change for this table. When enabled, pick the target tier and estimated GB/day — these are captured in the planned totals.';
-  const groupsSeen = new Set();
+  const notLakeTip = "This table doesn't currently support Lake-only ingestion. If that changes, a tier-change switch will appear here.";
 
-  LITE_XDR_GROUPS.forEach(g => g.tables.forEach(t => {
-    const sel = document.getElementById(t.id);
-    if (!sel) return;
-    const item = sel.closest('.check-item');
-    if (!item || item.classList.contains('xdr-tbl-item')) return;
+  document.querySelectorAll('.check-group[data-tier-enabled]').forEach(group => {
+    const items = Array.from(group.querySelectorAll('.check-item')).filter(item => {
+      const sel = item.querySelector('select.status-select[id]');
+      return sel && !item.classList.contains('xdr-tbl-item');
+    });
+    if (!items.length) return;
 
-    item.classList.add('xdr-tbl-item');
-    item.dataset.id = t.id;
-
-    // Insert column header once per check-group (for the Full layout)
-    const group = item.closest('.check-group');
-    if (group && !groupsSeen.has(group)) {
-      groupsSeen.add(group);
-      group.classList.add('xdr-tbl-group');
+    group.classList.add('xdr-tbl-group');
+    // Insert column header once per group (after the title if present)
+    if (!group.querySelector('.xdr-tbl-hdr')) {
       const hdr = document.createElement('div');
       hdr.className = 'xdr-tbl-hdr';
       hdr.innerHTML = `
@@ -7978,57 +8018,79 @@ function initXdrTierChangeControls() {
           <span class="info-ico" tabindex="0" data-tip="${tipText}">i</span>
         </span>
         <span class="hdr-cell"></span>`;
-      // Insert after the group title (if any), otherwise at the start of group
       const title = group.querySelector('.check-group-title');
       if (title) title.insertAdjacentElement('afterend', hdr);
       else group.insertBefore(hdr, group.firstChild);
     }
 
-    // Segmented pill (mirrors Lite) — writes through to the Full <select>
-    const seg = document.createElement('div');
-    seg.className = 'lite-seg';
-    seg.setAttribute('role', 'group');
-    seg.setAttribute('aria-label', t.label + ' current tier');
-    seg.innerHTML = `
-      <button type="button" data-v="off"       onclick="setLiteXdr('${t.id}','off')">Not ingested</button>
-      <button type="button" data-v="analytics" onclick="setLiteXdr('${t.id}','analytics')">Analytics</button>
-      <button type="button" data-v="lake"      onclick="setLiteXdr('${t.id}','lake')">Lake</button>`;
-    item.appendChild(seg);
+    items.forEach(item => {
+      const sel = item.querySelector('select.status-select[id]');
+      const id = sel.id;
+      const labelEl = item.querySelector('label');
+      const labelText = (labelEl ? (labelEl.textContent || '').trim() : id).split('\n')[0];
+      const lakeOk = isLakeCapable(id);
 
-    // Switch toggle + change-tier details
-    const wrap = document.createElement('div');
-    wrap.className = 'xdr-tc-inline';
-    wrap.id = t.id + '-tc-inline';
-    wrap.innerHTML = `
-      <label class="tc-lbl" title="Plan a tier change for this table">
-        <span class="lite-xdr-switch">
-          <input type="checkbox" id="${t.id}-tc-toggle"
-                 onchange="setXdrTierChangePlanned('${t.id}', this.checked)">
-          <span class="slider"></span>
-        </span>
-      </label>`;
-    item.appendChild(wrap);
+      item.classList.add('xdr-tbl-item');
+      item.dataset.id = id;
 
-    const details = document.createElement('div');
-    details.className = 'xdr-tc-inline xdr-tc-details-wrap';
-    details.innerHTML = `
-      <span class="xdr-tc-details">
-        <span>&rarr;</span>
-        <select id="${t.id}-tc-tier" class="analytics"
-                onchange="setXdrTierChangeTier('${t.id}', this.value)">
-          <option value="Analytics">Analytics</option>
-          <option value="Lake">Lake</option>
-        </select>
-        <input type="number" id="${t.id}-tc-gbday" min="0" step="0.1" placeholder="0"
-               oninput="setXdrTierChangeGbday('${t.id}', this.value)">
-        <span>GB/day</span>
-      </span>`;
-    item.appendChild(details);
+      // Segmented pill (mirrors Lite) — writes through to the Full <select>
+      const seg = document.createElement('div');
+      seg.className = 'lite-seg';
+      seg.setAttribute('role', 'group');
+      seg.setAttribute('aria-label', labelText + ' current tier');
+      seg.innerHTML = `
+        <button type="button" data-v="off"       onclick="setLiteXdr('${id}','off')">Not ingested</button>
+        <button type="button" data-v="analytics" onclick="setLiteXdr('${id}','analytics')">Analytics</button>
+        <button type="button" data-v="lake"      onclick="setLiteXdr('${id}','lake')">Lake</button>`;
+      item.appendChild(seg);
 
-    // Prime segmented pill from existing <select> value
-    applyLiteXdrSegState(t.id, liteValueFromFull(sel.value));
-    syncXdrTierChangeRow(t.id);
-  }));
+      if (lakeOk) {
+        // Switch toggle + change-tier details
+        const wrap = document.createElement('div');
+        wrap.className = 'xdr-tc-inline';
+        wrap.id = id + '-tc-inline';
+        wrap.innerHTML = `
+          <label class="tc-lbl" title="Plan a tier change for this table">
+            <span class="lite-xdr-switch">
+              <input type="checkbox" id="${id}-tc-toggle"
+                     onchange="setXdrTierChangePlanned('${id}', this.checked)">
+              <span class="slider"></span>
+            </span>
+          </label>`;
+        item.appendChild(wrap);
+
+        const details = document.createElement('div');
+        details.className = 'xdr-tc-inline xdr-tc-details-wrap';
+        details.innerHTML = `
+          <span class="xdr-tc-details">
+            <span>&rarr;</span>
+            <select id="${id}-tc-tier" class="analytics"
+                    onchange="setXdrTierChangeTier('${id}', this.value)">
+              <option value="Analytics">Analytics</option>
+              <option value="Lake">Lake</option>
+            </select>
+            <input type="number" id="${id}-tc-gbday" min="0" step="0.1" placeholder="0"
+                   oninput="setXdrTierChangeGbday('${id}', this.value)">
+            <span>GB/day</span>
+          </span>`;
+        item.appendChild(details);
+      } else {
+        // Muted "Analytics only" indicator — occupies the same two grid columns
+        const badge = document.createElement('span');
+        badge.className = 'tc-analytics-only';
+        badge.title = notLakeTip;
+        badge.innerHTML = `Analytics only
+          <span class="info-ico" tabindex="0" data-tip="${notLakeTip}">i</span>`;
+        item.appendChild(badge);
+        const spacer = document.createElement('span');
+        item.appendChild(spacer);
+      }
+
+      // Prime segmented pill from existing <select> value
+      applyLiteXdrSegState(id, liteValueFromFull(sel.value));
+      if (lakeOk) syncXdrTierChangeRow(id);
+    });
+  });
 }
 
 function onLiteAmaChange() { refreshLiteAma(); }
