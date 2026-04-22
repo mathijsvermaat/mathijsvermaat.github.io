@@ -4928,9 +4928,12 @@ function onStatusChange(sel) {
   // Handle connector collapse when first setup item is N/A, Not configured, or To be added
   handleConnectorCollapse(sel);
 
-  // Keep the Lite XDR tri-state view in sync when a Full xdr-t* select changes
-  if (typeof syncLiteXdrFromSelect === 'function' && sel.id && sel.id.startsWith('xdr-t')) {
-    syncLiteXdrFromSelect(sel);
+  // Keep the Lite/decorated tri-state pill in sync whenever a backed select changes
+  if (typeof syncLiteXdrFromSelect === 'function' && sel.id) {
+    const item = sel.closest('.check-item');
+    if ((item && item.classList.contains('xdr-tbl-item')) || sel.id.startsWith('xdr-t')) {
+      syncLiteXdrFromSelect(sel);
+    }
   }
 
   updateProgress();
@@ -8035,7 +8038,19 @@ function initXdrTierChangeControls() {
       const sel = item.querySelector('select.status-select[id]');
       const id = sel.id;
       const labelEl = item.querySelector('label');
-      const labelText = (labelEl ? (labelEl.textContent || '').trim() : id).split('\n')[0];
+      // If the label has a nested .check-detail (typical outside XDR), that holds the raw
+      // table name — prefer it so decorated rows render just the table name (matches XDR).
+      let labelText = id;
+      if (labelEl) {
+        const detail = labelEl.querySelector('.check-detail');
+        if (detail) {
+          labelText = (detail.textContent || '').split('\u2014')[0].trim() || (detail.textContent || '').trim();
+          // Replace the label content with just the table name, preserving the 'for' attribute.
+          labelEl.textContent = labelText;
+        } else {
+          labelText = (labelEl.textContent || '').trim().split('\n')[0];
+        }
+      }
       const lakeOk = isLakeCapable(id);
 
       item.classList.add('xdr-tbl-item');
