@@ -3515,23 +3515,23 @@
               <label for="aws-c1">CloudTrail → S3 → SQS → Sentinel connector configured</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="aws-t1" data-tier="2" data-connector="Amazon Web Services" data-item="AWSCloudTrail table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="aws-t1">AWSCloudTrail<div class="check-detail">Start with management events only</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="aws-t2" data-tier="2" data-connector="Amazon Web Services" data-item="AWSGuardDuty table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="aws-t2">AWSGuardDuty</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="aws-t3" data-tier="2" data-connector="Amazon Web Services" data-item="AWSVPCFlow table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="aws-t3">AWSVPCFlow<div class="check-detail">High-volume — enable selectively</div></label>
             </div>
@@ -3583,11 +3583,11 @@
               <label for="gcp-c1">Audit Logs → Pub/Sub → Sentinel connector configured</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="gcp-t1" data-tier="2" data-connector="Google Cloud Platform" data-item="GCPAuditLogs table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="gcp-t1">GCPAuditLogs<div class="check-detail">Start with Admin Activity + Policy Denied (free within GCP)</div></label>
             </div>
@@ -7803,6 +7803,11 @@ const TIER_CAPABILITY = {
   'azfw-t1':  { lakeCapable: true }, 'azfw-t2':  { lakeCapable: true },
   'azfw-t3':  { lakeCapable: true }, 'azfw-t4':  { lakeCapable: true },
   'azfw-t5':  { lakeCapable: true }, 'azfw-t6':  { lakeCapable: true },
+  // Amazon Web Services — AWSCloudTrail / AWSGuardDuty / AWSVPCFlow all Yes/Yes
+  'aws-t1': { lakeCapable: true }, 'aws-t2': { lakeCapable: true },
+  'aws-t3': { lakeCapable: true },
+  // Google Cloud Platform — GCPAuditLogs Yes/Yes
+  'gcp-t1': { lakeCapable: true },
 };
 function isLakeCapable(id) { return !!(TIER_CAPABILITY[id] && TIER_CAPABILITY[id].lakeCapable); }
 
