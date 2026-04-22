@@ -5704,6 +5704,47 @@ function updateTodoSummary() {
     totalCount++;
   });
 
+  // XDR per-table tier-change todos
+  if (typeof xdrTierChangeState === 'object' && xdrTierChangeState) {
+    const labelMap = {};
+    if (typeof LITE_XDR_GROUPS !== 'undefined') {
+      LITE_XDR_GROUPS.forEach(g => g.tables.forEach(t => { labelMap[t.id] = t.label; }));
+    }
+    for (const id in xdrTierChangeState) {
+      const s = xdrTierChangeState[id];
+      if (!s) continue;
+      const sel = document.getElementById(id);
+      if (!sel) continue;
+      const connectorName = sel.dataset.connector || 'Microsoft Defender XDR';
+      const label = labelMap[id] || (sel.dataset.item || id).replace(/ table enabled$/, '');
+      const currentLite = liteValueFromFull(sel.value); // 'off' | 'analytics' | 'lake'
+      const currentStr = currentLite === 'analytics' ? 'Analytics'
+                       : currentLite === 'lake'      ? 'Lake'
+                       : 'Not ingested';
+      const targetStr = s.tier === 'Lake' ? 'Lake' : 'Analytics';
+      const gb = parseFloat(s.gbday) || 0;
+      let text = `📊 Change tier for ${label} — ${currentStr} → ${targetStr}`;
+      if (gb > 0) text += ` (${gb} GB/day)`;
+
+      let group = container.querySelector(`[data-tierchange-connector="${connectorName}"]`);
+      if (!group) {
+        group = document.createElement('div');
+        group.className = 'todo-connector-group';
+        group.dataset.tierchangeConnector = connectorName;
+        const h3 = document.createElement('h3');
+        h3.textContent = connectorName;
+        group.appendChild(h3);
+        const ul = document.createElement('ul');
+        group.appendChild(ul);
+        container.appendChild(group);
+      }
+      const li = document.createElement('li');
+      li.textContent = text;
+      group.querySelector('ul').appendChild(li);
+      totalCount++;
+    }
+  }
+
   countBadge.textContent = totalCount;
 }
 
