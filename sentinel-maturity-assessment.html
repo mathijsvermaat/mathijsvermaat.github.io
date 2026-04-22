@@ -3275,17 +3275,17 @@
               <label for="purview-c1">Connector enabled in Sentinel</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="purview-t1" data-tier="2" data-connector="Microsoft Purview" data-item="MicrosoftPurviewInformationProtection table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="purview-t1">MicrosoftPurviewInformationProtection</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="purview-t2" data-tier="2" data-connector="Microsoft Purview" data-item="PurviewDataSensitivityLogs table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="purview-t2">PurviewDataSensitivityLogs</label>
             </div>
@@ -7808,6 +7808,8 @@ const TIER_CAPABILITY = {
   'aws-t3': { lakeCapable: true },
   // Google Cloud Platform — GCPAuditLogs Yes/Yes
   'gcp-t1': { lakeCapable: true },
+  // Microsoft Purview — both Purview tables Yes/Yes
+  'purview-t1': { lakeCapable: true }, 'purview-t2': { lakeCapable: true },
 };
 function isLakeCapable(id) { return !!(TIER_CAPABILITY[id] && TIER_CAPABILITY[id].lakeCapable); }
 
