@@ -2263,6 +2263,16 @@
             </div>
           </div>
 
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Target Table</div>
+            <div class="check-item">
+              <select class="status-select" id="azact-tbl" data-tier="1" data-connector="Azure Activity Logs" data-item="AzureActivity table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="azact-tbl">AzureActivity<div class="check-detail">All Azure Activity log categories route to this single table</div></label>
+            </div>
+          </div>
+
           <div class="check-group">
             <div class="check-group-title">Content Hub</div>
             <div class="check-item">
@@ -7864,6 +7874,7 @@ const TIER_CAPABILITY = {
   'syslog-tbl': { lakeCapable: true },    // Syslog
   'dns-tbl': { lakeCapable: true },       // DnsEvents
   'gsa-tbl': { lakeCapable: true },       // NetworkAccessTraffic
+  'azact-tbl': { lakeCapable: true },     // AzureActivity
 };
 function isLakeCapable(id) { return !!(TIER_CAPABILITY[id] && TIER_CAPABILITY[id].lakeCapable); }
 
