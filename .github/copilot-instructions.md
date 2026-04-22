@@ -273,6 +273,9 @@ Dynamic connector IDs: `conn-{type}{N}` (e.g., `conn-thirdparty1`, `conn-thirdpa
   manualTodos: [{ title, desc }],
   expansions: {
     "prefix": { desc, gbday, plan: "Analytics"|"Data Lake" }
+  },
+  xdrTierChange: {
+    "xdr-tN": { tier: "Analytics"|"Lake", gbday: "number-as-string" }
   }
 }
 ```
@@ -343,6 +346,71 @@ Both use the same inherit/override pattern: when set to "Inherit workspace", the
 Key functions: `onRetentionOverride(prefix)`, `onTotalRetentionOverride(prefix)`, `getEffectiveAnalyticsPeriod(prefix)`, `getEffectiveTotalPeriod(prefix)`.
 
 **Backward compatibility**: Old save files with `archive: "Yes"` are auto-migrated to `totalOverride: "override"` in `applyState()`.
+
+---
+
+## Per-Table Tier-Change Pattern (Lake-capable connectors)
+
+Several connectors (Defender XDR today; Azure Activity, Entra ID, Defender for Cloud, etc. planned) expose tables that can be routed to **Analytics** or **Sentinel Data Lake**. The assessment surfaces a unified "Change tier" planning UI for these tables — identical in Full and Lite mode.
+
+### Visual anatomy (per row)
+
+```
+TABLE              | CURRENT TIER                        | CHANGE TIER ⓘ | → [Analytics|Lake] [n] GB/day
+<table-name-pill>  | [Not ingested][Analytics][Lake]     | [switch]      | (hidden unless toggle on)
+```
+
+- Column headers (`Table / Current tier / Change tier ⓘ`) are injected once per table `check-group`.
+- The native `<select class="status-select">` is **kept in the DOM as the source of truth** for current state, but hidden (`display:none`). Clicking a segmented pill writes through to it via `setLiteXdr(id, v)` → `onStatusChange()`.
+- The switch is a `.lite-xdr-switch` (sliding toggle). When on, the target-tier pill-select + GB/day input render to the right.
+
+### Shared state object
+
+```javascript
+const xdrTierChangeState = {};   // { [selectId]: { tier, gbday } }
+```
+
+- Presence of an entry ⇒ change planned.
+- Setters: `setXdrTierChangePlanned(id, bool)`, `setXdrTierChangeTier(id, 'Analytics'|'Lake')`, `setXdrTierChangeGbday(id, v)`.
+- `syncXdrTierChangeRow(id)` pushes state into both Lite and Full rows (switch checked, target select value + class, GB/day input value, `.tc-on` visibility).
+- Persisted as `state.xdrTierChange`; restored in `applyState()` **before** `renderLiteXdr()` and `syncXdrTierChangeRow()` are re-run.
+
+### Todo integration
+
+`updateTodoSummary()` iterates `xdrTierChangeState` and emits one item per planned table, grouped under `sel.dataset.connector`:
+
+```
+📊 Change tier for {Label} — {Current} → {Target} (n GB/day)
+```
+
+Current tier is derived from `liteValueFromFull(sel.value)` → `'Not ingested' | 'Analytics' | 'Lake'`.
+
+### Full-mode layout reuse
+
+`initXdrTierChangeControls()` restructures every Full-mode `xdr-t*` `.check-item` into the Lite layout at load:
+
+1. Adds `.xdr-tbl-item` class (sets the 4-col grid: `minmax(220px,1fr) auto auto auto`) and `data-id` = select id.
+2. Hides the native `<select>` via `.check-item.xdr-tbl-item > select.status-select { display: none }`.
+3. Injects `.lite-seg` segmented pill (writes through to the select).
+4. Injects `.xdr-tc-inline` switch + `.xdr-tc-details-wrap` details block.
+5. Adds `.xdr-tbl-hdr` column-header row once per `.check-group.xdr-tbl-group`.
+
+### Adding this pattern to a new Lake-capable connector
+
+When a connector exposes tables that support direct Lake ingestion (e.g., `MicrosoftGraphActivityLogs`, `EnrichedOffice365AuditLogs`, Defender for Cloud tables):
+
+1. **Status options** on each table `<select>` must include `Configured (Lake)` in addition to `Configured`, `Not configured`, `N/A`. `liteValueFromFull()` / `fullValueFromLite()` map this to the `lake` segmented-pill state.
+2. **Register the tables** in a group catalogue (today: `LITE_XDR_GROUPS`). For a new connector, either extend this catalogue or generalise it — the same data structure (`{ name, tables: [{ id, label }] }`) is consumed by `renderLiteXdr()`, `initXdrTierChangeControls()`, `updateLiteXdrProgress()`, and the todo iteration.
+3. **Keep IDs stable** (`{prefix}-t{N}`). Saved `xdrTierChange` entries are keyed by select id, so renaming breaks state round-trip.
+4. **Do not duplicate state**: the segmented pill is a view over the native `<select>`; the tier-change entry is the only new state.
+5. **Both modes in sync**: after any change, ensure `syncXdrTierChangeRow(id)` and `updateLiteXdrTotals()` run (the existing setters already do).
+6. **Lite catalogue rendering** is optional for connectors that don't get their own Lite-mode section — Full-mode injection alone is enough.
+
+### Don'ts
+
+- Don't replace the native `<select>` with a custom element; it powers progress, warnings, To-do, export, and save/load.
+- Don't add per-table GB/day inputs for the **current** tier — GB/day is only captured when a tier change is planned.
+- Don't hide the To-do summary in Lite mode; tier-change items must remain visible.
 
 ---
 
