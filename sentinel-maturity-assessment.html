@@ -8313,7 +8313,7 @@ function initXdrTierChangeControls() {
         }
         // Items marked with data-custom-label render their own label content
         // (e.g. third-party rows with an editable table-name input) — don't overwrite.
-        if (!item.dataset.customLabel) {
+        if (!item.hasAttribute('data-custom-label')) {
           labelEl.textContent = labelText;
         }
         if (annotation) labelEl.title = annotation;
