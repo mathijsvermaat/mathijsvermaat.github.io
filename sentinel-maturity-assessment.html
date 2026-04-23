@@ -1442,6 +1442,31 @@
        so data authoring happens in one place. */
     body.lite-mode #conn-xdr .check-group:has(select[id^="xdr-t"]) { display: none; }
 
+    /* ---------- Lite: per-connector "hide full-assessment checks" ---------- */
+    /* In Lite, hide the non-essential check-groups (Workloads/Log Categories,
+       Target Table, Content Hub, Validation) inside every connector body
+       until the user clicks the per-connector toggle. The toggle stamps
+       .lite-show-full on the parent .connector-section to reveal them.
+       Full mode is never matched, so Full view is unchanged. */
+    body.lite-mode .connector-section:not(.lite-show-full) [data-lite-scope="full"] { display: none; }
+
+    .lite-full-toggle { display: none; }
+    body.lite-mode .lite-full-toggle {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin: 4px 24px 14px; padding: 4px 10px;
+      background: transparent; border: 1px dashed var(--border);
+      border-radius: 999px; cursor: pointer;
+      font-size: 0.75rem; color: var(--text-light); font-weight: 500;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    body.lite-mode .lite-full-toggle:hover {
+      background: var(--bg); color: var(--primary); border-color: var(--primary);
+    }
+    body.lite-mode .connector-section.lite-show-full .lite-full-toggle {
+      border-style: solid; color: var(--primary); border-color: var(--primary);
+    }
+    .lite-full-toggle .chev { font-size: 0.7rem; line-height: 1; }
+
     /* ---------- Lite: XDR tri-state table view ---------- */
     .lite-xdr-group { padding: 14px 24px 4px; border-top: 1px solid var(--border); }
     .lite-xdr-group:first-child { border-top: 0; }
@@ -5298,6 +5323,12 @@ function computeGateExcludedSelects() {
       if (sel !== gate) excluded.add(sel);
     });
   });
+  // In Lite mode, also exclude selects inside full-only groups of sections
+  // that haven't been toggled open. Matches the CSS rule that hides them.
+  if (document.body.classList.contains('lite-mode')) {
+    document.querySelectorAll('.connector-section:not(.lite-show-full) [data-lite-scope="full"] select.status-select[data-tier]')
+      .forEach(sel => excluded.add(sel));
+  }
   return excluded;
 }
 
@@ -8396,6 +8427,81 @@ function updateLiteXdrProgress() {
   if (prog) prog.textContent = `${done} / ${total}`;
 }
 
+// ===================== LITE: HIDE FULL-ASSESSMENT CHECKS =====================
+// Titles of check-groups that are considered "full-only" and therefore hidden
+// in Lite mode by default. Matched case-insensitively against the plain text
+// of .check-group-title. "Connector Setup" and "Retention" are always shown.
+const LITE_FULL_GROUP_TITLES = new Set([
+  'workloads enabled',
+  'log categories enabled',
+  'target table',
+  'content hub',
+  'validation',
+]);
+
+// Tag every matching .check-group with data-lite-scope="full" so a single
+// CSS rule (scoped to body.lite-mode) can hide them. Safe to call repeatedly
+// and safe to call before Lite is active — the attribute has no effect in
+// Full mode. Pass a root to limit scope after a dynamic connector is added.
+function tagLiteFullGroups(root) {
+  const scope = root || document;
+  scope.querySelectorAll('.connector-section .check-group').forEach(group => {
+    if (group.hasAttribute('data-lite-scope')) return;
+    const titleEl = group.querySelector('.check-group-title');
+    if (!titleEl) return;
+    const title = (titleEl.textContent || '').trim().toLowerCase();
+    // Strip anything after an em-space or bullet that the markup uses for link suffixes.
+    const core = title.split('\u2003')[0].split('·')[0].trim();
+    if (LITE_FULL_GROUP_TITLES.has(core)) {
+      group.setAttribute('data-lite-scope', 'full');
+    }
+  });
+}
+
+// Inject a per-connector toggle button that reveals/hides the full-only groups.
+// Visible only in Lite (CSS). Skips sections that have no hidden groups, and
+// skips a section that already has a toggle (idempotent).
+function injectLiteFullToggles(root) {
+  const scope = root || document;
+  scope.querySelectorAll('.connector-section').forEach(section => {
+    // Only attach inside sections that actually carry hidden groups.
+    if (!section.querySelector('[data-lite-scope="full"]')) return;
+    const body = section.querySelector('.connector-body');
+    if (!body) return;
+    if (body.querySelector(':scope > .lite-full-toggle')) return;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'lite-full-toggle';
+    btn.setAttribute('aria-expanded', 'false');
+    btn.onclick = () => toggleLiteFullVisible(section, btn);
+    setLiteFullToggleLabel(section, btn);
+    body.appendChild(btn);
+  });
+}
+
+function setLiteFullToggleLabel(section, btn) {
+  const hiddenCount = section.querySelectorAll('[data-lite-scope="full"]').length;
+  const expanded = section.classList.contains('lite-show-full');
+  btn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  btn.innerHTML = expanded
+    ? `Hide full-assessment checks <span class="chev">▴</span>`
+    : `Show ${hiddenCount} hidden full-assessment check${hiddenCount === 1 ? '' : 's'} <span class="chev">▾</span>`;
+}
+
+function toggleLiteFullVisible(section, btn) {
+  section.classList.toggle('lite-show-full');
+  setLiteFullToggleLabel(section, btn);
+  // Hidden selects affect the progress denominators; recompute.
+  if (typeof updateProgress === 'function') updateProgress();
+}
+
+// One-shot initializer — safe to call on load and after dynamic connector adds.
+function initLiteFullMode(root) {
+  tagLiteFullGroups(root);
+  injectLiteFullToggles(root);
+}
+
 // Inject Lite-style layout (segmented pill + change-tier switch OR "Analytics only" indicator)
 // into every .check-item inside a .check-group[data-tier-enabled]. Opt-in via markup so the
 // pattern can be rolled out connector-by-connector. Original <select> remains as state backing.
@@ -8527,6 +8633,10 @@ function initXdrTierChangeControls() {
       if (lakeOk) syncXdrTierChangeRow(id);
     });
   });
+  // Any dynamic connector scaffold that triggers this function also wants
+  // its full-only groups tagged and a toggle injected — chain the Lite
+  // initializer so scaffolds don't each need a second hook.
+  if (typeof initLiteFullMode === 'function') initLiteFullMode();
 }
 
 function onLiteAmaChange() { refreshLiteAma(); }
@@ -8811,6 +8921,7 @@ function setAssessmentMode(mode) {
 // ---------- Init & state hooks ----------
 document.addEventListener('DOMContentLoaded', () => {
   initXdrTierChangeControls();
+  initLiteFullMode();
   renderLiteXdr();
   syncLiteWsRetFromFull();
   syncLiteAmaWorkbookFromFull();
