@@ -1437,10 +1437,11 @@
       display: none !important;
     }
 
-    /* In Lite mode, the XDR connector's Tables check groups are driven via
-       the Lite XDR section below. Hide them inside the Full connector body
-       so data authoring happens in one place. */
-    body.lite-mode #conn-xdr .check-group:has(select[id^="xdr-t"]) { display: none; }
+    /* In Lite mode, the XDR connector's Tables groups were previously hard-
+       hidden because the Lite XDR tri-state panel below covered the same
+       ground. They are now tagged data-lite-scope="full" like every other
+       non-essential group, so the per-connector toggle governs visibility
+       and advanced users can still reveal them inside conn-xdr if needed. */
 
     /* ---------- Lite: per-connector "hide full-assessment checks" ---------- */
     /* In Lite, hide the non-essential check-groups (Workloads/Log Categories,
@@ -8431,6 +8432,9 @@ function updateLiteXdrProgress() {
 // Titles of check-groups that are considered "full-only" and therefore hidden
 // in Lite mode by default. Matched case-insensitively against the plain text
 // of .check-group-title. "Connector Setup" and "Retention" are always shown.
+// XDR breaks its tables into multiple groups ("Tables — Endpoint (MDE)",
+// "Tables — Alerts", …), so any title that starts with "tables" is also
+// treated as full-only.
 const LITE_FULL_GROUP_TITLES = new Set([
   'workloads enabled',
   'log categories enabled',
@@ -8438,6 +8442,12 @@ const LITE_FULL_GROUP_TITLES = new Set([
   'content hub',
   'validation',
 ]);
+
+function isLiteFullGroupTitle(core) {
+  if (LITE_FULL_GROUP_TITLES.has(core)) return true;
+  // XDR-style "Tables — Endpoint (MDE)", "Tables — Alerts", etc.
+  return /^tables\b/.test(core);
+}
 
 // Tag every matching .check-group with data-lite-scope="full" so a single
 // CSS rule (scoped to body.lite-mode) can hide them. Safe to call repeatedly
@@ -8452,7 +8462,7 @@ function tagLiteFullGroups(root) {
     const title = (titleEl.textContent || '').trim().toLowerCase();
     // Strip anything after an em-space or bullet that the markup uses for link suffixes.
     const core = title.split('\u2003')[0].split('·')[0].trim();
-    if (LITE_FULL_GROUP_TITLES.has(core)) {
+    if (isLiteFullGroupTitle(core)) {
       group.setAttribute('data-lite-scope', 'full');
     }
   });
