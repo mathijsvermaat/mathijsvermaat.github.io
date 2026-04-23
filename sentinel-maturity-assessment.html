@@ -1303,19 +1303,19 @@
       background: var(--white);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: 16px 24px;
+      padding: 14px 20px;
       margin-bottom: 24px;
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      column-gap: 16px;
-      row-gap: 10px;
+      display: flex;
       align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
     }
 
-    .overall-progress .label { font-weight: 600; font-size: 0.9rem; white-space: nowrap; }
-    .overall-progress .label-sub { color: var(--text-light); font-weight: 500; font-size: 0.75rem; display: block; margin-top: 2px; }
-    .overall-progress .bar-wrap { min-width: 0; }
-    .overall-progress .percent { font-size: 0.9rem; font-weight: 600; color: var(--primary); min-width: 45px; text-align: right; }
+    .overall-progress .metric { flex: 1 1 220px; min-width: 200px; display: grid; grid-template-columns: 1fr auto; column-gap: 10px; row-gap: 4px; align-items: center; }
+    .overall-progress .metric .label { font-weight: 600; font-size: 0.85rem; white-space: nowrap; }
+    .overall-progress .metric .label-sub { color: var(--text-light); font-weight: 500; font-size: 0.7rem; display: block; margin-top: 1px; }
+    .overall-progress .metric .percent { font-size: 0.85rem; font-weight: 600; color: var(--primary); min-width: 40px; text-align: right; }
+    .overall-progress .metric .bar-wrap { grid-column: 1 / span 2; }
     .overall-progress .progress-bar-fill.configured { background: var(--success, #107c10); }
     .overall-progress .percent.configured { color: var(--success, #107c10); }
     .overall-progress .progress-bar-fill.notconfigured { background: var(--danger, #d13438); }
@@ -1847,35 +1847,41 @@
 
   <!-- Overall Progress -->
   <div class="overall-progress">
-    <span class="label" title="Percentage of in-scope checks that have any status recorded (Configured, Not configured, To be added, or N/A).">Assessed
-      <span class="label-sub">any status recorded</span>
-    </span>
-    <div class="bar-wrap">
-      <div class="progress-bar-container">
-        <div class="progress-bar-fill" id="overall-bar" style="width: 0%"></div>
+    <div class="metric">
+      <span class="label" title="Percentage of in-scope checks that have any status recorded (Configured, Not configured, To be added, or N/A).">Assessed
+        <span class="label-sub">any status recorded</span>
+      </span>
+      <span class="percent" id="overall-percent">0%</span>
+      <div class="bar-wrap">
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="overall-bar" style="width: 0%"></div>
+        </div>
       </div>
     </div>
-    <span class="percent" id="overall-percent">0%</span>
 
-    <span class="label" title="Share of all in-scope checks that are marked Configured. ‘N/A’ is excluded from the denominator; empty and ‘To be added’ remain in the denominator so this reflects the whole scope.">Configured
-      <span class="label-sub">of all in-scope checks</span>
-    </span>
-    <div class="bar-wrap">
-      <div class="progress-bar-container">
-        <div class="progress-bar-fill configured" id="configured-bar" style="width: 0%"></div>
+    <div class="metric">
+      <span class="label" title="Share of all in-scope checks that are marked Configured. ‘N/A’ is excluded from the denominator; empty and ‘To be added’ remain in the denominator so this reflects the whole scope.">Configured
+        <span class="label-sub">of all in-scope checks</span>
+      </span>
+      <span class="percent configured" id="configured-percent">0%</span>
+      <div class="bar-wrap">
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill configured" id="configured-bar" style="width: 0%"></div>
+        </div>
       </div>
     </div>
-    <span class="percent configured" id="configured-percent">0%</span>
 
-    <span class="label" title="Share of all in-scope checks that are marked Not configured. Same denominator as the Configured bar, so the two percentages together never exceed 100%; the remainder is empty or ‘To be added’.">Not configured
-      <span class="label-sub">of all in-scope checks</span>
-    </span>
-    <div class="bar-wrap">
-      <div class="progress-bar-container">
-        <div class="progress-bar-fill notconfigured" id="notconfigured-bar" style="width: 0%"></div>
+    <div class="metric">
+      <span class="label" title="Share of all in-scope checks that are marked Not configured. Same denominator as the Configured bar, so the two percentages together never exceed 100%; the remainder is empty or ‘To be added’.">Not configured
+        <span class="label-sub">of all in-scope checks</span>
+      </span>
+      <span class="percent notconfigured" id="notconfigured-percent">0%</span>
+      <div class="bar-wrap">
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill notconfigured" id="notconfigured-bar" style="width: 0%"></div>
+        </div>
       </div>
     </div>
-    <span class="percent notconfigured" id="notconfigured-percent">0%</span>
   </div>
 
   <!-- To Do Summary — items marked "To be added" + manual items -->
