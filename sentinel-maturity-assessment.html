@@ -5229,12 +5229,37 @@ function updateLicenseBenefit() {
 }
 
 // ===================== PROGRESS TRACKING =====================
+// Gate values that collapse a connector's dependent groups (see handleConnectorCollapse).
+// When the primary "Connector enabled in Sentinel" select is in one of these states,
+// the dependent selects below it are hidden and cleared, so they must also be
+// excluded from the progress numerator AND denominator. The gate itself still counts.
+const GATE_COLLAPSE_VALUES = ['N/A', 'Not configured', 'To be added'];
+
+function computeGateExcludedSelects() {
+  const excluded = new Set();
+  document.querySelectorAll('.connector-section[id^="conn-"]').forEach(section => {
+    // General workspace section is never collapsed (see handleConnectorCollapse).
+    if (section.id === 'conn-gen-workspace') return;
+    const setupGroup = section.querySelector('.connector-body .check-group')
+      || section.querySelector('.check-group');
+    if (!setupGroup) return;
+    const gate = setupGroup.querySelector('select.status-select[data-tier]');
+    if (!gate || !GATE_COLLAPSE_VALUES.includes(gate.value)) return;
+    section.querySelectorAll('select.status-select[data-tier]').forEach(sel => {
+      if (sel !== gate) excluded.add(sel);
+    });
+  });
+  return excluded;
+}
+
 function updateProgress() {
+  const gateExcluded = computeGateExcludedSelects();
   const allSelects = document.querySelectorAll('select.status-select[data-tier]');
   let totalItems = 0;
   let assessedItems = 0;
 
   allSelects.forEach(sel => {
+    if (gateExcluded.has(sel)) return;
     totalItems++;
     if (sel.value !== '') assessedItems++;
   });
@@ -5248,10 +5273,18 @@ function updateProgress() {
   for (const tier of ['general', '1', '2', '3']) {
     const tierAll = document.querySelectorAll(`select.status-select[data-tier="${tier}"]`);
     let tierAssessed = 0;
-    tierAll.forEach(sel => { if (sel.value !== '') tierAssessed++; });
+    let tierTotal = 0;
+    tierAll.forEach(sel => {
+      if (gateExcluded.has(sel)) return;
+      tierTotal++;
+      if (sel.value !== '') tierAssessed++;
+    });
     const el = document.getElementById(`tier-${tier}-progress`);
-    if (el && tierAll.length > 0) {
-      el.textContent = `${tierAssessed} / ${tierAll.length}`;
+    if (el && tierTotal > 0) {
+      el.textContent = `${tierAssessed} / ${tierTotal}`;
+    } else if (el && tierAll.length > 0) {
+      // All items in this tier are gate-excluded — show 0/0 rather than stale count.
+      el.textContent = `0 / 0`;
     }
   }
 
@@ -5273,27 +5306,42 @@ function updateProgress() {
     if (!section) continue;
     const sels = section.querySelectorAll('select.status-select[data-tier]');
     let assessed = 0;
-    sels.forEach(sel => { if (sel.value !== '') assessed++; });
+    let total = 0;
+    sels.forEach(sel => {
+      if (gateExcluded.has(sel)) return;
+      total++;
+      if (sel.value !== '') assessed++;
+    });
     const el = document.getElementById(conn + '-progress');
-    if (el) el.textContent = `${assessed}/${sels.length}`;
+    if (el) el.textContent = `${assessed}/${total}`;
   }
 
   // Dynamic third-party connectors
   document.querySelectorAll('#thirdparty-connectors > .connector-section').forEach(section => {
     const sels = section.querySelectorAll('select.status-select[data-tier]');
     let assessed = 0;
-    sels.forEach(sel => { if (sel.value !== '') assessed++; });
+    let total = 0;
+    sels.forEach(sel => {
+      if (gateExcluded.has(sel)) return;
+      total++;
+      if (sel.value !== '') assessed++;
+    });
     const el = document.getElementById(section.id + '-progress');
-    if (el) el.textContent = `${assessed}/${sels.length}`;
+    if (el) el.textContent = `${assessed}/${total}`;
   });
 
   // Dynamic third-party TI connectors
   document.querySelectorAll('#thirdpartyti-connectors > .connector-section').forEach(section => {
     const sels = section.querySelectorAll('select.status-select[data-tier]');
     let assessed = 0;
-    sels.forEach(sel => { if (sel.value !== '') assessed++; });
+    let total = 0;
+    sels.forEach(sel => {
+      if (gateExcluded.has(sel)) return;
+      total++;
+      if (sel.value !== '') assessed++;
+    });
     const el = document.getElementById(section.id + '-progress');
-    if (el) el.textContent = `${assessed}/${sels.length}`;
+    if (el) el.textContent = `${assessed}/${total}`;
   });
 
   // Dynamic identity, app, collab, custom, devops, OT connectors
@@ -5301,9 +5349,14 @@ function updateProgress() {
     document.querySelectorAll(`#${type}-connectors > .connector-section`).forEach(section => {
       const sels = section.querySelectorAll('select.status-select[data-tier]');
       let assessed = 0;
-      sels.forEach(sel => { if (sel.value !== '') assessed++; });
+      let total = 0;
+      sels.forEach(sel => {
+        if (gateExcluded.has(sel)) return;
+        total++;
+        if (sel.value !== '') assessed++;
+      });
       const el = document.getElementById(section.id + '-progress');
-      if (el) el.textContent = `${assessed}/${sels.length}`;
+      if (el) el.textContent = `${assessed}/${total}`;
     });
   });
 }
