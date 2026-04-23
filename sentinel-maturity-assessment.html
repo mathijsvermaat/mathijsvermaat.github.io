@@ -1556,8 +1556,14 @@
     /* ---------- Full-mode XDR table rows (match Lite visual) ---------- */
     .check-item.xdr-tbl-item {
       display: grid;
-      grid-template-columns: minmax(200px, 1fr) auto auto auto minmax(190px, auto);
+      grid-template-columns: minmax(220px, 1fr) auto auto auto;
       align-items: center; gap: 14px; padding: 6px 0;
+    }
+    /* Retention cell drops to its own second line, spanning the full row */
+    .check-item.xdr-tbl-item > .xdr-tbl-ret {
+      grid-column: 1 / -1;
+      justify-self: end;
+      padding-top: 2px;
     }
     .check-item.xdr-tbl-item > select.status-select { display: none; }
     .check-item.xdr-tbl-item > label {
@@ -1589,7 +1595,7 @@
     }
     .check-group.xdr-tbl-group .xdr-tbl-hdr {
       display: grid;
-      grid-template-columns: minmax(200px, 1fr) auto auto auto minmax(190px, auto);
+      grid-template-columns: minmax(220px, 1fr) auto auto auto;
       align-items: center; gap: 14px;
       padding: 4px 0 6px; margin-bottom: 2px;
       border-bottom: 1px solid var(--border);
@@ -1606,6 +1612,10 @@
       justify-content: flex-end;
     }
     .xdr-tbl-ret .ret-grp { display: inline-flex; align-items: center; gap: 4px; }
+    .xdr-tbl-ret .ret-heading {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.4px;
+      color: var(--text-light); margin-right: 2px;
+    }
     .xdr-tbl-ret .ret-grp > .ret-prefix {
       font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.4px;
       color: var(--text-light);
@@ -8584,10 +8594,7 @@ function initXdrTierChangeControls() {
         <span class="hdr-cell">Change tier
           <span class="info-ico" tabindex="0" data-tip="${tipText}">i</span>
         </span>
-        <span class="hdr-cell"></span>
-        <span class="hdr-cell" style="justify-content:flex-end">Retention
-          <span class="info-ico" tabindex="0" data-tip="Per-table retention. Defaults inherit from the Workspace Configuration (Analytics retention and Default retention policy). Long-term can also be None.">i</span>
-        </span>`;
+        <span class="hdr-cell"></span>`;
       const title = group.querySelector('.check-group-title');
       if (title) title.insertAdjacentElement('afterend', hdr);
       else group.insertBefore(hdr, group.firstChild);
@@ -8770,12 +8777,12 @@ function renderTableRetentionCell(item) {
   cell.innerHTML = '';
   // Show nothing when the table is not configured / N/A / unassessed.
   if (!v || v === 'Not configured' || v === 'N/A') {
-    const dash = document.createElement('span');
-    dash.className = 'ret-empty';
-    dash.textContent = '—';
-    cell.appendChild(dash);
     return;
   }
+  const heading = document.createElement('span');
+  heading.className = 'ret-heading';
+  heading.textContent = 'Retention:';
+  cell.appendChild(heading);
   const st = tableRetentionState[id] || {};
   if (v === 'Configured (Lake)') {
     cell.appendChild(buildRetSelect(id, 'lake', st.lake || '', 'Lake',
