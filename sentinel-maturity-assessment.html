@@ -1320,6 +1320,8 @@
     .overall-progress .percent.configured { color: var(--success, #107c10); }
     .overall-progress .progress-bar-fill.notconfigured { background: var(--danger, #d13438); }
     .overall-progress .percent.notconfigured { color: var(--danger, #d13438); }
+    .overall-progress .progress-bar-fill.todo { background: var(--warning, #ca8a04); }
+    .overall-progress .percent.todo { color: var(--warning, #ca8a04); }
 
     .footer {
       text-align: center;
@@ -1879,6 +1881,18 @@
       <div class="bar-wrap">
         <div class="progress-bar-container">
           <div class="progress-bar-fill notconfigured" id="notconfigured-bar" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric">
+      <span class="label" title="Share of all in-scope checks that are marked ‘To be added’ — items flagged as follow-up work during the assessment. Same denominator as the Configured and Not configured bars.">To Do
+        <span class="label-sub">‘To be added’ of in-scope</span>
+      </span>
+      <span class="percent todo" id="todo-percent">0%</span>
+      <div class="bar-wrap">
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill todo" id="todo-bar" style="width: 0%"></div>
         </div>
       </div>
     </div>
@@ -5292,9 +5306,10 @@ function updateProgress() {
   const allSelects = document.querySelectorAll('select.status-select[data-tier]');
   let totalItems = 0;
   let assessedItems = 0;
-  let readinessDenom = 0;  // in-scope items excluding N/A — shared denominator for the two status bars
+  let readinessDenom = 0;  // in-scope items excluding N/A — shared denominator for the status bars
   let readyItems = 0;       // Configured (incl. Configured (Lake) / Healthy)
   let notReadyItems = 0;    // Not configured (incl. Unhealthy)
+  let todoItems = 0;        // To be added
 
   allSelects.forEach(sel => {
     if (gateExcluded.has(sel)) return;
@@ -5304,6 +5319,7 @@ function updateProgress() {
     if (v !== 'N/A') readinessDenom++;
     if (v === 'Configured' || v === 'Configured (Lake)' || v === 'Healthy') readyItems++;
     else if (v === 'Not configured' || v === 'Unhealthy') notReadyItems++;
+    else if (v === 'To be added') todoItems++;
   });
 
   // Overall — Assessed
@@ -5318,17 +5334,22 @@ function updateProgress() {
   const cPct = document.getElementById('configured-percent');
   const nBar = document.getElementById('notconfigured-bar');
   const nPct = document.getElementById('notconfigured-percent');
+  const tBar = document.getElementById('todo-bar');
+  const tPct = document.getElementById('todo-percent');
   if (cBar && cPct && nBar && nPct) {
     if (readinessDenom > 0) {
       const cp = Math.round((readyItems / readinessDenom) * 100);
       const np = Math.round((notReadyItems / readinessDenom) * 100);
+      const tp = Math.round((todoItems / readinessDenom) * 100);
       cBar.style.width = cp + '%';
       cPct.textContent = cp + '%';
       nBar.style.width = np + '%';
       nPct.textContent = np + '%';
+      if (tBar && tPct) { tBar.style.width = tp + '%'; tPct.textContent = tp + '%'; }
     } else {
       cBar.style.width = '0%'; cPct.textContent = '0%';
       nBar.style.width = '0%'; nPct.textContent = '0%';
+      if (tBar && tPct) { tBar.style.width = '0%'; tPct.textContent = '0%'; }
     }
   }
 
