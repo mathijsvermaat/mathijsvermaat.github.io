@@ -1307,14 +1307,14 @@
       margin-bottom: 24px;
       display: flex;
       align-items: center;
-      gap: 24px;
+      gap: 16px;
       flex-wrap: wrap;
     }
 
-    .overall-progress .metric { flex: 1 1 220px; min-width: 200px; display: grid; grid-template-columns: 1fr auto; column-gap: 10px; row-gap: 4px; align-items: center; }
-    .overall-progress .metric .label { font-weight: 600; font-size: 0.85rem; white-space: nowrap; }
-    .overall-progress .metric .label-sub { color: var(--text-light); font-weight: 500; font-size: 0.7rem; display: block; margin-top: 1px; }
-    .overall-progress .metric .percent { font-size: 0.85rem; font-weight: 600; color: var(--primary); min-width: 40px; text-align: right; }
+    .overall-progress .metric { flex: 1 1 0; min-width: 0; display: grid; grid-template-columns: 1fr auto; column-gap: 8px; row-gap: 4px; align-items: center; }
+    .overall-progress .metric .label { font-weight: 600; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .overall-progress .metric .label-sub { color: var(--text-light); font-weight: 500; font-size: 0.68rem; display: block; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .overall-progress .metric .percent { font-size: 0.8rem; font-weight: 600; color: var(--primary); min-width: 36px; text-align: right; }
     .overall-progress .metric .bar-wrap { grid-column: 1 / span 2; }
     .overall-progress .progress-bar-fill.configured { background: var(--success, #107c10); }
     .overall-progress .percent.configured { color: var(--success, #107c10); }
