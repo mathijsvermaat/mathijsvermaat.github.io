@@ -1316,8 +1316,10 @@
     .overall-progress .label-sub { color: var(--text-light); font-weight: 500; font-size: 0.75rem; display: block; margin-top: 2px; }
     .overall-progress .bar-wrap { min-width: 0; }
     .overall-progress .percent { font-size: 0.9rem; font-weight: 600; color: var(--primary); min-width: 45px; text-align: right; }
-    .overall-progress .progress-bar-fill.readiness { background: var(--success, #16a34a); }
-    .overall-progress .percent.readiness { color: var(--success, #16a34a); }
+    .overall-progress .progress-bar-fill.configured { background: var(--success, #107c10); }
+    .overall-progress .percent.configured { color: var(--success, #107c10); }
+    .overall-progress .progress-bar-fill.notconfigured { background: var(--danger, #d13438); }
+    .overall-progress .percent.notconfigured { color: var(--danger, #d13438); }
 
     .footer {
       text-align: center;
@@ -1855,15 +1857,25 @@
     </div>
     <span class="percent" id="overall-percent">0%</span>
 
-    <span class="label" title="Of the checks marked Configured or Not configured, the share that is actually Configured. ‘N/A’ and ‘To be added’ are excluded from both sides of this ratio.">Readiness
-      <span class="label-sub">Configured / (Configured + Not configured)</span>
+    <span class="label" title="Share of all in-scope checks that are marked Configured. ‘N/A’ is excluded from the denominator; empty and ‘To be added’ remain in the denominator so this reflects the whole scope.">Configured
+      <span class="label-sub">of all in-scope checks</span>
     </span>
     <div class="bar-wrap">
       <div class="progress-bar-container">
-        <div class="progress-bar-fill readiness" id="readiness-bar" style="width: 0%"></div>
+        <div class="progress-bar-fill configured" id="configured-bar" style="width: 0%"></div>
       </div>
     </div>
-    <span class="percent readiness" id="readiness-percent">—</span>
+    <span class="percent configured" id="configured-percent">0%</span>
+
+    <span class="label" title="Share of all in-scope checks that are marked Not configured. Same denominator as the Configured bar, so the two percentages together never exceed 100%; the remainder is empty or ‘To be added’.">Not configured
+      <span class="label-sub">of all in-scope checks</span>
+    </span>
+    <div class="bar-wrap">
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill notconfigured" id="notconfigured-bar" style="width: 0%"></div>
+      </div>
+    </div>
+    <span class="percent notconfigured" id="notconfigured-percent">0%</span>
   </div>
 
   <!-- To Do Summary — items marked "To be added" + manual items -->
@@ -5274,14 +5286,16 @@ function updateProgress() {
   const allSelects = document.querySelectorAll('select.status-select[data-tier]');
   let totalItems = 0;
   let assessedItems = 0;
-  let readyItems = 0;     // Configured (incl. Configured (Lake) / Healthy)
-  let notReadyItems = 0;  // Not configured (incl. Unhealthy)
+  let readinessDenom = 0;  // in-scope items excluding N/A — shared denominator for the two status bars
+  let readyItems = 0;       // Configured (incl. Configured (Lake) / Healthy)
+  let notReadyItems = 0;    // Not configured (incl. Unhealthy)
 
   allSelects.forEach(sel => {
     if (gateExcluded.has(sel)) return;
     totalItems++;
     const v = sel.value;
     if (v !== '') assessedItems++;
+    if (v !== 'N/A') readinessDenom++;
     if (v === 'Configured' || v === 'Configured (Lake)' || v === 'Healthy') readyItems++;
     else if (v === 'Not configured' || v === 'Unhealthy') notReadyItems++;
   });
@@ -5291,19 +5305,24 @@ function updateProgress() {
   document.getElementById('overall-bar').style.width = pct + '%';
   document.getElementById('overall-percent').textContent = pct + '%';
 
-  // Overall — Readiness (Configured vs. decided-on items only).
-  // Excludes empty and "To be added" on purpose so the ratio reflects what is actually in place today.
-  const readinessBar = document.getElementById('readiness-bar');
-  const readinessPercent = document.getElementById('readiness-percent');
-  if (readinessBar && readinessPercent) {
-    const readinessDenom = readyItems + notReadyItems;
+  // Configured / Not configured — share of all in-scope checks (excluding N/A).
+  // Using the same denominator guarantees the two bars never exceed 100% together;
+  // the remainder is empty or 'To be added', i.e. work still to triage or deliver.
+  const cBar = document.getElementById('configured-bar');
+  const cPct = document.getElementById('configured-percent');
+  const nBar = document.getElementById('notconfigured-bar');
+  const nPct = document.getElementById('notconfigured-percent');
+  if (cBar && cPct && nBar && nPct) {
     if (readinessDenom > 0) {
-      const rpct = Math.round((readyItems / readinessDenom) * 100);
-      readinessBar.style.width = rpct + '%';
-      readinessPercent.textContent = rpct + '%';
+      const cp = Math.round((readyItems / readinessDenom) * 100);
+      const np = Math.round((notReadyItems / readinessDenom) * 100);
+      cBar.style.width = cp + '%';
+      cPct.textContent = cp + '%';
+      nBar.style.width = np + '%';
+      nPct.textContent = np + '%';
     } else {
-      readinessBar.style.width = '0%';
-      readinessPercent.textContent = '—';
+      cBar.style.width = '0%'; cPct.textContent = '0%';
+      nBar.style.width = '0%'; nPct.textContent = '0%';
     }
   }
 
