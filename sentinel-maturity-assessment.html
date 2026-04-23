@@ -1556,7 +1556,7 @@
     /* ---------- Full-mode XDR table rows (match Lite visual) ---------- */
     .check-item.xdr-tbl-item {
       display: grid;
-      grid-template-columns: minmax(220px, 1fr) auto auto auto;
+      grid-template-columns: minmax(200px, 1fr) auto auto auto minmax(190px, auto);
       align-items: center; gap: 14px; padding: 6px 0;
     }
     .check-item.xdr-tbl-item > select.status-select { display: none; }
@@ -1589,7 +1589,7 @@
     }
     .check-group.xdr-tbl-group .xdr-tbl-hdr {
       display: grid;
-      grid-template-columns: minmax(220px, 1fr) auto auto auto;
+      grid-template-columns: minmax(200px, 1fr) auto auto auto minmax(190px, auto);
       align-items: center; gap: 14px;
       padding: 4px 0 6px; margin-bottom: 2px;
       border-bottom: 1px solid var(--border);
@@ -1599,6 +1599,26 @@
     .check-group.xdr-tbl-group .xdr-tbl-hdr .hdr-cell {
       display: inline-flex; align-items: center; gap: 6px;
     }
+    /* Per-table retention cell (Analytics + Long-term, or Lake) */
+    .xdr-tbl-ret {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 0.78rem; color: var(--text-light);
+      justify-content: flex-end;
+    }
+    .xdr-tbl-ret .ret-grp { display: inline-flex; align-items: center; gap: 4px; }
+    .xdr-tbl-ret .ret-grp > .ret-prefix {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.4px;
+      color: var(--text-light);
+    }
+    .xdr-tbl-ret select {
+      padding: 2px 6px; font: inherit; font-size: 0.78rem;
+      border: 1px solid var(--border); border-radius: 4px; background: var(--white);
+      max-width: 160px;
+    }
+    .xdr-tbl-ret select.analytics { background: #e6f4ea; border-color: var(--success); color: var(--success); }
+    .xdr-tbl-ret select.longterm  { background: #fff4ce; border-color: #c19c00;        color: #6b5300; }
+    .xdr-tbl-ret select.lake      { background: #f0e6fa; border-color: #8764b8;        color: #5c2d91; }
+    .xdr-tbl-ret .ret-empty { opacity: 0.4; }
     /* Full-mode per-table change-tier inline row
        (visually matches the Lite switch toggle + details) */
     .xdr-tc-inline {
@@ -7515,6 +7535,21 @@ function gatherState() {
   const wsTotalRetSel = document.getElementById('workspace-default-total-retention');
   if (wsTotalRetSel) state.meta.workspaceTotalRetention = wsTotalRetSel.value;
 
+  // Save per-table retention overrides (preview: XDR tables today, other
+  // connectors roll in later). Empty/unset entries are omitted.
+  if (typeof tableRetentionState === 'object' && tableRetentionState) {
+    const tr = {};
+    for (const [id, entry] of Object.entries(tableRetentionState)) {
+      if (!entry) continue;
+      const clean = {};
+      if (entry.analytics) clean.analytics = entry.analytics;
+      if (entry.longTerm)  clean.longTerm  = entry.longTerm;
+      if (entry.lake)      clean.lake      = entry.lake;
+      if (Object.keys(clean).length) tr[id] = clean;
+    }
+    if (Object.keys(tr).length) state.tableRetention = tr;
+  }
+
   // Save per-connector retention sections
   document.querySelectorAll('.retention-group[data-prefix]').forEach(group => {
     const prefix = group.dataset.prefix;
@@ -7788,6 +7823,18 @@ function applyState(state) {
     if (wsTotalSel) {
       wsTotalSel.value = state.meta.workspaceTotalRetention;
       onWorkspaceTotalRetentionChange();
+    }
+  }
+
+  // Restore per-table retention overrides, then re-render every cell so
+  // populated values show up (order matters: the initial init already ran
+  // before load, so cells exist).
+  if (state.tableRetention && typeof tableRetentionState === 'object') {
+    for (const [id, entry] of Object.entries(state.tableRetention)) {
+      tableRetentionState[id] = Object.assign({}, entry);
+    }
+    if (typeof refreshAllTableRetentionCells === 'function') {
+      refreshAllTableRetentionCells();
     }
   }
 
@@ -8396,6 +8443,9 @@ function syncLiteXdrFromSelect(sel) {
   applyLiteXdrSegState(sel.id, liteValueFromFull(sel.value));
   updateLiteXdrTotals();
   updateLiteXdrProgress();
+  // Keep the per-table retention cell in sync with the new tier value.
+  const item = document.querySelector(`.check-item.xdr-tbl-item[data-id="${sel.id}"]`);
+  if (item && typeof renderTableRetentionCell === 'function') renderTableRetentionCell(item);
 }
 
 function updateLiteXdrTotals() {
@@ -8438,15 +8488,12 @@ function updateLiteXdrProgress() {
 const LITE_FULL_GROUP_TITLES = new Set([
   'workloads enabled',
   'log categories enabled',
-  'target table',
   'content hub',
   'validation',
 ]);
 
 function isLiteFullGroupTitle(core) {
-  if (LITE_FULL_GROUP_TITLES.has(core)) return true;
-  // XDR-style "Tables — Endpoint (MDE)", "Tables — Alerts", etc.
-  return /^tables\b/.test(core);
+  return LITE_FULL_GROUP_TITLES.has(core);
 }
 
 // Tag every matching .check-group with data-lite-scope="full" so a single
@@ -8537,7 +8584,10 @@ function initXdrTierChangeControls() {
         <span class="hdr-cell">Change tier
           <span class="info-ico" tabindex="0" data-tip="${tipText}">i</span>
         </span>
-        <span class="hdr-cell"></span>`;
+        <span class="hdr-cell"></span>
+        <span class="hdr-cell" style="justify-content:flex-end">Retention
+          <span class="info-ico" tabindex="0" data-tip="Per-table retention. Defaults inherit from the Workspace Configuration (Analytics retention and Default retention policy). Long-term can also be None.">i</span>
+        </span>`;
       const title = group.querySelector('.check-group-title');
       if (title) title.insertAdjacentElement('afterend', hdr);
       else group.insertBefore(hdr, group.firstChild);
@@ -8638,9 +8688,16 @@ function initXdrTierChangeControls() {
         item.appendChild(spacer);
       }
 
+      // Retention cell (last column) — content driven by the current tier pill value.
+      const retCell = document.createElement('div');
+      retCell.className = 'xdr-tbl-ret';
+      retCell.id = id + '-ret-cell';
+      item.appendChild(retCell);
+
       // Prime segmented pill from existing <select> value
       applyLiteXdrSegState(id, liteValueFromFull(sel.value));
       if (lakeOk) syncXdrTierChangeRow(id);
+      renderTableRetentionCell(item);
     });
   });
   // Any dynamic connector scaffold that triggers this function also wants
@@ -8648,6 +8705,119 @@ function initXdrTierChangeControls() {
   // initializer so scaffolds don't each need a second hook.
   if (typeof initLiteFullMode === 'function') initLiteFullMode();
 }
+
+// ===================== PER-TABLE RETENTION (preview) =====================
+// State is keyed by the Full <select> id (e.g. "xdr-t1"). Empty string means
+// "inherit workspace default"; any other value is an explicit override.
+// Long-term/Lake additionally allow the literal value "None" (no long-term
+// / lake retention configured) — still counts as Configured for progress.
+const tableRetentionState = {};
+
+// Mirror the workspace analytics-retention options (id=workspace-default-retention).
+const RETENTION_OPTS_ANALYTICS = [
+  '30 days','60 days','90 days','120 days','180 days','270 days','365 days','2 years'
+];
+// Mirror the workspace total-retention / long-term options (id=workspace-default-total-retention).
+const RETENTION_OPTS_TOTAL = [
+  '90 days','120 days','180 days','270 days','365 days',
+  '1 year','2 years','3 years','4 years','5 years','6 years','7 years',
+  '8 years','9 years','10 years','11 years','12 years'
+];
+
+function getWsAnalyticsRetention() {
+  const el = document.getElementById('workspace-default-retention');
+  return el ? el.value : '90 days';
+}
+function getWsTotalRetention() {
+  const el = document.getElementById('workspace-default-total-retention');
+  return el ? el.value : '365 days';
+}
+
+// Build one labelled select for a retention field. `field` is 'analytics' |
+// 'longTerm' | 'lake'. Empty value = inherit workspace default (shown as
+// "Inherited (<ws value>)"). Long-term/Lake include a "None" option.
+function buildRetSelect(id, field, current, prefix, opts, inheritedValue, cssClass) {
+  const wrap = document.createElement('span');
+  wrap.className = 'ret-grp';
+  const lbl = document.createElement('span');
+  lbl.className = 'ret-prefix';
+  lbl.textContent = prefix;
+  wrap.appendChild(lbl);
+  const sel = document.createElement('select');
+  sel.className = cssClass || '';
+  sel.id = `${id}-ret-${field}`;
+  sel.setAttribute('aria-label', `${prefix} retention for ${id}`);
+  sel.addEventListener('change', () => onTableRetentionChange(id, field, sel.value));
+  const addOpt = (v, text) => {
+    const o = document.createElement('option');
+    o.value = v; o.textContent = text;
+    sel.appendChild(o);
+  };
+  addOpt('', `Inherited (${inheritedValue})`);
+  if (field !== 'analytics') addOpt('None', 'None');
+  opts.forEach(v => addOpt(v, v));
+  sel.value = current || '';
+  return wrap.appendChild(sel), wrap;
+}
+
+function renderTableRetentionCell(item) {
+  if (!item) return;
+  const cell = item.querySelector('.xdr-tbl-ret');
+  if (!cell) return;
+  const id = item.dataset.id;
+  const sel = id ? document.getElementById(id) : null;
+  const v = sel ? sel.value : '';
+  cell.innerHTML = '';
+  // Show nothing when the table is not configured / N/A / unassessed.
+  if (!v || v === 'Not configured' || v === 'N/A') {
+    const dash = document.createElement('span');
+    dash.className = 'ret-empty';
+    dash.textContent = '—';
+    cell.appendChild(dash);
+    return;
+  }
+  const st = tableRetentionState[id] || {};
+  if (v === 'Configured (Lake)') {
+    cell.appendChild(buildRetSelect(id, 'lake', st.lake || '', 'Lake',
+      RETENTION_OPTS_TOTAL, getWsTotalRetention(), 'lake'));
+  } else {
+    // "Configured" (Analytics tier)
+    cell.appendChild(buildRetSelect(id, 'analytics', st.analytics || '', 'A',
+      RETENTION_OPTS_ANALYTICS, getWsAnalyticsRetention(), 'analytics'));
+    cell.appendChild(buildRetSelect(id, 'longTerm', st.longTerm || '', 'LT',
+      RETENTION_OPTS_TOTAL, getWsTotalRetention(), 'longterm'));
+  }
+}
+
+function onTableRetentionChange(id, field, value) {
+  if (!tableRetentionState[id]) tableRetentionState[id] = {};
+  tableRetentionState[id][field] = value;
+  if (typeof saveState === 'function') try { saveState(); } catch (e) {}
+  if (typeof updateTodoSummary === 'function') updateTodoSummary();
+}
+
+// Re-render every per-table retention cell (used when workspace default
+// retention changes — the "Inherited (…)" label needs to refresh).
+function refreshAllTableRetentionCells() {
+  document.querySelectorAll('.check-item.xdr-tbl-item').forEach(item => {
+    renderTableRetentionCell(item);
+  });
+}
+
+// Hook workspace retention selects so per-table "Inherited" labels refresh
+// whenever the user changes the workspace defaults (Full or Lite variant).
+document.addEventListener('DOMContentLoaded', () => {
+  [
+    'workspace-default-retention',
+    'workspace-default-total-retention',
+    'lite-workspace-default-retention',
+    'lite-workspace-default-total-retention'
+  ].forEach(sid => {
+    const el = document.getElementById(sid);
+    if (el) el.addEventListener('change', refreshAllTableRetentionCells);
+  });
+});
+
 
 function onLiteAmaChange() { refreshLiteAma(); }
 
