@@ -1305,14 +1305,19 @@
       box-shadow: var(--shadow);
       padding: 16px 24px;
       margin-bottom: 24px;
-      display: flex;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      column-gap: 16px;
+      row-gap: 10px;
       align-items: center;
-      gap: 16px;
     }
 
     .overall-progress .label { font-weight: 600; font-size: 0.9rem; white-space: nowrap; }
-    .overall-progress .bar-wrap { flex: 1; }
+    .overall-progress .label-sub { color: var(--text-light); font-weight: 500; font-size: 0.75rem; display: block; margin-top: 2px; }
+    .overall-progress .bar-wrap { min-width: 0; }
     .overall-progress .percent { font-size: 0.9rem; font-weight: 600; color: var(--primary); min-width: 45px; text-align: right; }
+    .overall-progress .progress-bar-fill.readiness { background: var(--success, #16a34a); }
+    .overall-progress .percent.readiness { color: var(--success, #16a34a); }
 
     .footer {
       text-align: center;
@@ -1840,13 +1845,25 @@
 
   <!-- Overall Progress -->
   <div class="overall-progress">
-    <span class="label">Overall Progress</span>
+    <span class="label" title="Percentage of in-scope checks that have any status recorded (Configured, Not configured, To be added, or N/A).">Assessed
+      <span class="label-sub">any status recorded</span>
+    </span>
     <div class="bar-wrap">
       <div class="progress-bar-container">
         <div class="progress-bar-fill" id="overall-bar" style="width: 0%"></div>
       </div>
     </div>
     <span class="percent" id="overall-percent">0%</span>
+
+    <span class="label" title="Of the checks marked Configured or Not configured, the share that is actually Configured. ‘N/A’ and ‘To be added’ are excluded from both sides of this ratio.">Readiness
+      <span class="label-sub">Configured / (Configured + Not configured)</span>
+    </span>
+    <div class="bar-wrap">
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill readiness" id="readiness-bar" style="width: 0%"></div>
+      </div>
+    </div>
+    <span class="percent readiness" id="readiness-percent">—</span>
   </div>
 
   <!-- To Do Summary — items marked "To be added" + manual items -->
@@ -5257,17 +5274,38 @@ function updateProgress() {
   const allSelects = document.querySelectorAll('select.status-select[data-tier]');
   let totalItems = 0;
   let assessedItems = 0;
+  let readyItems = 0;     // Configured (incl. Configured (Lake) / Healthy)
+  let notReadyItems = 0;  // Not configured (incl. Unhealthy)
 
   allSelects.forEach(sel => {
     if (gateExcluded.has(sel)) return;
     totalItems++;
-    if (sel.value !== '') assessedItems++;
+    const v = sel.value;
+    if (v !== '') assessedItems++;
+    if (v === 'Configured' || v === 'Configured (Lake)' || v === 'Healthy') readyItems++;
+    else if (v === 'Not configured' || v === 'Unhealthy') notReadyItems++;
   });
 
-  // Overall
+  // Overall — Assessed
   const pct = totalItems ? Math.round((assessedItems / totalItems) * 100) : 0;
   document.getElementById('overall-bar').style.width = pct + '%';
   document.getElementById('overall-percent').textContent = pct + '%';
+
+  // Overall — Readiness (Configured vs. decided-on items only).
+  // Excludes empty and "To be added" on purpose so the ratio reflects what is actually in place today.
+  const readinessBar = document.getElementById('readiness-bar');
+  const readinessPercent = document.getElementById('readiness-percent');
+  if (readinessBar && readinessPercent) {
+    const readinessDenom = readyItems + notReadyItems;
+    if (readinessDenom > 0) {
+      const rpct = Math.round((readyItems / readinessDenom) * 100);
+      readinessBar.style.width = rpct + '%';
+      readinessPercent.textContent = rpct + '%';
+    } else {
+      readinessBar.style.width = '0%';
+      readinessPercent.textContent = '—';
+    }
+  }
 
   // Per tier
   for (const tier of ['general', '1', '2', '3']) {
