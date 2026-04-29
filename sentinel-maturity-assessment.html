@@ -3353,23 +3353,23 @@
               <label for="dfc-c2">Bi-directional incident sync enabled<div class="check-detail">Keeps Sentinel and Defender for Cloud alert status aligned</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="dfc-t1" data-tier="2" data-connector="Microsoft Defender for Cloud" data-item="SecurityAlert table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="dfc-t1">SecurityAlert<div class="check-detail">Free data source — threat detection alerts from all workload plans</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="dfc-t2" data-tier="2" data-connector="Microsoft Defender for Cloud" data-item="SecurityRecommendation table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="dfc-t2">SecurityRecommendation<div class="check-detail">Paid — CSPM recommendations and compliance findings</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="dfc-t3" data-tier="2" data-connector="Microsoft Defender for Cloud" data-item="SecurityRegulatoryCompliance table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="dfc-t3">SecurityRegulatoryCompliance<div class="check-detail">Paid — regulatory framework compliance status</div></label>
             </div>
@@ -3665,23 +3665,23 @@
               <label for="intune-c1">Intune logs routed via Entra ID diagnostic settings</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="intune-t1" data-tier="2" data-connector="Microsoft Intune" data-item="IntuneAuditLogs table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="intune-t1">IntuneAuditLogs<div class="check-detail">Free data source</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="intune-t2" data-tier="2" data-connector="Microsoft Intune" data-item="IntuneOperationalLogs table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="intune-t2">IntuneOperationalLogs<div class="check-detail">Free data source</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="intune-t3" data-tier="2" data-connector="Microsoft Intune" data-item="IntuneDevices table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="intune-t3">IntuneDevices<div class="check-detail">Paid — device compliance and inventory data</div></label>
             </div>
@@ -4252,11 +4252,11 @@
               <label for="iis-c1">AMA DCR configured for IIS log collection<div class="check-detail">Data Collection Rule collecting W3CIISLog via Azure Monitor Agent</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="iis-t1" data-tier="3" data-connector="IIS Web Server Logs" data-item="W3CIISLog table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="iis-t1">W3CIISLog table enabled</label>
             </div>
@@ -4308,11 +4308,11 @@
               <label for="mdca-c1">Connector enabled in Sentinel<div class="check-detail">MCAS alerts and Cloud Discovery logs connected</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="mdca-t1" data-tier="3" data-connector="Microsoft Defender for Cloud Apps" data-item="McasShadowItReporting table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="mdca-t1">McasShadowItReporting table enabled</label>
             </div>
@@ -4364,11 +4364,11 @@
               <label for="sap-c1">SAP data connector agent deployed<div class="check-detail">Container-based agent collecting SAP audit log, security log, and change documents</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="sap-t1" data-tier="3" data-connector="SAP" data-item="SAPAuditLog table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="sap-t1">SAPAuditLog table enabled</label>
             </div>
@@ -4420,11 +4420,11 @@
               <label for="sql-c1">Diagnostic settings configured for SQL audit<div class="check-detail">Azure SQL or SQL MI diagnostic settings sending audit logs to Log Analytics</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="sql-t1" data-tier="3" data-connector="SQL Database Audit" data-item="AzureDiagnostics (SQLSecurityAuditEvents) table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="sql-t1">AzureDiagnostics (SQLSecurityAuditEvents) table enabled</label>
             </div>
@@ -4551,11 +4551,11 @@
               <label for="azdevops-c1">Connector enabled in Sentinel<div class="check-detail">Azure DevOps audit streams configured to send audit logs to Sentinel</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="azdevops-t1" data-tier="3" data-connector="Azure DevOps" data-item="AzureDevOpsAuditing table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="azdevops-t1">AzureDevOpsAuditing table enabled</label>
             </div>
@@ -4607,11 +4607,11 @@
               <label for="github-c1">Connector enabled in Sentinel<div class="check-detail">GitHub audit log streaming or API-based ingestion configured</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="github-t1" data-tier="3" data-connector="GitHub Enterprise" data-item="GitHubAuditData table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="github-t1">GitHubAuditData table enabled</label>
             </div>
@@ -4688,11 +4688,11 @@
               <label for="aks-c1">Diagnostic settings configured for AKS<div class="check-detail">kube-apiserver audit logs, guard, and cluster autoscaler logs sent to Log Analytics</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="aks-t1" data-tier="3" data-connector="Azure Kubernetes Service" data-item="AzureDiagnostics (AKS) table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="aks-t1">AzureDiagnostics (AKS) or resource-specific tables enabled</label>
             </div>
@@ -4744,11 +4744,11 @@
               <label for="storage-c1">Diagnostic settings configured for Storage accounts<div class="check-detail">Blob, Table, Queue, and/or File storage diagnostics sent to Log Analytics</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="storage-t1" data-tier="3" data-connector="Azure Storage Analytics" data-item="StorageBlobLogs table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="storage-t1">StorageBlobLogs table enabled</label>
             </div>
@@ -4847,11 +4847,11 @@
               <label for="wfe-c1">WEF collector configured with AMA<div class="check-detail">Windows Event Forwarding collector with Azure Monitor Agent DCR</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="wfe-t1" data-tier="3" data-connector="Windows Forwarded Events" data-item="WindowsEvent table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="wfe-t1">WindowsEvent table enabled</label>
             </div>
@@ -4908,11 +4908,11 @@
               <label for="mdiot-c1">Connector enabled in Sentinel<div class="check-detail">Defender for IoT alerts and asset data connected to Sentinel workspace</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="mdiot-t1" data-tier="3" data-connector="Microsoft Defender for IoT" data-item="SecurityAlert (IoT) table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="mdiot-t1">SecurityAlert (IoT) table enabled</label>
             </div>
