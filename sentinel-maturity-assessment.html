@@ -8469,6 +8469,8 @@ function renderLiteXdr() {
   document.querySelectorAll('#lite-xdr-groups .lite-xdr-row[data-id]').forEach(row => {
     if (typeof renderTableRetentionCell === 'function') renderTableRetentionCell(row);
   });
+  // Make sure the XDR-only retention banner is present on the Lite Check 2 card.
+  if (typeof injectTablesRetentionNote === 'function') injectTablesRetentionNote();
   updateLiteXdrTotals();
   updateLiteXdrProgress();
 }
