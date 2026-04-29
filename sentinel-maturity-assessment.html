@@ -1437,11 +1437,14 @@
       display: none !important;
     }
 
-    /* In Lite mode, the XDR connector's Tables groups were previously hard-
-       hidden because the Lite XDR tri-state panel below covered the same
-       ground. They are now tagged data-lite-scope="full" like every other
-       non-essential group, so the per-connector toggle governs visibility
-       and advanced users can still reveal them inside conn-xdr if needed. */
+    /* In Lite mode, the Microsoft Defender XDR connector is fully replaced
+       by the dedicated "Defender XDR — Per-Table Ingestion" Lite card
+       (Check 2 in the Lite flow). Both surfaces bind to the same xdr-t*
+       <select>s in #conn-xdr, so hiding the connector entry here avoids a
+       duplicate UI without breaking the data model — Check 2 still drives
+       the Full Microsoft Defender XDR connector via the existing bidirectional
+       binding. The connector remains untouched in Full mode. */
+    body.lite-mode #conn-xdr { display: none; }
 
     /* ---------- Lite: per-connector "hide full-assessment checks" ---------- */
     /* In Lite, hide the non-essential check-groups (Workloads/Log Categories,
