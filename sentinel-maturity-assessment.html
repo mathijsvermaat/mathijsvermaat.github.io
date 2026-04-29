@@ -2524,6 +2524,22 @@
             </div>
           </div>
 
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Tables</div>
+            <div class="check-item">
+              <select class="status-select" id="health-t1" data-tier="1" data-connector="Sentinel Health" data-item="SentinelHealth table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="health-t1">SentinelHealth<div class="check-detail">Connector health and ingestion status events</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="health-t2" data-tier="1" data-connector="Sentinel Health" data-item="SentinelAudit table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="health-t2">SentinelAudit<div class="check-detail">Sentinel workspace audit events (rule edits, etc.)</div></label>
+            </div>
+          </div>
+
           <div class="check-group">
             <div class="check-group-title">Content Hub</div>
             <div class="check-item">
@@ -3426,6 +3442,15 @@
               <label for="akv-c1">Diagnostic settings configured (resource-specific)<div class="check-detail">Use AKVAuditLogs, not AzureDiagnostics</div></label>
             </div>
           </div>
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Target Table</div>
+            <div class="check-item">
+              <select class="status-select" id="akv-tbl" data-tier="2" data-connector="Azure Key Vault" data-item="AzureDiagnostics table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="akv-tbl">AzureDiagnostics<div class="check-detail">Key Vault audit logs land in AzureDiagnostics (filter ResourceProvider == "MICROSOFT.KEYVAULT")</div></label>
+            </div>
+          </div>
           <div class="check-group">
             <div class="check-group-title">Content Hub</div>
             <div class="check-item">
@@ -3472,6 +3497,15 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="copilot-c1">Connector enabled in Sentinel</label>
+            </div>
+          </div>
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Target Table</div>
+            <div class="check-item">
+              <select class="status-select" id="copilot-tbl" data-tier="2" data-connector="Copilot / AI Governance" data-item="CopilotActivity table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="copilot-tbl">CopilotActivity<div class="check-detail">M365 Copilot and Security Copilot activity (via Office Management API)</div></label>
             </div>
           </div>
           <div class="check-group">
@@ -3587,6 +3621,27 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="ti-c1">Connector enabled in Sentinel</label>
+            </div>
+          </div>
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Tables</div>
+            <div class="check-item">
+              <select class="status-select" id="ti-t1" data-tier="2" data-connector="Microsoft Defender TI" data-item="ThreatIntelIndicators table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="ti-t1">ThreatIntelIndicators<div class="check-detail">New STIX-based indicators table</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="ti-t2" data-tier="2" data-connector="Microsoft Defender TI" data-item="ThreatIntelObjects table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="ti-t2">ThreatIntelObjects<div class="check-detail">New STIX-based objects table (identity, malware, attack pattern, etc.)</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="ti-t3" data-tier="2" data-connector="Microsoft Defender TI" data-item="ThreatIntelligenceIndicator table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="ti-t3">ThreatIntelligenceIndicator<div class="check-detail">Legacy TI table (being deprecated in favour of ThreatIntelIndicators)</div></label>
             </div>
           </div>
           <div class="check-group">
@@ -3984,6 +4039,15 @@
               <label for="waf-c2">Diagnostic settings on Front Door<div class="check-detail">If using Azure Front Door with WAF policy</div></label>
             </div>
           </div>
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Target Table</div>
+            <div class="check-item">
+              <select class="status-select" id="waf-tbl" data-tier="2" data-connector="Azure WAF" data-item="AzureDiagnostics table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="waf-tbl">AzureDiagnostics<div class="check-detail">Recommended categories: ApplicationGatewayAccessLog, ApplicationGatewayFirewallLog, FrontdoorAccessLog, FrontdoorWebApplicationFirewallLog, WebApplicationFirewallLogs</div></label>
+            </div>
+          </div>
           <div class="check-group">
             <div class="check-group-title">Content Hub</div>
             <div class="check-item">
@@ -4156,6 +4220,15 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="vnet-c2">Traffic Analytics enabled (10-minute interval)<div class="check-detail">Required for NTANetAnalytics table in Sentinel</div></label>
+            </div>
+          </div>
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Target Table</div>
+            <div class="check-item">
+              <select class="status-select" id="vnet-tbl" data-tier="2" data-connector="VNet Flow Logs" data-item="NTANetAnalytics table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="vnet-tbl">NTANetAnalytics<div class="check-detail">Traffic Analytics summarised flow records (raw VNet flows are stored in storage account, not Sentinel)</div></label>
             </div>
           </div>
           <div class="check-group">
@@ -4778,53 +4851,6 @@
           <div class="section-comment">
             <label for="storage-comment">Comments / Rationale — Azure Storage Analytics</label>
             <textarea id="storage-comment" data-connector="Azure Storage Analytics" placeholder="e.g. Blob and File diagnostics enabled for sensitive storage accounts."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- ===== Microsoft Defender for DNS ===== -->
-      <div class="connector-section collapsed" id="conn-mddns">
-        <div class="connector-header" onclick="toggleConnector('conn-mddns')">
-          <h3>Microsoft Defender for DNS<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/microsoft-defender-for-dns.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a></div></h3>
-          <span class="cost-badge paid">Paid</span>
-          <span class="connector-progress" id="conn-mddns-progress">0/0</span>
-          <span class="connector-chevron">▼</span>
-        </div>
-        <div class="connector-body">
-          <div class="check-group">
-            <div class="check-group-title">Connector Setup</div>
-            <div class="check-item">
-              <select class="status-select" id="mddns-c1" data-tier="3" data-connector="Microsoft Defender for DNS" data-item="Defender for DNS plan enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="mddns-c1">Defender for DNS plan enabled<div class="check-detail">Part of Microsoft Defender for Cloud — threat detection for Azure DNS zones</div></label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Content Hub</div>
-            <div class="check-item">
-              <select class="status-select" id="mddns-ch1" data-tier="3" data-connector="Microsoft Defender for DNS" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="mddns-ch1">Analytic rules deployed</label>
-            </div>
-          </div>
-          <div class="check-group retention-group" data-prefix="mddns" data-connector="Microsoft Defender for DNS">
-            <div class="check-group-title">Retention</div>
-            <div class="retention-section-inline" id="mddns-retention-section"></div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Validation</div>
-            <div class="check-item">
-              <select class="status-select" id="mddns-v1" data-tier="3" data-connector="Microsoft Defender for DNS" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
-              </select>
-              <label for="mddns-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
-            </div>
-          </div>
-          <div class="section-comment">
-            <label for="mddns-comment">Comments / Rationale — Microsoft Defender for DNS</label>
-            <textarea id="mddns-comment" data-connector="Microsoft Defender for DNS" placeholder="e.g. Defender for DNS enabled for Azure DNS zones. Alerts flowing to Sentinel."></textarea>
           </div>
         </div>
       </div>
@@ -5517,7 +5543,7 @@ function updateProgress() {
     'conn-iis', 'conn-mdca', 'conn-sap', 'conn-sql', 'conn-thirdpartyapp',
     'conn-teams', 'conn-thirdpartycollab', 'conn-customapp',
     'conn-azdevops', 'conn-github', 'conn-thirdpartydevops',
-    'conn-aks', 'conn-storage', 'conn-mddns', 'conn-wfe',
+    'conn-aks', 'conn-storage', 'conn-wfe',
     'conn-mdiot', 'conn-thirdpartyot'
   ];
   for (const conn of connectors) {
