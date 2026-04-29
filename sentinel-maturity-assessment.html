@@ -755,11 +755,44 @@
 
     .todo-total {
       margin-top: 16px;
+      margin-bottom: 20px;
       padding-top: 12px;
       border-top: 2px solid var(--warning);
       font-size: 0.95rem;
       font-weight: 700;
       color: #8a6d00;
+    }
+
+    .todo-retention-total {
+      margin-top: 20px;
+      padding-top: 12px;
+      border-top: 2px solid var(--warning);
+      color: #8a6d00;
+    }
+
+    .todo-retention-total .todo-retention-primary {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .todo-retention-total .todo-retention-tiers {
+      margin-top: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #8a6d00;
+    }
+
+    .todo-retention-total .todo-retention-secondary {
+      margin-top: 4px;
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: var(--text-light);
+    }
+
+    .todo-retention-total .todo-retention-saved {
+      color: var(--success, #107c10);
+      font-weight: 600;
+      margin-left: 6px;
     }
 
     .todo-gbday {
@@ -1437,11 +1470,14 @@
       display: none !important;
     }
 
-    /* In Lite mode, the XDR connector's Tables groups were previously hard-
-       hidden because the Lite XDR tri-state panel below covered the same
-       ground. They are now tagged data-lite-scope="full" like every other
-       non-essential group, so the per-connector toggle governs visibility
-       and advanced users can still reveal them inside conn-xdr if needed. */
+    /* In Lite mode, the Microsoft Defender XDR connector is fully replaced
+       by the dedicated "Defender XDR — Per-Table Ingestion" Lite card
+       (Check 2 in the Lite flow). Both surfaces bind to the same xdr-t*
+       <select>s in #conn-xdr, so hiding the connector entry here avoids a
+       duplicate UI without breaking the data model — Check 2 still drives
+       the Full Microsoft Defender XDR connector via the existing bidirectional
+       binding. The connector remains untouched in Full mode. */
+    body.lite-mode #conn-xdr { display: none; }
 
     /* ---------- Lite: per-connector "hide full-assessment checks" ---------- */
     /* In Lite, hide the non-essential check-groups (Workloads/Log Categories,
@@ -1485,6 +1521,12 @@
       display: grid;
       grid-template-columns: minmax(220px, 1fr) auto auto auto;
       align-items: center; gap: 14px; padding: 6px 0;
+    }
+    /* Per-table retention drops to its own row (mirrors the Full xdr layout) */
+    .lite-xdr-row > .xdr-tbl-ret {
+      grid-column: 1 / -1;
+      justify-self: end;
+      padding-top: 2px;
     }
     .lite-xdr-row.hdr {
       padding: 4px 0 6px; margin-bottom: 2px;
@@ -1559,6 +1601,12 @@
       grid-template-columns: minmax(220px, 1fr) auto auto auto;
       align-items: center; gap: 14px; padding: 6px 0;
     }
+    /* Retention cell drops to its own second line, spanning the full row */
+    .check-item.xdr-tbl-item > .xdr-tbl-ret {
+      grid-column: 1 / -1;
+      justify-self: end;
+      padding-top: 2px;
+    }
     .check-item.xdr-tbl-item > select.status-select { display: none; }
     .check-item.xdr-tbl-item > label {
       font-family: Consolas, Menlo, monospace;
@@ -1599,6 +1647,94 @@
     .check-group.xdr-tbl-group .xdr-tbl-hdr .hdr-cell {
       display: inline-flex; align-items: center; gap: 6px;
     }
+    /* Per-table retention cell (Analytics + Long-term, or Lake) */
+    .xdr-tbl-ret {
+      display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+      font-size: 0.78rem; color: var(--text-light);
+    }
+    .xdr-tbl-ret-row, .xdr-tbl-ret-plan {
+      display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .xdr-tbl-ret .ret-grp { display: inline-flex; align-items: center; gap: 4px; }
+    .xdr-tbl-ret .ret-heading {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.4px;
+      color: var(--text-light); margin-right: 2px;
+    }
+    .xdr-tbl-ret .ret-grp > .ret-prefix {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.4px;
+      color: var(--text-light);
+    }
+    .xdr-tbl-ret select {
+      padding: 2px 6px; font: inherit; font-size: 0.78rem;
+      border: 1px solid var(--border); border-radius: 4px; background: var(--white);
+      max-width: 160px;
+    }
+    .xdr-tbl-ret select.analytics { background: #e6f4ea; border-color: var(--success); color: var(--success); }
+    .xdr-tbl-ret select.longterm  { background: #fff4ce; border-color: #c19c00;        color: #6b5300; }
+    .xdr-tbl-ret select.lake      { background: #f0e6fa; border-color: #8764b8;        color: #5c2d91; }
+    .xdr-tbl-ret .ret-empty { opacity: 0.4; }
+    /* Per-table retention-change planning row (toggled via "+ Plan retention change") */
+    .xdr-tbl-ret .ret-plan-toggle {
+      background: transparent; border: none; padding: 0 0 0 4px; margin: 0;
+      color: var(--accent, #0078d4); font: inherit; font-size: 0.74rem;
+      cursor: pointer; text-decoration: none;
+    }
+    .xdr-tbl-ret .ret-plan-toggle:hover { text-decoration: underline; }
+    .xdr-tbl-ret-plan .ret-plan-lbl {
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.4px;
+      color: var(--text-light);
+    }
+    .xdr-tbl-ret-plan select.ret-plan-target {
+      padding: 2px 6px; font: inherit; font-size: 0.78rem;
+      border: 1px solid var(--border); border-radius: 4px; background: var(--white);
+      max-width: 160px;
+    }
+    .xdr-tbl-ret-plan input.ret-plan-gbday {
+      width: 60px; padding: 2px 6px; font: inherit; font-size: 0.78rem;
+      border: 1px solid var(--border); border-radius: 4px; text-align: right;
+    }
+    .xdr-tbl-ret-plan .ret-plan-result {
+      font-size: 0.74rem; color: var(--text);
+      padding: 2px 6px; background: #fff8e6; border: 1px solid #f0d68a; border-radius: 4px;
+    }
+    .xdr-tbl-ret-plan .ret-plan-result strong { color: var(--text); }
+    /* Step 1 of per-table retention migration: hide the legacy connector-level
+       Retention group on connectors that now expose per-table retention.
+       Markup and saved state are preserved. */
+    .check-group.legacy-retention-suppressed { display: none; }
+
+    /* Inline explainer above the first tier-enabled Tables group */
+    .tables-retention-note {
+      display: flex; align-items: flex-start; gap: 10px;
+      margin: 6px 0 14px; padding: 10px 14px;
+      background: #f3f9ff;
+      border: 1px solid #c7e0f4;
+      border-left: 3px solid var(--accent, #0078d4);
+      border-radius: 6px;
+      font-size: 0.84rem; color: var(--text);
+      line-height: 1.45;
+    }
+    .tables-retention-note > .info-ico {
+      flex: 0 0 auto;
+      width: 18px; height: 18px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--accent, #0078d4); color: #fff;
+      border-radius: 50%; font-style: italic; font-weight: 600;
+      font-size: 0.78rem;
+      cursor: default;
+    }
+    .tables-retention-note .ret-pill {
+      display: inline-flex; align-items: center;
+      padding: 0 6px; border-radius: 10px;
+      font-size: 0.74rem; font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--white);
+      white-space: nowrap;
+    }
+    .tables-retention-note .ret-pill-an  { background: #e6f4ea; border-color: var(--success); color: var(--success); }
+    .tables-retention-note .ret-pill-lk  { background: #f0e6fa; border-color: #8764b8;        color: #5c2d91; }
+    .tables-retention-note .ret-pill-off { background: var(--secondary); color: var(--text-light); }
     /* Full-mode per-table change-tier inline row
        (visually matches the Lite switch toggle + details) */
     .xdr-tc-inline {
@@ -2421,6 +2557,22 @@
             </div>
           </div>
 
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Tables</div>
+            <div class="check-item">
+              <select class="status-select" id="health-t1" data-tier="1" data-connector="Sentinel Health" data-item="SentinelHealth table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="health-t1">SentinelHealth<div class="check-detail">Connector health and ingestion status events</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="health-t2" data-tier="1" data-connector="Sentinel Health" data-item="SentinelAudit table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="health-t2">SentinelAudit<div class="check-detail">Sentinel workspace audit events (rule edits, etc.)</div></label>
+            </div>
+          </div>
+
           <div class="check-group">
             <div class="check-group-title">Content Hub</div>
             <div class="check-item">
@@ -3112,6 +3264,19 @@
           <span class="cost-badge benefit">Ingestion Benefit (E5)</span>
         </div>
       </div>
+      <div class="connector-quick-actions" style="padding: 0 24px 8px;">
+        <button title="Set all items to Configured / Healthy" onclick="setAllConfigured(document.querySelector('#conn-xdr .connector-body'));">Set all configured</button>
+        <button title="Reset all items to Not assessed" onclick="resetConnector(document.querySelector('#conn-xdr .connector-body'));">Reset</button>
+      </div>
+      <div class="check-group" style="padding: 0 24px 12px;">
+        <div class="check-group-title">Connector Setup</div>
+        <div class="check-item">
+          <select class="status-select" id="lite-xdr-c1" onchange="onLiteXdrSetupChange(this)">
+            <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+          </select>
+          <label for="lite-xdr-c1">Connector enabled in Sentinel<div class="check-detail">Data connectors → Microsoft Defender XDR → Connect</div></label>
+        </div>
+      </div>
       <div id="lite-xdr-groups"></div>
       <div class="lite-ingest-totals" style="padding: 4px 24px 14px;">
         Planned Analytics: <strong id="lite-xdr-sum-an">0</strong> GB/day
@@ -3204,7 +3369,7 @@
       <div class="section-comment">
         <label for="lite-ama-comment">Comments / Rationale — Defender vs AMA coverage</label>
         <textarea id="lite-ama-comment" data-connector="AMA Coverage (Lite)" placeholder="e.g. Migration plan in progress; remaining MMA hosts scheduled for next quarter."></textarea>
-      </div>https://github.com/mathijsvermaat/azure-activity-log-sentinel-audit
+      </div>
     </div>
   </div>
 
@@ -3250,23 +3415,23 @@
               <label for="dfc-c2">Bi-directional incident sync enabled<div class="check-detail">Keeps Sentinel and Defender for Cloud alert status aligned</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="dfc-t1" data-tier="2" data-connector="Microsoft Defender for Cloud" data-item="SecurityAlert table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="dfc-t1">SecurityAlert<div class="check-detail">Free data source — threat detection alerts from all workload plans</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="dfc-t2" data-tier="2" data-connector="Microsoft Defender for Cloud" data-item="SecurityRecommendation table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="dfc-t2">SecurityRecommendation<div class="check-detail">Paid — CSPM recommendations and compliance findings</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="dfc-t3" data-tier="2" data-connector="Microsoft Defender for Cloud" data-item="SecurityRegulatoryCompliance table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="dfc-t3">SecurityRegulatoryCompliance<div class="check-detail">Paid — regulatory framework compliance status</div></label>
             </div>
@@ -3323,6 +3488,15 @@
               <label for="akv-c1">Diagnostic settings configured (resource-specific)<div class="check-detail">Use AKVAuditLogs, not AzureDiagnostics</div></label>
             </div>
           </div>
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Target Table</div>
+            <div class="check-item">
+              <select class="status-select" id="akv-tbl" data-tier="2" data-connector="Azure Key Vault" data-item="AzureDiagnostics table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="akv-tbl">AzureDiagnostics<div class="check-detail">Key Vault audit logs land in AzureDiagnostics (filter ResourceProvider == "MICROSOFT.KEYVAULT")</div></label>
+            </div>
+          </div>
           <div class="check-group">
             <div class="check-group-title">Content Hub</div>
             <div class="check-item">
@@ -3369,6 +3543,15 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="copilot-c1">Connector enabled in Sentinel</label>
+            </div>
+          </div>
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Target Table</div>
+            <div class="check-item">
+              <select class="status-select" id="copilot-tbl" data-tier="2" data-connector="Copilot / AI Governance" data-item="CopilotActivity table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="copilot-tbl">CopilotActivity<div class="check-detail">M365 Copilot and Security Copilot activity (via Office Management API)</div></label>
             </div>
           </div>
           <div class="check-group">
@@ -3486,6 +3669,27 @@
               <label for="ti-c1">Connector enabled in Sentinel</label>
             </div>
           </div>
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Tables</div>
+            <div class="check-item">
+              <select class="status-select" id="ti-t1" data-tier="2" data-connector="Microsoft Defender TI" data-item="ThreatIntelIndicators table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="ti-t1">ThreatIntelIndicators<div class="check-detail">New STIX-based indicators table</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="ti-t2" data-tier="2" data-connector="Microsoft Defender TI" data-item="ThreatIntelObjects table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="ti-t2">ThreatIntelObjects<div class="check-detail">New STIX-based objects table (identity, malware, attack pattern, etc.)</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="ti-t3" data-tier="2" data-connector="Microsoft Defender TI" data-item="ThreatIntelligenceIndicator table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="ti-t3">ThreatIntelligenceIndicator<div class="check-detail">Legacy TI table (being deprecated in favour of ThreatIntelIndicators)</div></label>
+            </div>
+          </div>
           <div class="check-group">
             <div class="check-group-title">Content Hub</div>
             <div class="check-item">
@@ -3562,23 +3766,23 @@
               <label for="intune-c1">Intune logs routed via Entra ID diagnostic settings</label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="intune-t1" data-tier="2" data-connector="Microsoft Intune" data-item="IntuneAuditLogs table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="intune-t1">IntuneAuditLogs<div class="check-detail">Free data source</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="intune-t2" data-tier="2" data-connector="Microsoft Intune" data-item="IntuneOperationalLogs table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="intune-t2">IntuneOperationalLogs<div class="check-detail">Free data source</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="intune-t3" data-tier="2" data-connector="Microsoft Intune" data-item="IntuneDevices table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="intune-t3">IntuneDevices<div class="check-detail">Paid — device compliance and inventory data</div></label>
             </div>
@@ -3881,6 +4085,15 @@
               <label for="waf-c2">Diagnostic settings on Front Door<div class="check-detail">If using Azure Front Door with WAF policy</div></label>
             </div>
           </div>
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Target Table</div>
+            <div class="check-item">
+              <select class="status-select" id="waf-tbl" data-tier="2" data-connector="Azure WAF" data-item="AzureDiagnostics table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="waf-tbl">AzureDiagnostics<div class="check-detail">Recommended categories: ApplicationGatewayAccessLog, ApplicationGatewayFirewallLog, FrontdoorAccessLog, FrontdoorWebApplicationFirewallLog, WebApplicationFirewallLogs</div></label>
+            </div>
+          </div>
           <div class="check-group">
             <div class="check-group-title">Content Hub</div>
             <div class="check-item">
@@ -4055,6 +4268,15 @@
               <label for="vnet-c2">Traffic Analytics enabled (10-minute interval)<div class="check-detail">Required for NTANetAnalytics table in Sentinel</div></label>
             </div>
           </div>
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Target Table</div>
+            <div class="check-item">
+              <select class="status-select" id="vnet-tbl" data-tier="2" data-connector="VNet Flow Logs" data-item="NTANetAnalytics table tier" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="vnet-tbl">NTANetAnalytics<div class="check-detail">Traffic Analytics summarised flow records (raw VNet flows are stored in storage account, not Sentinel)</div></label>
+            </div>
+          </div>
           <div class="check-group">
             <div class="check-group-title">Content Hub</div>
             <div class="check-item">
@@ -4149,11 +4371,11 @@
               <label for="iis-c1">AMA DCR configured for IIS log collection<div class="check-detail">Data Collection Rule collecting W3CIISLog via Azure Monitor Agent</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="iis-t1" data-tier="3" data-connector="IIS Web Server Logs" data-item="W3CIISLog table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="iis-t1">W3CIISLog table enabled</label>
             </div>
@@ -4205,11 +4427,11 @@
               <label for="mdca-c1">Connector enabled in Sentinel<div class="check-detail">MCAS alerts and Cloud Discovery logs connected</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="mdca-t1" data-tier="3" data-connector="Microsoft Defender for Cloud Apps" data-item="McasShadowItReporting table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="mdca-t1">McasShadowItReporting table enabled</label>
             </div>
@@ -4261,11 +4483,11 @@
               <label for="sap-c1">SAP data connector agent deployed<div class="check-detail">Container-based agent collecting SAP audit log, security log, and change documents</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="sap-t1" data-tier="3" data-connector="SAP" data-item="SAPAuditLog table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="sap-t1">SAPAuditLog table enabled</label>
             </div>
@@ -4317,11 +4539,11 @@
               <label for="sql-c1">Diagnostic settings configured for SQL audit<div class="check-detail">Azure SQL or SQL MI diagnostic settings sending audit logs to Log Analytics</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="sql-t1" data-tier="3" data-connector="SQL Database Audit" data-item="AzureDiagnostics (SQLSecurityAuditEvents) table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="sql-t1">AzureDiagnostics (SQLSecurityAuditEvents) table enabled</label>
             </div>
@@ -4448,11 +4670,11 @@
               <label for="azdevops-c1">Connector enabled in Sentinel<div class="check-detail">Azure DevOps audit streams configured to send audit logs to Sentinel</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="azdevops-t1" data-tier="3" data-connector="Azure DevOps" data-item="AzureDevOpsAuditing table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="azdevops-t1">AzureDevOpsAuditing table enabled</label>
             </div>
@@ -4504,11 +4726,11 @@
               <label for="github-c1">Connector enabled in Sentinel<div class="check-detail">GitHub audit log streaming or API-based ingestion configured</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="github-t1" data-tier="3" data-connector="GitHub Enterprise" data-item="GitHubAuditData table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="github-t1">GitHubAuditData table enabled</label>
             </div>
@@ -4585,11 +4807,11 @@
               <label for="aks-c1">Diagnostic settings configured for AKS<div class="check-detail">kube-apiserver audit logs, guard, and cluster autoscaler logs sent to Log Analytics</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="aks-t1" data-tier="3" data-connector="Azure Kubernetes Service" data-item="AzureDiagnostics (AKS) table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="aks-t1">AzureDiagnostics (AKS) or resource-specific tables enabled</label>
             </div>
@@ -4641,11 +4863,11 @@
               <label for="storage-c1">Diagnostic settings configured for Storage accounts<div class="check-detail">Blob, Table, Queue, and/or File storage diagnostics sent to Log Analytics</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="storage-t1" data-tier="3" data-connector="Azure Storage Analytics" data-item="StorageBlobLogs table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="storage-t1">StorageBlobLogs table enabled</label>
             </div>
@@ -4679,53 +4901,6 @@
         </div>
       </div>
 
-      <!-- ===== Microsoft Defender for DNS ===== -->
-      <div class="connector-section collapsed" id="conn-mddns">
-        <div class="connector-header" onclick="toggleConnector('conn-mddns')">
-          <h3>Microsoft Defender for DNS<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/microsoft-defender-for-dns.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a></div></h3>
-          <span class="cost-badge paid">Paid</span>
-          <span class="connector-progress" id="conn-mddns-progress">0/0</span>
-          <span class="connector-chevron">▼</span>
-        </div>
-        <div class="connector-body">
-          <div class="check-group">
-            <div class="check-group-title">Connector Setup</div>
-            <div class="check-item">
-              <select class="status-select" id="mddns-c1" data-tier="3" data-connector="Microsoft Defender for DNS" data-item="Defender for DNS plan enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="mddns-c1">Defender for DNS plan enabled<div class="check-detail">Part of Microsoft Defender for Cloud — threat detection for Azure DNS zones</div></label>
-            </div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Content Hub</div>
-            <div class="check-item">
-              <select class="status-select" id="mddns-ch1" data-tier="3" data-connector="Microsoft Defender for DNS" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="mddns-ch1">Analytic rules deployed</label>
-            </div>
-          </div>
-          <div class="check-group retention-group" data-prefix="mddns" data-connector="Microsoft Defender for DNS">
-            <div class="check-group-title">Retention</div>
-            <div class="retention-section-inline" id="mddns-retention-section"></div>
-          </div>
-          <div class="check-group">
-            <div class="check-group-title">Validation</div>
-            <div class="check-item">
-              <select class="status-select" id="mddns-v1" data-tier="3" data-connector="Microsoft Defender for DNS" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
-              </select>
-              <label for="mddns-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
-            </div>
-          </div>
-          <div class="section-comment">
-            <label for="mddns-comment">Comments / Rationale — Microsoft Defender for DNS</label>
-            <textarea id="mddns-comment" data-connector="Microsoft Defender for DNS" placeholder="e.g. Defender for DNS enabled for Azure DNS zones. Alerts flowing to Sentinel."></textarea>
-          </div>
-        </div>
-      </div>
-
       <!-- ===== Windows Forwarded Events ===== -->
       <div class="connector-section collapsed" id="conn-wfe">
         <div class="connector-header" onclick="toggleConnector('conn-wfe')">
@@ -4744,11 +4919,11 @@
               <label for="wfe-c1">WEF collector configured with AMA<div class="check-detail">Windows Event Forwarding collector with Azure Monitor Agent DCR</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="wfe-t1" data-tier="3" data-connector="Windows Forwarded Events" data-item="WindowsEvent table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="wfe-t1">WindowsEvent table enabled</label>
             </div>
@@ -4805,11 +4980,11 @@
               <label for="mdiot-c1">Connector enabled in Sentinel<div class="check-detail">Defender for IoT alerts and asset data connected to Sentinel workspace</div></label>
             </div>
           </div>
-          <div class="check-group">
+          <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
               <select class="status-select" id="mdiot-t1" data-tier="3" data-connector="Microsoft Defender for IoT" data-item="SecurityAlert (IoT) table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="mdiot-t1">SecurityAlert (IoT) table enabled</label>
             </div>
@@ -5096,6 +5271,8 @@ function onStatusChange(sel) {
     const item = sel.closest('.check-item');
     if ((item && item.classList.contains('xdr-tbl-item')) || sel.id.startsWith('xdr-t')) {
       syncLiteXdrFromSelect(sel);
+    } else if (sel.id === 'xdr-c1' && typeof syncLiteXdrSetup === 'function') {
+      syncLiteXdrSetup();
     }
   }
 
@@ -5414,7 +5591,7 @@ function updateProgress() {
     'conn-iis', 'conn-mdca', 'conn-sap', 'conn-sql', 'conn-thirdpartyapp',
     'conn-teams', 'conn-thirdpartycollab', 'conn-customapp',
     'conn-azdevops', 'conn-github', 'conn-thirdpartydevops',
-    'conn-aks', 'conn-storage', 'conn-mddns', 'conn-wfe',
+    'conn-aks', 'conn-storage', 'conn-wfe',
     'conn-mdiot', 'conn-thirdpartyot'
   ];
   for (const conn of connectors) {
@@ -5830,6 +6007,29 @@ function updateTodoSummary() {
   const manualCount = document.querySelectorAll('#manual-todo-list .manual-todo-item').length;
   let totalCount = todoItems.length + manualCount;
 
+  // Aggregate one-off long-term storage deltas from retention extensions/reductions
+  // (separate from the GB/day daily-ingest total computed below).
+  let retentionAddedGB = 0;
+  let retentionSavedGB = 0;
+  // Ongoing GB/day rate now committed to (or freed from) long-term storage.
+  let retentionAddedGbday = 0;
+  let retentionSavedGbday = 0;
+  // Per-tier breakdown (different pricing tiers).
+  const retTier = {
+    analytics: { addedGbday: 0, savedGbday: 0, addedGB: 0, savedGB: 0 },
+    longTerm:  { addedGbday: 0, savedGbday: 0, addedGB: 0, savedGB: 0 },
+    lake:      { addedGbday: 0, savedGbday: 0, addedGB: 0, savedGB: 0 },
+  };
+  const accrueRetention = (tierKey, delta, gbday) => {
+    if (delta > 0) {
+      retentionAddedGB += delta; retentionAddedGbday += gbday;
+      retTier[tierKey].addedGB += delta; retTier[tierKey].addedGbday += gbday;
+    } else if (delta < 0) {
+      retentionSavedGB += -delta; retentionSavedGbday += gbday;
+      retTier[tierKey].savedGB += -delta; retTier[tierKey].savedGbday += gbday;
+    }
+  };
+
   container.innerHTML = '';
 
   if (todoItems.length === 0) {
@@ -5927,9 +6127,11 @@ function updateTodoSummary() {
       const gbday = parseFloat(aGb?.value) || 0;
       const currentDays = parsePeriodToDays(currentPeriod);
       const targetDays = parsePeriodToDays(aTarget.value);
-      const delta = gbday && targetDays > currentDays ? Math.round((targetDays - currentDays) * gbday) : 0;
+      const delta = gbday ? Math.round((targetDays - currentDays) * gbday) : 0;
       let text = `Change analytics retention from ${currentPeriod} to ${aTarget.value}`;
-      if (delta > 0) text += ` (+${delta.toLocaleString()} GB storage)`;
+      if (delta > 0) { text += ` (+${gbday} GB/day · +${delta.toLocaleString()} GB total)`; }
+      else if (delta < 0) { text += ` (−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total)`; }
+      accrueRetention('analytics', delta, gbday);
       const group = getOrCreateGroup();
       const li = document.createElement('li');
       li.textContent = text;
@@ -5946,9 +6148,11 @@ function updateTodoSummary() {
       const gbday = parseFloat(tGb?.value) || 0;
       const currentDays = parsePeriodToDays(currentTotal);
       const targetDays = parsePeriodToDays(tTarget.value);
-      const delta = gbday && targetDays > currentDays ? Math.round((targetDays - currentDays) * gbday) : 0;
+      const delta = gbday ? Math.round((targetDays - currentDays) * gbday) : 0;
       let text = `Change total retention from ${currentTotal} to ${tTarget.value}`;
-      if (delta > 0) text += ` (+${delta.toLocaleString()} GB storage)`;
+      if (delta > 0) { text += ` (+${gbday} GB/day · +${delta.toLocaleString()} GB total)`; }
+      else if (delta < 0) { text += ` (−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total)`; }
+      accrueRetention('longTerm', delta, gbday);
       const group = getOrCreateGroup();
       const li = document.createElement('li');
       li.textContent = text;
@@ -5956,6 +6160,89 @@ function updateTodoSummary() {
       totalCount++;
     }
   });
+
+  // Per-table retention-change todos (replacement for the legacy connector-level
+  // planning UI on connectors that now expose per-table retention).
+  if (typeof tableRetentionState === 'object' && tableRetentionState) {
+    const getOrCreateConnectorGroup = (connectorName) => {
+      let group = container.querySelector(`[data-retention-connector="${connectorName}"]`);
+      if (!group) {
+        group = document.createElement('div');
+        group.className = 'todo-connector-group';
+        group.dataset.retentionConnector = connectorName;
+        const h3 = document.createElement('h3');
+        h3.textContent = connectorName;
+        group.appendChild(h3);
+        const ul = document.createElement('ul');
+        group.appendChild(ul);
+        container.appendChild(group);
+      }
+      return group;
+    };
+    const getTableLabel = (id) => {
+      const lbl = document.querySelector(`label[for="${id}"]`);
+      if (!lbl) return id;
+      // Take the first text node (before any <div class="check-detail">).
+      for (const n of lbl.childNodes) {
+        if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()) return n.textContent.trim();
+      }
+      return (lbl.textContent || id).trim();
+    };
+    Object.entries(tableRetentionState).forEach(([id, entry]) => {
+      if (!entry || !entry.change) return;
+      const ch = entry.change;
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      const tier = sel.value;
+      // Only meaningful when the table is configured in some tier.
+      if (tier !== 'Configured' && tier !== 'Configured (Lake)') return;
+      const connectorName = sel.dataset.connector || 'Unknown';
+      const tableLabel = getTableLabel(id);
+      const gbday = parseFloat(ch.gbday) || 0;
+
+      const emit = (text) => {
+        const group = getOrCreateConnectorGroup(connectorName);
+        const li = document.createElement('li');
+        li.textContent = text;
+        group.querySelector('ul').appendChild(li);
+        totalCount++;
+      };
+
+      if (tier === 'Configured (Lake)') {
+        if (ch.lakeTarget) {
+          const cur = entry.lake || getWsTotalRetention();
+          const cd = parsePeriodToDays(cur), td = parsePeriodToDays(ch.lakeTarget);
+          const delta = gbday ? Math.round((td - cd) * gbday) : 0;
+          let text = `${tableLabel}: change Lake retention from ${cur} to ${ch.lakeTarget}`;
+          if (delta > 0) { text += ` (+${gbday} GB/day · +${delta.toLocaleString()} GB total)`; }
+          else if (delta < 0) { text += ` (−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total)`; }
+          accrueRetention('lake', delta, gbday);
+          emit(text);
+        }
+      } else {
+        if (ch.analyticsTarget) {
+          const cur = entry.analytics || getWsAnalyticsRetention();
+          const cd = parsePeriodToDays(cur), td = parsePeriodToDays(ch.analyticsTarget);
+          const delta = gbday ? Math.round((td - cd) * gbday) : 0;
+          let text = `${tableLabel}: change Analytics retention from ${cur} to ${ch.analyticsTarget}`;
+          if (delta > 0) { text += ` (+${gbday} GB/day · +${delta.toLocaleString()} GB total)`; }
+          else if (delta < 0) { text += ` (−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total)`; }
+          accrueRetention('analytics', delta, gbday);
+          emit(text);
+        }
+        if (ch.longTermTarget) {
+          const cur = entry.longTerm || getWsTotalRetention();
+          const cd = parsePeriodToDays(cur), td = parsePeriodToDays(ch.longTermTarget);
+          const delta = gbday ? Math.round((td - cd) * gbday) : 0;
+          let text = `${tableLabel}: change Long-term retention from ${cur} to ${ch.longTermTarget}`;
+          if (delta > 0) { text += ` (+${gbday} GB/day · +${delta.toLocaleString()} GB total)`; }
+          else if (delta < 0) { text += ` (−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total)`; }
+          accrueRetention('longTerm', delta, gbday);
+          emit(text);
+        }
+      }
+    });
+  }
 
   // Planned expansion todos
   document.querySelectorAll('[id$="-expansion-toggle"]').forEach(toggle => {
@@ -6039,6 +6326,61 @@ function updateTodoSummary() {
       group.querySelector('ul').appendChild(li);
       totalCount++;
     }
+  }
+
+  // Long-term storage delta totals from retention extensions/reductions
+  if (retentionAddedGB > 0 || retentionSavedGB > 0) {
+    const netGB = retentionAddedGB - retentionSavedGB;
+    const netGbday = retentionAddedGbday - retentionSavedGbday;
+    const retDiv = document.createElement('div');
+    retDiv.className = 'todo-retention-total';
+
+    // Primary line: GB/day rate (the metric we care about most).
+    const primary = document.createElement('div');
+    primary.className = 'todo-retention-primary';
+    let primaryText = 'Estimated additional long-term retention: ';
+    if (netGbday > 0) primaryText += `+${netGbday.toFixed(1)} GB/day`;
+    else if (netGbday < 0) primaryText += `−${(-netGbday).toFixed(1)} GB/day (net saving)`;
+    else primaryText += '0 GB/day (net change)';
+    primary.textContent = primaryText;
+    retDiv.appendChild(primary);
+
+    // Per-tier breakdown (different pricing tiers).
+    const tierLabels = { analytics: 'Analytics', longTerm: 'Long-term', lake: 'Data Lake' };
+    const tierParts = [];
+    ['analytics', 'longTerm', 'lake'].forEach(k => {
+      const t = retTier[k];
+      const netDay = t.addedGbday - t.savedGbday;
+      const netGb  = t.addedGB - t.savedGB;
+      if (t.addedGbday === 0 && t.savedGbday === 0) return;
+      let part = `${tierLabels[k]}: `;
+      if (netDay > 0) part += `+${netDay.toFixed(1)} GB/day`;
+      else if (netDay < 0) part += `−${(-netDay).toFixed(1)} GB/day`;
+      else part += '0 GB/day';
+      part += ` (${netGb >= 0 ? '+' : '−'}${Math.abs(netGb).toLocaleString()} GB total)`;
+      tierParts.push(part);
+    });
+    if (tierParts.length > 1) {
+      const tierDiv = document.createElement('div');
+      tierDiv.className = 'todo-retention-tiers';
+      tierDiv.textContent = tierParts.join(' · ');
+      retDiv.appendChild(tierDiv);
+    }
+
+    // Secondary line: total GB over the extension period.
+    const secondary = document.createElement('div');
+    secondary.className = 'todo-retention-secondary';
+    let secondaryText = 'Total over retention period: ';
+    if (netGB > 0) secondaryText += `+${netGB.toLocaleString()} GB`;
+    else if (netGB < 0) secondaryText += `−${(-netGB).toLocaleString()} GB (net saving)`;
+    else secondaryText += '0 GB';
+    if (retentionAddedGB > 0 && retentionSavedGB > 0) {
+      secondaryText += ` — added: +${retentionAddedGB.toLocaleString()} GB · saved: −${retentionSavedGB.toLocaleString()} GB`;
+    }
+    secondary.textContent = secondaryText;
+    retDiv.appendChild(secondary);
+
+    container.appendChild(retDiv);
   }
 
   countBadge.textContent = totalCount;
@@ -7515,6 +7857,34 @@ function gatherState() {
   const wsTotalRetSel = document.getElementById('workspace-default-total-retention');
   if (wsTotalRetSel) state.meta.workspaceTotalRetention = wsTotalRetSel.value;
 
+  // Save per-table retention overrides (preview: XDR tables today, other
+  // connectors roll in later). Empty/unset entries are omitted.
+  if (typeof tableRetentionState === 'object' && tableRetentionState) {
+    const tr = {};
+    for (const [id, entry] of Object.entries(tableRetentionState)) {
+      if (!entry) continue;
+      const clean = {};
+      if (entry.analytics) clean.analytics = entry.analytics;
+      if (entry.longTerm)  clean.longTerm  = entry.longTerm;
+      if (entry.lake)      clean.lake      = entry.lake;
+      // Per-table retention-change planning (open/closed UI state is not saved).
+      if (entry.change && typeof entry.change === 'object') {
+        const ch = {};
+        if (entry.change.analyticsTarget) ch.analyticsTarget = entry.change.analyticsTarget;
+        if (entry.change.longTermTarget)  ch.longTermTarget  = entry.change.longTermTarget;
+        if (entry.change.lakeTarget)      ch.lakeTarget      = entry.change.lakeTarget;
+        if (entry.change.gbday)           ch.gbday           = entry.change.gbday;
+        if (Object.keys(ch).length) {
+          // Persist 'open' too so the section re-opens after reload when planning has data.
+          ch.open = true;
+          clean.change = ch;
+        }
+      }
+      if (Object.keys(clean).length) tr[id] = clean;
+    }
+    if (Object.keys(tr).length) state.tableRetention = tr;
+  }
+
   // Save per-connector retention sections
   document.querySelectorAll('.retention-group[data-prefix]').forEach(group => {
     const prefix = group.dataset.prefix;
@@ -7788,6 +8158,18 @@ function applyState(state) {
     if (wsTotalSel) {
       wsTotalSel.value = state.meta.workspaceTotalRetention;
       onWorkspaceTotalRetentionChange();
+    }
+  }
+
+  // Restore per-table retention overrides, then re-render every cell so
+  // populated values show up (order matters: the initial init already ran
+  // before load, so cells exist).
+  if (state.tableRetention && typeof tableRetentionState === 'object') {
+    for (const [id, entry] of Object.entries(state.tableRetention)) {
+      tableRetentionState[id] = Object.assign({}, entry);
+    }
+    if (typeof refreshAllTableRetentionCells === 'function') {
+      refreshAllTableRetentionCells();
     }
   }
 
@@ -8352,6 +8734,7 @@ function renderLiteXdr() {
           <button type="button" data-v="analytics" onclick="setLiteXdr('${t.id}','analytics')">Analytics</button>
           <button type="button" data-v="lake"      onclick="setLiteXdr('${t.id}','lake')">Lake</button>
         </div>${tcCells}
+        <div class="xdr-tbl-ret"></div>
       </div>`;
     }).join('');
     return `<div class="lite-xdr-group"><h3>${group.name} <span class="chip">${group.tables.length}</span></h3>${header}${rows}</div>`;
@@ -8362,6 +8745,13 @@ function renderLiteXdr() {
     const sel = document.getElementById(t.id);
     if (sel) applyLiteXdrSegState(t.id, liteValueFromFull(sel.value));
   }));
+  // Render per-table retention on each Lite row (uses the same chips as Full).
+  document.querySelectorAll('#lite-xdr-groups .lite-xdr-row[data-id]').forEach(row => {
+    if (typeof renderTableRetentionCell === 'function') renderTableRetentionCell(row);
+  });
+  // Make sure the XDR-only retention banner is present on the Lite Check 2 card.
+  if (typeof injectTablesRetentionNote === 'function') injectTablesRetentionNote();
+  if (typeof syncLiteXdrSetup === 'function') syncLiteXdrSetup();
   updateLiteXdrTotals();
   updateLiteXdrProgress();
 }
@@ -8390,12 +8780,33 @@ function setLiteXdr(id, v) {
   onStatusChange(sel); // cascades progress/warnings + calls syncLiteXdrFromSelect
 }
 
+// Lite Check 2 Connector Setup mirror — bound to the full xdr-c1 select.
+function onLiteXdrSetupChange(liteSel) {
+  const fullSel = document.getElementById('xdr-c1');
+  if (!fullSel) return;
+  fullSel.value = liteSel.value;
+  onStatusChange(fullSel); // cascades progress/warnings + calls syncLiteXdrSetup
+}
+function syncLiteXdrSetup() {
+  const fullSel = document.getElementById('xdr-c1');
+  const liteSel = document.getElementById('lite-xdr-c1');
+  if (!fullSel || !liteSel) return;
+  if (liteSel.value !== fullSel.value) liteSel.value = fullSel.value;
+  // Mirror status-* badge classes for visual parity with the full select.
+  liteSel.className = fullSel.className;
+}
+
 // Called from onStatusChange when a Full xdr-t* select changes, to keep the
 // Lite segmented control visually in sync (bidirectional binding).
 function syncLiteXdrFromSelect(sel) {
   applyLiteXdrSegState(sel.id, liteValueFromFull(sel.value));
   updateLiteXdrTotals();
   updateLiteXdrProgress();
+  // Keep the per-table retention cell in sync with the new tier value.
+  const item = document.querySelector(`.check-item.xdr-tbl-item[data-id="${sel.id}"]`);
+  if (item && typeof renderTableRetentionCell === 'function') renderTableRetentionCell(item);
+  const liteRow = document.querySelector(`.lite-xdr-row[data-id="${sel.id}"]`);
+  if (liteRow && typeof renderTableRetentionCell === 'function') renderTableRetentionCell(liteRow);
 }
 
 function updateLiteXdrTotals() {
@@ -8438,15 +8849,12 @@ function updateLiteXdrProgress() {
 const LITE_FULL_GROUP_TITLES = new Set([
   'workloads enabled',
   'log categories enabled',
-  'target table',
   'content hub',
   'validation',
 ]);
 
 function isLiteFullGroupTitle(core) {
-  if (LITE_FULL_GROUP_TITLES.has(core)) return true;
-  // XDR-style "Tables — Endpoint (MDE)", "Tables — Alerts", etc.
-  return /^tables\b/.test(core);
+  return LITE_FULL_GROUP_TITLES.has(core);
 }
 
 // Tag every matching .check-group with data-lite-scope="full" so a single
@@ -8638,16 +9046,330 @@ function initXdrTierChangeControls() {
         item.appendChild(spacer);
       }
 
+      // Retention cell (last column) — content driven by the current tier pill value.
+      const retCell = document.createElement('div');
+      retCell.className = 'xdr-tbl-ret';
+      retCell.id = id + '-ret-cell';
+      item.appendChild(retCell);
+
       // Prime segmented pill from existing <select> value
       applyLiteXdrSegState(id, liteValueFromFull(sel.value));
       if (lakeOk) syncXdrTierChangeRow(id);
+      renderTableRetentionCell(item);
     });
   });
   // Any dynamic connector scaffold that triggers this function also wants
   // its full-only groups tagged and a toggle injected — chain the Lite
   // initializer so scaffolds don't each need a second hook.
   if (typeof initLiteFullMode === 'function') initLiteFullMode();
+  // Per-table retention now lives on each table row for connectors with a
+  // tier-enabled tables grid; suppress the legacy connector-level Retention
+  // group on those connectors so retention only shows up in one place.
+  if (typeof hideLegacyRetentionForTablesConnectors === 'function') {
+    hideLegacyRetentionForTablesConnectors();
+  }
+  if (typeof injectTablesRetentionNote === 'function') {
+    injectTablesRetentionNote();
+  }
 }
+
+// Add a class to .retention-group inside any .connector-section that also
+// has at least one .check-group[data-tier-enabled] (i.e. the connector has
+// per-table retention now). The CSS hides those groups; markup and saved
+// state are preserved so single-target-table connectors keep the legacy
+// section until step 2 of the migration.
+function hideLegacyRetentionForTablesConnectors() {
+  document.querySelectorAll('.connector-section').forEach(section => {
+    if (!section.querySelector('.check-group[data-tier-enabled]')) return;
+    section.querySelectorAll('.retention-group').forEach(group => {
+      group.classList.add('legacy-retention-suppressed');
+    });
+  });
+}
+
+// Insert a one-time explainer note inside the XDR connector (Full) and the
+// Lite Defender XDR Per-Table Ingestion card (Check 2). Other connectors
+// don't get the note — the per-table retention story is XDR-specific for
+// now (Lake only applies there).
+function injectTablesRetentionNote() {
+  const noteHtml = `
+    <span class="info-ico" aria-hidden="true">i</span>
+    <span>
+      <strong>Retention applies per table.</strong>
+      Set <span class="ret-pill ret-pill-an">Analytics</span> or
+      <span class="ret-pill ret-pill-lk">Lake</span> on a row to configure
+      its retention below — Analytics tables have an Analytics + Long-term
+      period, Lake tables have a single Lake period.
+      Tables left as <span class="ret-pill ret-pill-off">Not ingested</span>
+      stay in the default Defender XDR advanced-hunting store and have no
+      Sentinel retention to configure.
+    </span>`;
+
+  // Full: above the first tier-enabled tables group inside #conn-xdr only.
+  const fullXdr = document.getElementById('conn-xdr');
+  if (fullXdr && !fullXdr.querySelector('.tables-retention-note')) {
+    const firstTablesGroup = fullXdr.querySelector('.check-group[data-tier-enabled]');
+    if (firstTablesGroup) {
+      const note = document.createElement('div');
+      note.className = 'tables-retention-note';
+      note.innerHTML = noteHtml;
+      firstTablesGroup.parentNode.insertBefore(note, firstTablesGroup);
+    }
+  }
+
+  // Lite Check 2: above the lite-xdr-groups host. The host is a sibling of
+  // #lite-conn-xdr (both inside #lite-tier-xdr-body), so look it up directly.
+  const liteHost = document.getElementById('lite-xdr-groups');
+  if (liteHost && !liteHost.parentNode.querySelector(':scope > .tables-retention-note')) {
+    const note = document.createElement('div');
+    note.className = 'tables-retention-note';
+    note.innerHTML = noteHtml;
+    liteHost.parentNode.insertBefore(note, liteHost);
+  }
+}
+
+// ===================== PER-TABLE RETENTION (preview) =====================
+// State is keyed by the Full <select> id (e.g. "xdr-t1"). Empty string means
+// "inherit workspace default"; any other value is an explicit override.
+// Long-term/Lake additionally allow the literal value "None" (no long-term
+// / lake retention configured) — still counts as Configured for progress.
+const tableRetentionState = {};
+
+// Mirror the workspace analytics-retention options (id=workspace-default-retention).
+const RETENTION_OPTS_ANALYTICS = [
+  '30 days','60 days','90 days','120 days','180 days','270 days','365 days','2 years'
+];
+// Mirror the workspace total-retention / long-term options (id=workspace-default-total-retention).
+const RETENTION_OPTS_TOTAL = [
+  '90 days','120 days','180 days','270 days','365 days',
+  '1 year','2 years','3 years','4 years','5 years','6 years','7 years',
+  '8 years','9 years','10 years','11 years','12 years'
+];
+
+function getWsAnalyticsRetention() {
+  const el = document.getElementById('workspace-default-retention');
+  return el ? el.value : '90 days';
+}
+function getWsTotalRetention() {
+  const el = document.getElementById('workspace-default-total-retention');
+  return el ? el.value : '365 days';
+}
+
+// Build one labelled select for a retention field. `field` is 'analytics' |
+// 'longTerm' | 'lake'. Empty value = inherit workspace default (shown as
+// "Inherited (<ws value>)"). Long-term/Lake include a "None" option.
+function buildRetSelect(id, field, current, prefix, opts, inheritedValue, cssClass) {
+  const wrap = document.createElement('span');
+  wrap.className = 'ret-grp';
+  const lbl = document.createElement('span');
+  lbl.className = 'ret-prefix';
+  lbl.textContent = prefix;
+  wrap.appendChild(lbl);
+  const sel = document.createElement('select');
+  sel.className = cssClass || '';
+  sel.id = `${id}-ret-${field}`;
+  sel.setAttribute('aria-label', `${prefix} retention for ${id}`);
+  sel.addEventListener('change', () => onTableRetentionChange(id, field, sel.value));
+  const addOpt = (v, text) => {
+    const o = document.createElement('option');
+    o.value = v; o.textContent = text;
+    sel.appendChild(o);
+  };
+  addOpt('', `Inherited (${inheritedValue})`);
+  if (field !== 'analytics') addOpt('None', 'None');
+  opts.forEach(v => addOpt(v, v));
+  sel.value = current || '';
+  return wrap.appendChild(sel), wrap;
+}
+
+function renderTableRetentionCell(item) {
+  if (!item) return;
+  const cell = item.querySelector('.xdr-tbl-ret');
+  if (!cell) return;
+  const id = item.dataset.id;
+  const sel = id ? document.getElementById(id) : null;
+  const v = sel ? sel.value : '';
+  cell.innerHTML = '';
+  // Show nothing when the table is not configured / N/A / unassessed.
+  if (!v || v === 'Not configured' || v === 'N/A') {
+    return;
+  }
+  const st = tableRetentionState[id] || {};
+  const isLake = (v === 'Configured (Lake)');
+
+  // ----- Row 1: chips -----
+  const row1 = document.createElement('div');
+  row1.className = 'xdr-tbl-ret-row';
+  const heading = document.createElement('span');
+  heading.className = 'ret-heading';
+  heading.textContent = 'Retention:';
+  row1.appendChild(heading);
+  if (isLake) {
+    row1.appendChild(buildRetSelect(id, 'lake', st.lake || '', 'Lake',
+      RETENTION_OPTS_TOTAL, getWsTotalRetention(), 'lake'));
+  } else {
+    row1.appendChild(buildRetSelect(id, 'analytics', st.analytics || '', 'A',
+      RETENTION_OPTS_ANALYTICS, getWsAnalyticsRetention(), 'analytics'));
+    row1.appendChild(buildRetSelect(id, 'longTerm', st.longTerm || '', 'LT',
+      RETENTION_OPTS_TOTAL, getWsTotalRetention(), 'longterm'));
+  }
+  // "+ Plan retention change" toggle
+  const planOpen = !!(st.change && st.change.open);
+  const planBtn = document.createElement('button');
+  planBtn.type = 'button';
+  planBtn.className = 'ret-plan-toggle';
+  planBtn.textContent = planOpen ? '\u2212 Hide planning' : '+ Plan retention change';
+  planBtn.addEventListener('click', () => {
+    if (!tableRetentionState[id]) tableRetentionState[id] = {};
+    if (!tableRetentionState[id].change) tableRetentionState[id].change = {};
+    tableRetentionState[id].change.open = !planOpen;
+    rerenderTableRetentionTwins(id, item);
+    if (typeof saveState === 'function') try { saveState(); } catch (e) {}
+    if (typeof updateTodoSummary === 'function') updateTodoSummary();
+  });
+  row1.appendChild(planBtn);
+  cell.appendChild(row1);
+
+  if (!planOpen) return;
+
+  // ----- Row 2: planning fields -----
+  const ch = (tableRetentionState[id] && tableRetentionState[id].change) || {};
+  const row2 = document.createElement('div');
+  row2.className = 'xdr-tbl-ret-plan';
+
+  const updateAndRerender = () => {
+    rerenderTableRetentionTwins(id, item);
+    if (typeof saveState === 'function') try { saveState(); } catch (e) {}
+    if (typeof updateTodoSummary === 'function') updateTodoSummary();
+  };
+  const mkLbl = (txt) => { const s = document.createElement('span'); s.className = 'ret-plan-lbl'; s.textContent = txt; return s; };
+  const mkTargetSel = (key, opts) => {
+    const s = document.createElement('select');
+    s.className = 'ret-plan-target';
+    s.innerHTML = '<option value="">\u2014 Select \u2014</option>' +
+      opts.map(o => `<option value="${o}"${ch[key] === o ? ' selected' : ''}>${o}</option>`).join('');
+    s.addEventListener('change', () => {
+      tableRetentionState[id].change[key] = s.value;
+      updateAndRerender();
+    });
+    return s;
+  };
+  const mkGb = () => {
+    const inp = document.createElement('input');
+    inp.type = 'number'; inp.min = '0'; inp.step = '0.1'; inp.placeholder = '0';
+    inp.className = 'ret-plan-gbday';
+    inp.value = ch.gbday || '';
+    inp.addEventListener('input', () => {
+      tableRetentionState[id].change.gbday = inp.value;
+      // Keep open state, refresh delta in place rather than full re-render
+      // so focus is preserved as the user types.
+      updateInlineDelta();
+      if (typeof saveState === 'function') try { saveState(); } catch (e) {}
+      if (typeof updateTodoSummary === 'function') updateTodoSummary();
+      // Mirror gbday + delta to twin without rebuilding this row.
+      const twin = findTwinRow(id, item);
+      if (twin) renderTableRetentionCell(twin);
+    });
+    return inp;
+  };
+
+  const gbday = parseFloat(ch.gbday) || 0;
+  let resultSpan;
+  const updateInlineDelta = () => {
+    if (!resultSpan) return;
+    const gb = parseFloat(tableRetentionState[id].change.gbday) || 0;
+    const lines = [];
+    if (isLake) {
+      const cur = st.lake || getWsTotalRetention();
+      const tgt = tableRetentionState[id].change.lakeTarget;
+      if (tgt && gb > 0) {
+        const cd = parsePeriodToDays(cur), td = parsePeriodToDays(tgt);
+        if (td > cd) lines.push(`Lake: +${Math.round((td - cd) * gb).toLocaleString()} GB`);
+      }
+    } else {
+      const curA = st.analytics || getWsAnalyticsRetention();
+      const curLT = st.longTerm || getWsTotalRetention();
+      const aT = tableRetentionState[id].change.analyticsTarget;
+      const ltT = tableRetentionState[id].change.longTermTarget;
+      if (aT && gb > 0) {
+        const cd = parsePeriodToDays(curA), td = parsePeriodToDays(aT);
+        if (td > cd) lines.push(`A: +${Math.round((td - cd) * gb).toLocaleString()} GB`);
+      }
+      if (ltT && gb > 0) {
+        const cd = parsePeriodToDays(curLT), td = parsePeriodToDays(ltT);
+        if (td > cd) lines.push(`LT: +${Math.round((td - cd) * gb).toLocaleString()} GB`);
+      }
+    }
+    resultSpan.innerHTML = lines.length ? lines.join(' \u00b7 ') : '';
+    resultSpan.style.display = lines.length ? '' : 'none';
+  };
+
+  if (isLake) {
+    row2.appendChild(mkLbl('Lake target:'));
+    row2.appendChild(mkTargetSel('lakeTarget', RETENTION_OPTS_TOTAL));
+  } else {
+    row2.appendChild(mkLbl('A target:'));
+    row2.appendChild(mkTargetSel('analyticsTarget', RETENTION_OPTS_ANALYTICS));
+    row2.appendChild(mkLbl('LT target:'));
+    row2.appendChild(mkTargetSel('longTermTarget', RETENTION_OPTS_TOTAL));
+  }
+  row2.appendChild(mkLbl('GB/day:'));
+  row2.appendChild(mkGb());
+  resultSpan = document.createElement('span');
+  resultSpan.className = 'ret-plan-result';
+  row2.appendChild(resultSpan);
+  updateInlineDelta();
+
+  cell.appendChild(row2);
+}
+
+// Find the matching row on the other surface (Full ↔ Lite) so changes
+// made on one mirror to the other.
+function findTwinRow(id, item) {
+  if (!item) return null;
+  if (item.classList.contains('lite-xdr-row')) {
+    return document.querySelector(`.check-item.xdr-tbl-item[data-id="${id}"]`);
+  }
+  return document.querySelector(`#lite-xdr-groups .lite-xdr-row[data-id="${id}"]`);
+}
+function rerenderTableRetentionTwins(id, item) {
+  renderTableRetentionCell(item);
+  const twin = findTwinRow(id, item);
+  if (twin) renderTableRetentionCell(twin);
+}
+
+function onTableRetentionChange(id, field, value) {
+  if (!tableRetentionState[id]) tableRetentionState[id] = {};
+  tableRetentionState[id][field] = value;
+  if (typeof saveState === 'function') try { saveState(); } catch (e) {}
+  if (typeof updateTodoSummary === 'function') updateTodoSummary();
+}
+
+// Re-render every per-table retention cell (used when workspace default
+// retention changes — the "Inherited (…)" label needs to refresh).
+function refreshAllTableRetentionCells() {
+  document.querySelectorAll('.check-item.xdr-tbl-item').forEach(item => {
+    renderTableRetentionCell(item);
+  });
+  document.querySelectorAll('#lite-xdr-groups .lite-xdr-row[data-id]').forEach(row => {
+    renderTableRetentionCell(row);
+  });
+}
+
+// Hook workspace retention selects so per-table "Inherited" labels refresh
+// whenever the user changes the workspace defaults (Full or Lite variant).
+document.addEventListener('DOMContentLoaded', () => {
+  [
+    'workspace-default-retention',
+    'workspace-default-total-retention',
+    'lite-workspace-default-retention',
+    'lite-workspace-default-total-retention'
+  ].forEach(sid => {
+    const el = document.getElementById(sid);
+    if (el) el.addEventListener('change', refreshAllTableRetentionCells);
+  });
+});
+
 
 function onLiteAmaChange() { refreshLiteAma(); }
 
