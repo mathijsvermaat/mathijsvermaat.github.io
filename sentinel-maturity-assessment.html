@@ -8820,16 +8820,14 @@ function injectTablesRetentionNote() {
     }
   }
 
-  // Lite Check 2: above the lite-xdr-groups host inside #lite-conn-xdr.
-  const liteXdr = document.getElementById('lite-conn-xdr');
-  if (liteXdr && !liteXdr.querySelector('.tables-retention-note')) {
-    const host = liteXdr.querySelector('#lite-xdr-groups');
-    if (host) {
-      const note = document.createElement('div');
-      note.className = 'tables-retention-note';
-      note.innerHTML = noteHtml;
-      host.parentNode.insertBefore(note, host);
-    }
+  // Lite Check 2: above the lite-xdr-groups host. The host is a sibling of
+  // #lite-conn-xdr (both inside #lite-tier-xdr-body), so look it up directly.
+  const liteHost = document.getElementById('lite-xdr-groups');
+  if (liteHost && !liteHost.parentNode.querySelector(':scope > .tables-retention-note')) {
+    const note = document.createElement('div');
+    note.className = 'tables-retention-note';
+    note.innerHTML = noteHtml;
+    liteHost.parentNode.insertBefore(note, liteHost);
   }
 }
 
