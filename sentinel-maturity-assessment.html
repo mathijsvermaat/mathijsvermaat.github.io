@@ -1489,6 +1489,12 @@
       grid-template-columns: minmax(220px, 1fr) auto auto auto;
       align-items: center; gap: 14px; padding: 6px 0;
     }
+    /* Per-table retention drops to its own row (mirrors the Full xdr layout) */
+    .lite-xdr-row > .xdr-tbl-ret {
+      grid-column: 1 / -1;
+      justify-self: end;
+      padding-top: 2px;
+    }
     .lite-xdr-row.hdr {
       padding: 4px 0 6px; margin-bottom: 2px;
       border-bottom: 1px solid var(--border);
@@ -8448,6 +8454,7 @@ function renderLiteXdr() {
           <button type="button" data-v="analytics" onclick="setLiteXdr('${t.id}','analytics')">Analytics</button>
           <button type="button" data-v="lake"      onclick="setLiteXdr('${t.id}','lake')">Lake</button>
         </div>${tcCells}
+        <div class="xdr-tbl-ret"></div>
       </div>`;
     }).join('');
     return `<div class="lite-xdr-group"><h3>${group.name} <span class="chip">${group.tables.length}</span></h3>${header}${rows}</div>`;
@@ -8458,6 +8465,10 @@ function renderLiteXdr() {
     const sel = document.getElementById(t.id);
     if (sel) applyLiteXdrSegState(t.id, liteValueFromFull(sel.value));
   }));
+  // Render per-table retention on each Lite row (uses the same chips as Full).
+  document.querySelectorAll('#lite-xdr-groups .lite-xdr-row[data-id]').forEach(row => {
+    if (typeof renderTableRetentionCell === 'function') renderTableRetentionCell(row);
+  });
   updateLiteXdrTotals();
   updateLiteXdrProgress();
 }
@@ -8495,6 +8506,8 @@ function syncLiteXdrFromSelect(sel) {
   // Keep the per-table retention cell in sync with the new tier value.
   const item = document.querySelector(`.check-item.xdr-tbl-item[data-id="${sel.id}"]`);
   if (item && typeof renderTableRetentionCell === 'function') renderTableRetentionCell(item);
+  const liteRow = document.querySelector(`.lite-xdr-row[data-id="${sel.id}"]`);
+  if (liteRow && typeof renderTableRetentionCell === 'function') renderTableRetentionCell(liteRow);
 }
 
 function updateLiteXdrTotals() {
@@ -8775,31 +8788,47 @@ function hideLegacyRetentionForTablesConnectors() {
   });
 }
 
-// Insert a one-time explainer note before the first tier-enabled tables
-// group in every connector. Clarifies that Analytics and Lake tables expose
-// per-table retention controls, while tables left in their XDR/advanced-
-// hunting default (Not ingested in Sentinel) do not.
+// Insert a one-time explainer note inside the XDR connector (Full) and the
+// Lite Defender XDR Per-Table Ingestion card (Check 2). Other connectors
+// don't get the note — the per-table retention story is XDR-specific for
+// now (Lake only applies there).
 function injectTablesRetentionNote() {
-  document.querySelectorAll('.connector-section').forEach(section => {
-    if (section.querySelector('.tables-retention-note')) return;
-    const firstTablesGroup = section.querySelector('.check-group[data-tier-enabled]');
-    if (!firstTablesGroup) return;
-    const note = document.createElement('div');
-    note.className = 'tables-retention-note';
-    note.innerHTML = `
-      <span class="info-ico" aria-hidden="true">i</span>
-      <span>
-        <strong>Retention applies per table.</strong>
-        Set <span class="ret-pill ret-pill-an">Analytics</span> or
-        <span class="ret-pill ret-pill-lk">Lake</span> on a row to configure
-        its retention below — Analytics tables have an Analytics + Long-term
-        period, Lake tables have a single Lake period.
-        Tables left as <span class="ret-pill ret-pill-off">Not ingested</span>
-        stay in the default Defender XDR advanced-hunting store and have no
-        Sentinel retention to configure.
-      </span>`;
-    firstTablesGroup.parentNode.insertBefore(note, firstTablesGroup);
-  });
+  const noteHtml = `
+    <span class="info-ico" aria-hidden="true">i</span>
+    <span>
+      <strong>Retention applies per table.</strong>
+      Set <span class="ret-pill ret-pill-an">Analytics</span> or
+      <span class="ret-pill ret-pill-lk">Lake</span> on a row to configure
+      its retention below — Analytics tables have an Analytics + Long-term
+      period, Lake tables have a single Lake period.
+      Tables left as <span class="ret-pill ret-pill-off">Not ingested</span>
+      stay in the default Defender XDR advanced-hunting store and have no
+      Sentinel retention to configure.
+    </span>`;
+
+  // Full: above the first tier-enabled tables group inside #conn-xdr only.
+  const fullXdr = document.getElementById('conn-xdr');
+  if (fullXdr && !fullXdr.querySelector('.tables-retention-note')) {
+    const firstTablesGroup = fullXdr.querySelector('.check-group[data-tier-enabled]');
+    if (firstTablesGroup) {
+      const note = document.createElement('div');
+      note.className = 'tables-retention-note';
+      note.innerHTML = noteHtml;
+      firstTablesGroup.parentNode.insertBefore(note, firstTablesGroup);
+    }
+  }
+
+  // Lite Check 2: above the lite-xdr-groups host inside #lite-conn-xdr.
+  const liteXdr = document.getElementById('lite-conn-xdr');
+  if (liteXdr && !liteXdr.querySelector('.tables-retention-note')) {
+    const host = liteXdr.querySelector('#lite-xdr-groups');
+    if (host) {
+      const note = document.createElement('div');
+      note.className = 'tables-retention-note';
+      note.innerHTML = noteHtml;
+      host.parentNode.insertBefore(note, host);
+    }
+  }
 }
 
 // ===================== PER-TABLE RETENTION (preview) =====================
@@ -8897,6 +8926,9 @@ function onTableRetentionChange(id, field, value) {
 function refreshAllTableRetentionCells() {
   document.querySelectorAll('.check-item.xdr-tbl-item').forEach(item => {
     renderTableRetentionCell(item);
+  });
+  document.querySelectorAll('#lite-xdr-groups .lite-xdr-row[data-id]').forEach(row => {
+    renderTableRetentionCell(row);
   });
 }
 
