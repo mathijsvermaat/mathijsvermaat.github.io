@@ -755,11 +755,44 @@
 
     .todo-total {
       margin-top: 16px;
+      margin-bottom: 20px;
       padding-top: 12px;
       border-top: 2px solid var(--warning);
       font-size: 0.95rem;
       font-weight: 700;
       color: #8a6d00;
+    }
+
+    .todo-retention-total {
+      margin-top: 20px;
+      padding-top: 12px;
+      border-top: 2px solid var(--warning);
+      color: #8a6d00;
+    }
+
+    .todo-retention-total .todo-retention-primary {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .todo-retention-total .todo-retention-tiers {
+      margin-top: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #8a6d00;
+    }
+
+    .todo-retention-total .todo-retention-secondary {
+      margin-top: 4px;
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: var(--text-light);
+    }
+
+    .todo-retention-total .todo-retention-saved {
+      color: var(--success, #107c10);
+      font-weight: 600;
+      margin-left: 6px;
     }
 
     .todo-gbday {
@@ -3231,6 +3264,19 @@
           <span class="cost-badge benefit">Ingestion Benefit (E5)</span>
         </div>
       </div>
+      <div class="connector-quick-actions" style="padding: 0 24px 8px;">
+        <button title="Set all items to Configured / Healthy" onclick="setAllConfigured(document.querySelector('#conn-xdr .connector-body'));">Set all configured</button>
+        <button title="Reset all items to Not assessed" onclick="resetConnector(document.querySelector('#conn-xdr .connector-body'));">Reset</button>
+      </div>
+      <div class="check-group" style="padding: 0 24px 12px;">
+        <div class="check-group-title">Connector Setup</div>
+        <div class="check-item">
+          <select class="status-select" id="lite-xdr-c1" onchange="onLiteXdrSetupChange(this)">
+            <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+          </select>
+          <label for="lite-xdr-c1">Connector enabled in Sentinel<div class="check-detail">Data connectors → Microsoft Defender XDR → Connect</div></label>
+        </div>
+      </div>
       <div id="lite-xdr-groups"></div>
       <div class="lite-ingest-totals" style="padding: 4px 24px 14px;">
         Planned Analytics: <strong id="lite-xdr-sum-an">0</strong> GB/day
@@ -3323,7 +3369,7 @@
       <div class="section-comment">
         <label for="lite-ama-comment">Comments / Rationale — Defender vs AMA coverage</label>
         <textarea id="lite-ama-comment" data-connector="AMA Coverage (Lite)" placeholder="e.g. Migration plan in progress; remaining MMA hosts scheduled for next quarter."></textarea>
-      </div>https://github.com/mathijsvermaat/azure-activity-log-sentinel-audit
+      </div>
     </div>
   </div>
 
@@ -5225,6 +5271,8 @@ function onStatusChange(sel) {
     const item = sel.closest('.check-item');
     if ((item && item.classList.contains('xdr-tbl-item')) || sel.id.startsWith('xdr-t')) {
       syncLiteXdrFromSelect(sel);
+    } else if (sel.id === 'xdr-c1' && typeof syncLiteXdrSetup === 'function') {
+      syncLiteXdrSetup();
     }
   }
 
@@ -5959,6 +6007,29 @@ function updateTodoSummary() {
   const manualCount = document.querySelectorAll('#manual-todo-list .manual-todo-item').length;
   let totalCount = todoItems.length + manualCount;
 
+  // Aggregate one-off long-term storage deltas from retention extensions/reductions
+  // (separate from the GB/day daily-ingest total computed below).
+  let retentionAddedGB = 0;
+  let retentionSavedGB = 0;
+  // Ongoing GB/day rate now committed to (or freed from) long-term storage.
+  let retentionAddedGbday = 0;
+  let retentionSavedGbday = 0;
+  // Per-tier breakdown (different pricing tiers).
+  const retTier = {
+    analytics: { addedGbday: 0, savedGbday: 0, addedGB: 0, savedGB: 0 },
+    longTerm:  { addedGbday: 0, savedGbday: 0, addedGB: 0, savedGB: 0 },
+    lake:      { addedGbday: 0, savedGbday: 0, addedGB: 0, savedGB: 0 },
+  };
+  const accrueRetention = (tierKey, delta, gbday) => {
+    if (delta > 0) {
+      retentionAddedGB += delta; retentionAddedGbday += gbday;
+      retTier[tierKey].addedGB += delta; retTier[tierKey].addedGbday += gbday;
+    } else if (delta < 0) {
+      retentionSavedGB += -delta; retentionSavedGbday += gbday;
+      retTier[tierKey].savedGB += -delta; retTier[tierKey].savedGbday += gbday;
+    }
+  };
+
   container.innerHTML = '';
 
   if (todoItems.length === 0) {
@@ -6056,9 +6127,11 @@ function updateTodoSummary() {
       const gbday = parseFloat(aGb?.value) || 0;
       const currentDays = parsePeriodToDays(currentPeriod);
       const targetDays = parsePeriodToDays(aTarget.value);
-      const delta = gbday && targetDays > currentDays ? Math.round((targetDays - currentDays) * gbday) : 0;
+      const delta = gbday ? Math.round((targetDays - currentDays) * gbday) : 0;
       let text = `Change analytics retention from ${currentPeriod} to ${aTarget.value}`;
-      if (delta > 0) text += ` (+${delta.toLocaleString()} GB storage)`;
+      if (delta > 0) { text += ` (+${gbday} GB/day · +${delta.toLocaleString()} GB total)`; }
+      else if (delta < 0) { text += ` (−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total)`; }
+      accrueRetention('analytics', delta, gbday);
       const group = getOrCreateGroup();
       const li = document.createElement('li');
       li.textContent = text;
@@ -6075,9 +6148,11 @@ function updateTodoSummary() {
       const gbday = parseFloat(tGb?.value) || 0;
       const currentDays = parsePeriodToDays(currentTotal);
       const targetDays = parsePeriodToDays(tTarget.value);
-      const delta = gbday && targetDays > currentDays ? Math.round((targetDays - currentDays) * gbday) : 0;
+      const delta = gbday ? Math.round((targetDays - currentDays) * gbday) : 0;
       let text = `Change total retention from ${currentTotal} to ${tTarget.value}`;
-      if (delta > 0) text += ` (+${delta.toLocaleString()} GB storage)`;
+      if (delta > 0) { text += ` (+${gbday} GB/day · +${delta.toLocaleString()} GB total)`; }
+      else if (delta < 0) { text += ` (−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total)`; }
+      accrueRetention('longTerm', delta, gbday);
       const group = getOrCreateGroup();
       const li = document.createElement('li');
       li.textContent = text;
@@ -6137,26 +6212,32 @@ function updateTodoSummary() {
         if (ch.lakeTarget) {
           const cur = entry.lake || getWsTotalRetention();
           const cd = parsePeriodToDays(cur), td = parsePeriodToDays(ch.lakeTarget);
-          const delta = (gbday && td > cd) ? Math.round((td - cd) * gbday) : 0;
+          const delta = gbday ? Math.round((td - cd) * gbday) : 0;
           let text = `${tableLabel}: change Lake retention from ${cur} to ${ch.lakeTarget}`;
-          if (delta > 0) text += ` (+${delta.toLocaleString()} GB storage)`;
+          if (delta > 0) { text += ` (+${gbday} GB/day · +${delta.toLocaleString()} GB total)`; }
+          else if (delta < 0) { text += ` (−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total)`; }
+          accrueRetention('lake', delta, gbday);
           emit(text);
         }
       } else {
         if (ch.analyticsTarget) {
           const cur = entry.analytics || getWsAnalyticsRetention();
           const cd = parsePeriodToDays(cur), td = parsePeriodToDays(ch.analyticsTarget);
-          const delta = (gbday && td > cd) ? Math.round((td - cd) * gbday) : 0;
+          const delta = gbday ? Math.round((td - cd) * gbday) : 0;
           let text = `${tableLabel}: change Analytics retention from ${cur} to ${ch.analyticsTarget}`;
-          if (delta > 0) text += ` (+${delta.toLocaleString()} GB storage)`;
+          if (delta > 0) { text += ` (+${gbday} GB/day · +${delta.toLocaleString()} GB total)`; }
+          else if (delta < 0) { text += ` (−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total)`; }
+          accrueRetention('analytics', delta, gbday);
           emit(text);
         }
         if (ch.longTermTarget) {
           const cur = entry.longTerm || getWsTotalRetention();
           const cd = parsePeriodToDays(cur), td = parsePeriodToDays(ch.longTermTarget);
-          const delta = (gbday && td > cd) ? Math.round((td - cd) * gbday) : 0;
+          const delta = gbday ? Math.round((td - cd) * gbday) : 0;
           let text = `${tableLabel}: change Long-term retention from ${cur} to ${ch.longTermTarget}`;
-          if (delta > 0) text += ` (+${delta.toLocaleString()} GB storage)`;
+          if (delta > 0) { text += ` (+${gbday} GB/day · +${delta.toLocaleString()} GB total)`; }
+          else if (delta < 0) { text += ` (−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total)`; }
+          accrueRetention('longTerm', delta, gbday);
           emit(text);
         }
       }
@@ -6245,6 +6326,61 @@ function updateTodoSummary() {
       group.querySelector('ul').appendChild(li);
       totalCount++;
     }
+  }
+
+  // Long-term storage delta totals from retention extensions/reductions
+  if (retentionAddedGB > 0 || retentionSavedGB > 0) {
+    const netGB = retentionAddedGB - retentionSavedGB;
+    const netGbday = retentionAddedGbday - retentionSavedGbday;
+    const retDiv = document.createElement('div');
+    retDiv.className = 'todo-retention-total';
+
+    // Primary line: GB/day rate (the metric we care about most).
+    const primary = document.createElement('div');
+    primary.className = 'todo-retention-primary';
+    let primaryText = 'Estimated additional long-term retention: ';
+    if (netGbday > 0) primaryText += `+${netGbday.toFixed(1)} GB/day`;
+    else if (netGbday < 0) primaryText += `−${(-netGbday).toFixed(1)} GB/day (net saving)`;
+    else primaryText += '0 GB/day (net change)';
+    primary.textContent = primaryText;
+    retDiv.appendChild(primary);
+
+    // Per-tier breakdown (different pricing tiers).
+    const tierLabels = { analytics: 'Analytics', longTerm: 'Long-term', lake: 'Data Lake' };
+    const tierParts = [];
+    ['analytics', 'longTerm', 'lake'].forEach(k => {
+      const t = retTier[k];
+      const netDay = t.addedGbday - t.savedGbday;
+      const netGb  = t.addedGB - t.savedGB;
+      if (t.addedGbday === 0 && t.savedGbday === 0) return;
+      let part = `${tierLabels[k]}: `;
+      if (netDay > 0) part += `+${netDay.toFixed(1)} GB/day`;
+      else if (netDay < 0) part += `−${(-netDay).toFixed(1)} GB/day`;
+      else part += '0 GB/day';
+      part += ` (${netGb >= 0 ? '+' : '−'}${Math.abs(netGb).toLocaleString()} GB total)`;
+      tierParts.push(part);
+    });
+    if (tierParts.length > 1) {
+      const tierDiv = document.createElement('div');
+      tierDiv.className = 'todo-retention-tiers';
+      tierDiv.textContent = tierParts.join(' · ');
+      retDiv.appendChild(tierDiv);
+    }
+
+    // Secondary line: total GB over the extension period.
+    const secondary = document.createElement('div');
+    secondary.className = 'todo-retention-secondary';
+    let secondaryText = 'Total over retention period: ';
+    if (netGB > 0) secondaryText += `+${netGB.toLocaleString()} GB`;
+    else if (netGB < 0) secondaryText += `−${(-netGB).toLocaleString()} GB (net saving)`;
+    else secondaryText += '0 GB';
+    if (retentionAddedGB > 0 && retentionSavedGB > 0) {
+      secondaryText += ` — added: +${retentionAddedGB.toLocaleString()} GB · saved: −${retentionSavedGB.toLocaleString()} GB`;
+    }
+    secondary.textContent = secondaryText;
+    retDiv.appendChild(secondary);
+
+    container.appendChild(retDiv);
   }
 
   countBadge.textContent = totalCount;
@@ -8615,6 +8751,7 @@ function renderLiteXdr() {
   });
   // Make sure the XDR-only retention banner is present on the Lite Check 2 card.
   if (typeof injectTablesRetentionNote === 'function') injectTablesRetentionNote();
+  if (typeof syncLiteXdrSetup === 'function') syncLiteXdrSetup();
   updateLiteXdrTotals();
   updateLiteXdrProgress();
 }
@@ -8641,6 +8778,22 @@ function setLiteXdr(id, v) {
   if (!sel) return;
   sel.value = fullValueFromLite(v);
   onStatusChange(sel); // cascades progress/warnings + calls syncLiteXdrFromSelect
+}
+
+// Lite Check 2 Connector Setup mirror — bound to the full xdr-c1 select.
+function onLiteXdrSetupChange(liteSel) {
+  const fullSel = document.getElementById('xdr-c1');
+  if (!fullSel) return;
+  fullSel.value = liteSel.value;
+  onStatusChange(fullSel); // cascades progress/warnings + calls syncLiteXdrSetup
+}
+function syncLiteXdrSetup() {
+  const fullSel = document.getElementById('xdr-c1');
+  const liteSel = document.getElementById('lite-xdr-c1');
+  if (!fullSel || !liteSel) return;
+  if (liteSel.value !== fullSel.value) liteSel.value = fullSel.value;
+  // Mirror status-* badge classes for visual parity with the full select.
+  liteSel.className = fullSel.className;
 }
 
 // Called from onStatusChange when a Full xdr-t* select changes, to keep the
