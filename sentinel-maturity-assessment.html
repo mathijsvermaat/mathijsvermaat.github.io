@@ -1633,6 +1633,38 @@
        Retention group on connectors that now expose per-table retention.
        Markup and saved state are preserved. */
     .check-group.legacy-retention-suppressed { display: none; }
+
+    /* Inline explainer above the first tier-enabled Tables group */
+    .tables-retention-note {
+      display: flex; align-items: flex-start; gap: 10px;
+      margin: 6px 0 14px; padding: 10px 14px;
+      background: #f3f9ff;
+      border: 1px solid #c7e0f4;
+      border-left: 3px solid var(--accent, #0078d4);
+      border-radius: 6px;
+      font-size: 0.84rem; color: var(--text);
+      line-height: 1.45;
+    }
+    .tables-retention-note > .info-ico {
+      flex: 0 0 auto;
+      width: 18px; height: 18px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--accent, #0078d4); color: #fff;
+      border-radius: 50%; font-style: italic; font-weight: 600;
+      font-size: 0.78rem;
+      cursor: default;
+    }
+    .tables-retention-note .ret-pill {
+      display: inline-flex; align-items: center;
+      padding: 0 6px; border-radius: 10px;
+      font-size: 0.74rem; font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--white);
+      white-space: nowrap;
+    }
+    .tables-retention-note .ret-pill-an  { background: #e6f4ea; border-color: var(--success); color: var(--success); }
+    .tables-retention-note .ret-pill-lk  { background: #f0e6fa; border-color: #8764b8;        color: #5c2d91; }
+    .tables-retention-note .ret-pill-off { background: var(--secondary); color: var(--text-light); }
     /* Full-mode per-table change-tier inline row
        (visually matches the Lite switch toggle + details) */
     .xdr-tc-inline {
@@ -8721,6 +8753,9 @@ function initXdrTierChangeControls() {
   if (typeof hideLegacyRetentionForTablesConnectors === 'function') {
     hideLegacyRetentionForTablesConnectors();
   }
+  if (typeof injectTablesRetentionNote === 'function') {
+    injectTablesRetentionNote();
+  }
 }
 
 // Add a class to .retention-group inside any .connector-section that also
@@ -8734,6 +8769,33 @@ function hideLegacyRetentionForTablesConnectors() {
     section.querySelectorAll('.retention-group').forEach(group => {
       group.classList.add('legacy-retention-suppressed');
     });
+  });
+}
+
+// Insert a one-time explainer note before the first tier-enabled tables
+// group in every connector. Clarifies that Analytics and Lake tables expose
+// per-table retention controls, while tables left in their XDR/advanced-
+// hunting default (Not ingested in Sentinel) do not.
+function injectTablesRetentionNote() {
+  document.querySelectorAll('.connector-section').forEach(section => {
+    if (section.querySelector('.tables-retention-note')) return;
+    const firstTablesGroup = section.querySelector('.check-group[data-tier-enabled]');
+    if (!firstTablesGroup) return;
+    const note = document.createElement('div');
+    note.className = 'tables-retention-note';
+    note.innerHTML = `
+      <span class="info-ico" aria-hidden="true">i</span>
+      <span>
+        <strong>Retention applies per table.</strong>
+        Set <span class="ret-pill ret-pill-an">Analytics</span> or
+        <span class="ret-pill ret-pill-lk">Lake</span> on a row to configure
+        its retention below — Analytics tables have an Analytics + Long-term
+        period, Lake tables have a single Lake period.
+        Tables left as <span class="ret-pill ret-pill-off">Not ingested</span>
+        stay in the default Defender XDR advanced-hunting store and have no
+        Sentinel retention to configure.
+      </span>`;
+    firstTablesGroup.parentNode.insertBefore(note, firstTablesGroup);
   });
 }
 
