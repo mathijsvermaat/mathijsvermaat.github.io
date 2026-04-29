@@ -1629,6 +1629,10 @@
     .xdr-tbl-ret select.longterm  { background: #fff4ce; border-color: #c19c00;        color: #6b5300; }
     .xdr-tbl-ret select.lake      { background: #f0e6fa; border-color: #8764b8;        color: #5c2d91; }
     .xdr-tbl-ret .ret-empty { opacity: 0.4; }
+    /* Step 1 of per-table retention migration: hide the legacy connector-level
+       Retention group on connectors that now expose per-table retention.
+       Markup and saved state are preserved. */
+    .check-group.legacy-retention-suppressed { display: none; }
     /* Full-mode per-table change-tier inline row
        (visually matches the Lite switch toggle + details) */
     .xdr-tc-inline {
@@ -8711,6 +8715,26 @@ function initXdrTierChangeControls() {
   // its full-only groups tagged and a toggle injected — chain the Lite
   // initializer so scaffolds don't each need a second hook.
   if (typeof initLiteFullMode === 'function') initLiteFullMode();
+  // Per-table retention now lives on each table row for connectors with a
+  // tier-enabled tables grid; suppress the legacy connector-level Retention
+  // group on those connectors so retention only shows up in one place.
+  if (typeof hideLegacyRetentionForTablesConnectors === 'function') {
+    hideLegacyRetentionForTablesConnectors();
+  }
+}
+
+// Add a class to .retention-group inside any .connector-section that also
+// has at least one .check-group[data-tier-enabled] (i.e. the connector has
+// per-table retention now). The CSS hides those groups; markup and saved
+// state are preserved so single-target-table connectors keep the legacy
+// section until step 2 of the migration.
+function hideLegacyRetentionForTablesConnectors() {
+  document.querySelectorAll('.connector-section').forEach(section => {
+    if (!section.querySelector('.check-group[data-tier-enabled]')) return;
+    section.querySelectorAll('.retention-group').forEach(group => {
+      group.classList.add('legacy-retention-suppressed');
+    });
+  });
 }
 
 // ===================== PER-TABLE RETENTION (preview) =====================
