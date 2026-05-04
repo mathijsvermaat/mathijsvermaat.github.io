@@ -1464,11 +1464,14 @@
     body.lite-mode #tier-1,
     body.lite-mode #tier-2,
     body.lite-mode #tier-3,
-    body.lite-mode .risk-summary,
     body.lite-mode .warnings-summary,
     body.lite-mode .connector-search {
       display: none !important;
     }
+    /* Keep the risk panel visible in Lite mode so "Not configured" connectors
+       (e.g. setting Microsoft Defender XDR via the Check 2 mirror) surface
+       their accepted-risk banner at the top of the page, matching Full mode.
+       updateAcceptedRisks() handles show/hide based on whether any risks exist. */
 
     /* In Lite mode, the Microsoft Defender XDR connector is fully replaced
        by the dedicated "Defender XDR — Per-Table Ingestion" Lite card
