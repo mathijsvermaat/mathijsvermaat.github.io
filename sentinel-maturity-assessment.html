@@ -5332,13 +5332,17 @@ function resetConnector(connectorBody) {
 }
 
 // ===================== CONNECTOR COLLAPSE ON N/A / NOT CONFIGURED / TO BE ADDED =====================
+// General sections without a real "gate" check — every item is independent and
+// must never trigger the cascade-collapse / progress-exclusion behaviour.
+const NON_GATED_SECTION_IDS = ['conn-gen-workspace', 'conn-gen-solutions', 'conn-gen-workbooks'];
+
 function handleConnectorCollapse(sel) {
   // Only act on the first Connector Setup select (-c1) within a connector body
   const connectorBody = sel.closest('.connector-body');
   if (!connectorBody) return;
-  // Never collapse the general workspace section — all items should always be visible
+  // Never collapse general sections without a gate — all items should always be visible
   const connSection = connectorBody.closest('.connector-section');
-  if (connSection && connSection.id === 'conn-gen-workspace') return;
+  if (connSection && NON_GATED_SECTION_IDS.includes(connSection.id)) return;
   const setupGroup = connectorBody.querySelector('.check-group');
   if (!setupGroup) return;
   const firstSetupSelect = setupGroup.querySelector('select.status-select');
@@ -5400,7 +5404,7 @@ function handleGbdayInput(sel) {
   if (!connectorBody) return;
   // Skip free data source connectors where GB/day is not relevant
   const connSection = connectorBody.closest('.connector-section');
-  if (connSection && ['conn-gen-workspace', 'conn-health', 'conn-o365', 'conn-azactivity'].includes(connSection.id)) return;
+  if (connSection && ['conn-gen-workspace', 'conn-gen-solutions', 'conn-gen-workbooks', 'conn-health', 'conn-o365', 'conn-azactivity'].includes(connSection.id)) return;
   const firstGroup = connectorBody.querySelector('.check-group');
   if (!firstGroup) return;
   const firstSelect = firstGroup.querySelector('select.status-select');
@@ -5493,8 +5497,8 @@ const GATE_COLLAPSE_VALUES = ['N/A', 'Not configured', 'To be added'];
 function computeGateExcludedSelects() {
   const excluded = new Set();
   document.querySelectorAll('.connector-section[id^="conn-"]').forEach(section => {
-    // General workspace section is never collapsed (see handleConnectorCollapse).
-    if (section.id === 'conn-gen-workspace') return;
+    // Non-gated general sections are never collapsed (see handleConnectorCollapse).
+    if (NON_GATED_SECTION_IDS.includes(section.id)) return;
     const setupGroup = section.querySelector('.connector-body .check-group')
       || section.querySelector('.check-group');
     if (!setupGroup) return;
