@@ -1390,7 +1390,10 @@
 
     @media print {
       body { background: white; margin: 0; padding: 0; }
-      .container, .toolbar, .footer { display: none !important; }
+      /* Hide only the top-level container/toolbar/footer — not the clone
+         that lives inside #report-content (which itself has class "container"
+         and would otherwise vanish, leaving an empty printout). */
+      body > .container, body > .toolbar, body > .footer { display: none !important; }
       .report-screen { position: static !important; display: block !important; }
       .report-toolbar { display: none !important; }
       .report-container { margin: 0; padding: 0; max-width: 100%; }
