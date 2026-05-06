@@ -422,6 +422,24 @@
 
     .connector-body { padding: 0 24px 20px; }
 
+    .connector-note {
+      margin: 12px 0 4px;
+      padding: 10px 14px;
+      background: #fff8e1;
+      border-left: 4px solid var(--warning);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      color: #5c4a00;
+      line-height: 1.45;
+    }
+    .connector-note strong { color: #8a6d00; }
+    .connector-note code {
+      background: rgba(0,0,0,0.06);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 0.8rem;
+    }
+
     .connector-quick-actions {
       display: flex;
       justify-content: flex-end;
@@ -4071,13 +4089,16 @@
           <span class="connector-chevron">▼</span>
         </div>
         <div class="connector-body">
+          <div class="connector-note">
+            <strong>Note:</strong> Microsoft Intune is <strong>not</strong> a Sentinel data connector — it does not appear in <strong>Content Hub</strong> or under <strong>Data connectors</strong> in the Sentinel/Defender portal. Intune log ingestion is configured directly from the <strong>Intune admin center → Reports → Diagnostics settings</strong>, sending logs to your Log Analytics workspace. Detections that use Intune tables come from generic or cross-solution analytic-rule templates rather than a dedicated Intune solution.
+          </div>
           <div class="check-group">
             <div class="check-group-title">Connector Setup</div>
             <div class="check-item">
-              <select class="status-select" id="intune-c1" data-tier="2" data-connector="Microsoft Intune" data-item="Intune logs routed via Entra ID diagnostic settings" onchange="onStatusChange(this)">
+              <select class="status-select" id="intune-c1" data-tier="2" data-connector="Microsoft Intune" data-item="Intune Diagnostics Settings configured to send logs to Log Analytics workspace" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="intune-c1">Intune logs routed via Entra ID diagnostic settings</label>
+              <label for="intune-c1">Intune Diagnostics Settings &rarr; Send to Log Analytics workspace<div class="check-detail">Configured in Intune admin center &rarr; Reports &rarr; Diagnostics settings (not via Sentinel Data connectors)</div></label>
             </div>
           </div>
           <div class="check-group" data-tier-enabled>
@@ -4086,13 +4107,13 @@
               <select class="status-select" id="intune-t1" data-tier="2" data-connector="Microsoft Intune" data-item="IntuneAuditLogs table enabled" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="intune-t1">IntuneAuditLogs<div class="check-detail">Free data source</div></label>
+              <label for="intune-t1">IntuneAuditLogs<div class="check-detail">Paid &mdash; standard Log Analytics ingestion</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="intune-t2" data-tier="2" data-connector="Microsoft Intune" data-item="IntuneOperationalLogs table enabled" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="intune-t2">IntuneOperationalLogs<div class="check-detail">Free data source</div></label>
+              <label for="intune-t2">IntuneOperationalLogs<div class="check-detail">Paid &mdash; standard Log Analytics ingestion</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="intune-t3" data-tier="2" data-connector="Microsoft Intune" data-item="IntuneDevices table enabled" onchange="onStatusChange(this)">
@@ -4100,14 +4121,20 @@
               </select>
               <label for="intune-t3">IntuneDevices<div class="check-detail">Paid — device compliance and inventory data</div></label>
             </div>
+            <div class="check-item">
+              <select class="status-select" id="intune-t4" data-tier="2" data-connector="Microsoft Intune" data-item="IntuneDeviceComplianceOrg table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="intune-t4">IntuneDeviceComplianceOrg<div class="check-detail">Paid — organisational device compliance reporting</div></label>
+            </div>
           </div>
           <div class="check-group">
-            <div class="check-group-title">Content Hub</div>
+            <div class="check-group-title">Detections</div>
             <div class="check-item">
-              <select class="status-select" id="intune-ch1" data-tier="2" data-connector="Microsoft Intune" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
+              <select class="status-select" id="intune-ch1" data-tier="2" data-connector="Microsoft Intune" data-item="Analytic rules using Intune tables deployed" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="intune-ch1">Analytic rules deployed</label>
+              <label for="intune-ch1">Analytic rules using Intune tables deployed<div class="check-detail">No dedicated Intune Content Hub solution — use generic or cross-solution analytic-rule templates referencing IntuneAuditLogs / IntuneOperationalLogs</div></label>
             </div>
           </div>
           <div class="check-group retention-group" data-prefix="intune" data-connector="Microsoft Intune">
