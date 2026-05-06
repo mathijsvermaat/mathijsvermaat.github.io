@@ -174,6 +174,8 @@ Four collapsible summary sections appear between the tier sections and the conne
 | **Configuration Warnings** | `.warnings-summary` | Amber (`#e67e22`) | Connector active but sub-items "Not configured" |
 | **Comments Summary** | `.comments-summary` | Blue (`--primary`) | Any non-empty comment textarea |
 
+**Lite-mode visibility:** `.warnings-summary` and the manual To-do input are hidden via CSS in Lite mode. `.risk-summary` is intentionally **kept visible** in Lite — `updateAcceptedRisks()` handles its show/hide based on whether any risks exist, so accepted-risk banners (e.g. setting Microsoft Defender XDR to "Not configured" via the Lite Check 2 mirror) surface at the top of the page exactly as in Full mode.
+
 ### Configuration Warnings
 
 The `configWarningTexts` object maps **select element `id` values** (e.g., `syslog-f1`, `xdr-t3`) to SOC-impact warning descriptions. `updateConfigWarnings()` iterates all connector sections, checks if the first setup item is "Configured" or "To be added", then collects all sub-item selects with value "Not configured" that have a matching entry in `configWarningTexts`. Results are displayed as a bulleted list per connector.
@@ -212,7 +214,7 @@ All event handlers are attached inline in HTML. Key patterns:
 | `onWorkspaceTotalRetentionChange()` | Propagate workspace total retention default to all inherited connectors |
 | `getEffectiveTotalPeriod(prefix)` | Return effective total retention (override or workspace default) |
 | `handleGbdayInput(sel)` | Create/destroy GB/day input for "To be added" items |
-| `handleConnectorCollapse(sel)` | Auto-collapse subsequent groups when first setup item ≠ Configured |
+| `handleConnectorCollapse(sel)` | Auto-collapse subsequent groups when first setup item ≠ Configured. Sections listed in `NON_GATED_SECTION_IDS` (`conn-gen-workspace`, `conn-gen-solutions`, `conn-gen-workbooks`) are exempt — every item is independent, no item acts as a gate. The same exemption is honoured in `computeGateExcludedSelects` and the GB/day skip list. |
 | `filterConnectors(query)` | Search by connector name, auto-expand matching tiers |
 
 ### State Management
@@ -331,7 +333,9 @@ Links inside `.check-item .check-detail` and `.check-group-title` use `var(--tex
 
 ## Retention System
 
-Each connector gets a retention block built by `initRetentionSection(prefix)`:
+> Two coexisting models. **Connector-level** (legacy, described below) is still used by connectors that have not been migrated. **Per-table** (the new model, see [Per-Table Retention Pattern](#per-table-retention-pattern)) is used by every connector with a per-table tables group, and on those connectors the legacy connector-level Retention block is hidden.
+
+Each legacy connector gets a retention block built by `initRetentionSection(prefix)`:
 
 1. **Analytics retention**: Inherit workspace default or override with custom period
 2. **Total retention**: Inherit workspace default or override with custom period (mirrors analytics pattern)
@@ -346,6 +350,74 @@ Both use the same inherit/override pattern: when set to "Inherit workspace", the
 Key functions: `onRetentionOverride(prefix)`, `onTotalRetentionOverride(prefix)`, `getEffectiveAnalyticsPeriod(prefix)`, `getEffectiveTotalPeriod(prefix)`.
 
 **Backward compatibility**: Old save files with `archive: "Yes"` are auto-migrated to `totalOverride: "override"` in `applyState()`.
+
+---
+
+## Per-Table Retention Pattern
+
+The per-table retention model decorates each `<select>` row inside a connector's table `check-group` with three retention chips (Analytics / Long-term / Lake) plus an optional "plan retention change" toggle that adds target tiers + GB/day. It is the table-row sibling of the [Per-Table Tier-Change Pattern](#per-table-tier-change-pattern) and shares the same `data-tier-enabled` opt-in mechanism.
+
+### Visual anatomy (per row, second line under the table row)
+
+```
+RETENTION  | [Analytics: <period>] [Long-term: <period>] [Lake: <period>]   PLAN CHANGE [switch]
+           | (when switch on) → Analytics target [<period>]  Long-term target [<period>]  Lake target [<period>]  [n] GB/day
+```
+
+- The chip row sits on its own row beneath the table-status row (Analytics / Long-term / Lake pills are independent and any combination can be filled in).
+- An explainer note is injected once at the top of the Tables group (“Retention is set per table; workspace defaults still apply unless overridden.”).
+- On any connector that uses per-table retention, the legacy connector-level Retention block from `initRetentionSection(prefix)` is **hidden** — do not render both.
+
+### Shared state object
+
+```javascript
+const tableRetentionState = {};
+// tableRetentionState[selectId] = {
+//   analytics, longTerm, lake,                       // current effective periods (or '' = inherit)
+//   change?: { analyticsTarget, longTermTarget, lakeTarget, gbday }  // present only when planning a change
+// };
+```
+
+- `analytics` / `longTerm` / `lake` are the *current* per-table retention periods for each tier. Empty string ⇒ inherit workspace default.
+- `change` is present only when the planner switch is on; absence means no planned change.
+- Persisted as `state.tableRetention`; restored in `applyState()` **before** the per-table UI is re-rendered.
+
+### To-do summary integration
+
+`updateTodoSummary()` walks `tableRetentionState`, computes signed deltas vs. the current effective periods, and aggregates them via the helper:
+
+```javascript
+accrueRetention(tierKey, deltaDays, gbday)
+// tierKey ∈ { 'analytics', 'longTerm', 'lake' }
+// retTier[tierKey] = { addedGB, savedGB, addedGbday, savedGbday }
+// also accumulates combined retentionAdded/Saved{GB,Gbday}
+```
+
+The block rendered under the To-do summary uses three nested elements:
+
+- `.todo-retention-primary` — bold net **GB/day** delta (signed) across all tiers and tables.
+- `.todo-retention-tiers` — per-tier breakdown (Analytics / Long-term / Lake), suppressed when only one tier is active so the primary line is not duplicated.
+- `.todo-retention-secondary` — muted total **GB** delta across the planning window.
+
+### Lite mode
+
+In Lite mode the per-table retention chips and planner are surfaced inside **Check 2** (“Defender XDR — Per-Table Ingestion”) alongside the tier-change controls. The connector card `#conn-xdr` is hidden (`body.lite-mode #conn-xdr { display: none }`) because Check 2 owns that surface. Both surfaces bind to the same selects + `tableRetentionState` entries, so the data model is identical.
+
+Lite Check 2 quick-actions (`Set all to Analytics 90d / Lake 365d`, `Reset retention plan`) and the to-do retention totals were added together — they are deliberate Lite-only ergonomics; do not replicate them in the Full table-row UI.
+
+### Adding per-table retention to a new connector
+
+1. Add `data-tier-enabled` to the `<div class="check-group">` containing the table rows (same attribute already used for tier-change). The decorator picks the group up automatically.
+2. **Hide** the legacy connector-level Retention block for that connector (it is no longer the source of truth) — see existing migrated connectors for the pattern.
+3. **Keep IDs stable** (`{prefix}-t{N}`). `tableRetentionState` is keyed by select id; renaming breaks state round-trip.
+4. Make sure the workspace-level Analytics / Long-term defaults still propagate — per-table values should display the workspace default when empty (“inherit”).
+5. Don't introduce a separate per-table state object; reuse `tableRetentionState`.
+
+### Don'ts
+
+- Don't render both the legacy connector-level Retention block and the per-table chips on the same connector — only one source of truth.
+- Don't store retention deltas anywhere other than `tableRetentionState[id].change` — the to-do summary recomputes from current vs. target on every update.
+- Don't aggregate retention across connectors at to-do time without going through `accrueRetention()`; the per-tier breakdown depends on the helper.
 
 ---
 
@@ -436,7 +508,7 @@ When a connector exposes tables that support direct Lake ingestion (e.g., `Micro
 
 ## Export
 
-- **PDF**: Expand all sections → `window.print()` with `@media print` CSS
+- **PDF**: Expand all sections → `window.print()` with `@media print` CSS. The export clones `.container` into `#report-content`, so any `@media print` rule that hides top-level layout (e.g. `.container`, `.toolbar`, `.footer`) **must be scoped with `body > …`**. An unscoped selector also hits the cloned content inside the report overlay and produces a blank printout.
 - **Excel**: `gatherState()` → build 2D array → SheetJS XLSX write → download
 - **JSON**: `gatherState()` → `JSON.stringify` → Blob download
 - **File naming**: `sentinel-assessment_{customer}_{date}.{json|xlsx}`
