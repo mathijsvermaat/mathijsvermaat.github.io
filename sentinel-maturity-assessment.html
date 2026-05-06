@@ -5159,10 +5159,10 @@
         </div>
       </div>
 
-      <!-- ===== Azure Storage Analytics ===== -->
+      <!-- ===== Azure Storage Account ===== -->
       <div class="connector-section collapsed" id="conn-storage">
         <div class="connector-header" onclick="toggleConnector('conn-storage')">
-          <h3>Azure Storage Analytics<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/azure-storage-analytics.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a>&emsp;<a href="https://learn.microsoft.com/en-us/azure/sentinel/data-connectors-reference#azure-storage-account" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/oshezaf/sentinelninja/blob/main/Solutions%20Docs/connectors/azurestorageaccount.md" target="_blank" onclick="event.stopPropagation()">Ninja ↗</a></div></h3>
+          <h3>Azure Storage Account<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/azure-storage-analytics.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a>&emsp;<a href="https://learn.microsoft.com/en-us/azure/sentinel/data-connectors-reference#azure-storage-account" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/oshezaf/sentinelninja/blob/main/Solutions%20Docs/connectors/azurestorageaccount.md" target="_blank" onclick="event.stopPropagation()">Ninja ↗</a></div></h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-storage-progress">0/0</span>
           <span class="connector-chevron">▼</span>
@@ -5171,7 +5171,7 @@
           <div class="check-group">
             <div class="check-group-title">Connector Setup</div>
             <div class="check-item">
-              <select class="status-select" id="storage-c1" data-tier="3" data-connector="Azure Storage Analytics" data-item="Diagnostic settings configured for Storage" onchange="onStatusChange(this)">
+              <select class="status-select" id="storage-c1" data-tier="3" data-connector="Azure Storage Account" data-item="Diagnostic settings configured for Storage" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="storage-c1">Diagnostic settings configured for Storage accounts<div class="check-detail">Blob, Table, Queue, and/or File storage diagnostics sent to Log Analytics</div></label>
@@ -5180,37 +5180,61 @@
           <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
-              <select class="status-select" id="storage-t1" data-tier="3" data-connector="Azure Storage Analytics" data-item="StorageBlobLogs table enabled" onchange="onStatusChange(this)">
+              <select class="status-select" id="storage-t-metrics" data-tier="3" data-connector="Azure Storage Account" data-item="AzureMetrics table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="storage-t-metrics">AzureMetrics table enabled<div class="check-detail">Storage account metrics (no DCR / Lake support)</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="storage-t-blob" data-tier="3" data-connector="Azure Storage Account" data-item="StorageBlobLogs table enabled" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="storage-t1">StorageBlobLogs table enabled</label>
+              <label for="storage-t-blob">StorageBlobLogs table enabled</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="storage-t-queue" data-tier="3" data-connector="Azure Storage Account" data-item="StorageQueueLogs table enabled" data-lake-capable="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="storage-t-queue">StorageQueueLogs table enabled</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="storage-t-table" data-tier="3" data-connector="Azure Storage Account" data-item="StorageTableLogs table enabled" data-lake-capable="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="storage-t-table">StorageTableLogs table enabled</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="storage-t-file" data-tier="3" data-connector="Azure Storage Account" data-item="StorageFileLogs table enabled" data-lake-capable="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="storage-t-file">StorageFileLogs table enabled</label>
             </div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Content Hub</div>
             <div class="check-item">
-              <select class="status-select" id="storage-ch1" data-tier="3" data-connector="Azure Storage Analytics" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
+              <select class="status-select" id="storage-ch1" data-tier="3" data-connector="Azure Storage Account" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="storage-ch1">Analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group retention-group" data-prefix="storage" data-connector="Azure Storage Analytics">
+          <div class="check-group retention-group" data-prefix="storage" data-connector="Azure Storage Account">
             <div class="check-group-title">Retention</div>
             <div class="retention-section-inline" id="storage-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
             <div class="check-item">
-              <select class="status-select" id="storage-v1" data-tier="3" data-connector="Azure Storage Analytics" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
+              <select class="status-select" id="storage-v1" data-tier="3" data-connector="Azure Storage Account" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
               <label for="storage-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
           </div>
           <div class="section-comment">
-            <label for="storage-comment">Comments / Rationale — Azure Storage Analytics</label>
-            <textarea id="storage-comment" data-connector="Azure Storage Analytics" placeholder="e.g. Blob and File diagnostics enabled for sensitive storage accounts."></textarea>
+            <label for="storage-comment">Comments / Rationale — Azure Storage Account</label>
+            <textarea id="storage-comment" data-connector="Azure Storage Account" placeholder="e.g. Blob and File diagnostics enabled for sensitive storage accounts."></textarea>
           </div>
         </div>
       </div>
@@ -7085,7 +7109,7 @@ const connectorRiskTexts = {
   'Azure DevOps': 'No Azure DevOps audit trail in Sentinel. Pipeline modifications, repository access changes, service connection abuse, and build artifact tampering invisible — supply chain attacks undetected.',
   'GitHub Enterprise': 'No GitHub audit logs in Sentinel. Repository permission changes, secret scanning events, branch protection modifications, and organization-level actions not monitored — code supply chain blind spot.',
   'Azure Kubernetes Service': 'No AKS control plane audit logs in Sentinel. Kubernetes API server activity, privilege escalation within clusters, and container escape attempts go undetected — container orchestration blind spot.',
-  'Azure Storage Analytics': 'No storage access logs in Sentinel. Blob reads, writes, and deletes on sensitive storage accounts not audited — data exfiltration from storage accounts invisible to SOC.',
+  'Azure Storage Account': 'No storage access logs in Sentinel. Blob reads, writes, and deletes on sensitive storage accounts not audited — data exfiltration from storage accounts invisible to SOC.',
   'Windows Forwarded Events': 'No centralized Windows Event Forwarding data in Sentinel. Servers not running AMA directly rely on WEF for event collection — gaps in Windows server audit trail for non-AMA environments.',
   'Microsoft Defender for IoT': 'No OT/IoT threat alerts or asset inventory in Sentinel. Industrial control system threats, unauthorized device activity, and protocol anomalies on OT networks go undetected.'
 };
@@ -8902,6 +8926,13 @@ function applyState(state) {
   }
 
   if (state.selects) {
+    // Migration: legacy 'storage-t1' (single StorageBlobLogs select) was
+    // replaced by per-table selects when the connector was renamed from
+    // Azure Storage Analytics to Azure Storage Account.
+    if (state.selects['storage-t1'] && !state.selects['storage-t-blob']) {
+      state.selects['storage-t-blob'] = state.selects['storage-t1'];
+      delete state.selects['storage-t1'];
+    }
     for (const [id, value] of Object.entries(state.selects)) {
       const el = document.getElementById(id);
       if (el) {
