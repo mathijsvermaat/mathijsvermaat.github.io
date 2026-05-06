@@ -354,6 +354,55 @@
     .connector-header .check-detail { font-size: 0.8rem; color: var(--text-light); margin-top: 2px; font-weight: 400; }
     .connector-header .check-detail a { color: var(--text-light); }
     .connector-header .check-detail a:hover { color: var(--primary); }
+
+    .btn-edit-tp-name {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 2px 6px;
+      border-radius: var(--radius);
+      line-height: 1;
+    }
+
+    .btn-edit-tp-name:hover {
+      color: var(--primary);
+      background: #e8f0fe;
+    }
+
+    .tp-name-edit {
+      flex: 1;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .tp-name-edit input {
+      flex: 1;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+    }
+
+    .tp-name-edit button {
+      padding: 3px 10px;
+      font-size: 0.78rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+
+    .tp-name-edit button.primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
     .connector-progress { font-size: 0.8rem; color: var(--text-light); min-width: 60px; text-align: right; }
     .connector-chevron { font-size: 1rem; color: var(--text-light); transition: transform 0.2s; }
     .connector-section.collapsed .connector-chevron { transform: rotate(-90deg); }
@@ -8283,6 +8332,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Inject audit-trail UI under every comment textarea
   setupCommentAuditTrails();
+  // Wire rename-on-pencil for third-party connector sections (now & on add)
+  setupThirdPartyNameEditors();
 });
 
 // ===================== COMMENT AUDIT TRAIL =====================
@@ -8396,6 +8447,134 @@ function openCommentUpdateForm(ta) {
     renderCommentUpdates(ta);
     if (typeof updateCommentsSummary === 'function') updateCommentsSummary();
   }
+}
+
+// ===================== THIRD-PARTY CONNECTOR RENAME =====================
+// Container IDs that hold dynamic third-party connector sections.
+const THIRD_PARTY_CONTAINER_IDS = [
+  'thirdparty-connectors',
+  'thirdpartyti-connectors',
+  'thirdpartyid-connectors',
+  'thirdpartyapp-connectors',
+  'thirdpartycollab-connectors',
+  'thirdpartydevops-connectors',
+  'thirdpartyot-connectors',
+];
+
+function setupThirdPartyNameEditors() {
+  THIRD_PARTY_CONTAINER_IDS.forEach(id => {
+    const container = document.getElementById(id);
+    if (!container) return;
+    container.querySelectorAll(':scope > .connector-section').forEach(attachTpNameEditor);
+    if (container.dataset.tpEditorObserved !== '1') {
+      container.dataset.tpEditorObserved = '1';
+      const obs = new MutationObserver(muts => {
+        muts.forEach(m => m.addedNodes.forEach(n => {
+          if (n.nodeType === 1 && n.classList && n.classList.contains('connector-section')) {
+            attachTpNameEditor(n);
+          }
+        }));
+      });
+      obs.observe(container, { childList: true });
+    }
+  });
+}
+
+function attachTpNameEditor(section) {
+  if (!section || section.dataset.tpEditorWired === '1') return;
+  section.dataset.tpEditorWired = '1';
+  const header = section.querySelector('.connector-header');
+  if (!header) return;
+  const h3 = header.querySelector('h3');
+  if (!h3) return;
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'btn-edit-tp-name';
+  btn.textContent = '\u270E';
+  btn.title = 'Rename connector';
+  btn.onclick = function(e) { e.stopPropagation(); openThirdPartyNameEditor(section); };
+  h3.insertAdjacentElement('afterend', btn);
+}
+
+function openThirdPartyNameEditor(section) {
+  const header = section.querySelector('.connector-header');
+  if (!header) return;
+  const h3 = header.querySelector('h3');
+  const editBtn = header.querySelector('.btn-edit-tp-name');
+  if (!h3 || !editBtn) return;
+  if (header.querySelector('.tp-name-edit')) return; // already open
+
+  const oldName = section.dataset.tpName || h3.textContent || '';
+  const wrap = document.createElement('div');
+  wrap.className = 'tp-name-edit';
+  // Stop the header click toggling the section while interacting with the form
+  wrap.addEventListener('click', e => e.stopPropagation());
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = oldName;
+  input.placeholder = 'Connector name';
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); save(); }
+    else if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+  });
+  const saveBtn = document.createElement('button');
+  saveBtn.type = 'button';
+  saveBtn.className = 'primary';
+  saveBtn.textContent = 'Save';
+  saveBtn.onclick = save;
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.onclick = cancel;
+  wrap.appendChild(input);
+  wrap.appendChild(saveBtn);
+  wrap.appendChild(cancelBtn);
+
+  h3.style.display = 'none';
+  editBtn.style.display = 'none';
+  h3.insertAdjacentElement('afterend', wrap);
+  // Keep edit button placement; insert form right after h3
+  setTimeout(() => input.focus(), 0);
+
+  function cancel() {
+    wrap.remove();
+    h3.style.display = '';
+    editBtn.style.display = '';
+  }
+  function save() {
+    const newName = input.value.trim();
+    if (!newName) { cancel(); return; }
+    if (newName !== oldName) renameThirdPartyConnector(section, newName);
+    cancel();
+  }
+}
+
+function renameThirdPartyConnector(section, newName) {
+  const oldName = section.dataset.tpName || '';
+  const oldSafe = oldName.replace(/[^a-zA-Z0-9 ]/g, '');
+  const newSafe = newName.replace(/[^a-zA-Z0-9 ]/g, '');
+
+  section.dataset.tpName = newName;
+  const h3 = section.querySelector('.connector-header h3');
+  if (h3) h3.textContent = newName;
+
+  // Update all data-connector references inside this section
+  section.querySelectorAll('[data-connector]').forEach(el => {
+    if (el.getAttribute('data-connector') === oldSafe) {
+      el.setAttribute('data-connector', newSafe);
+    }
+  });
+
+  // Update the rationale label that includes the connector name
+  const cmtLabel = section.querySelector('.section-comment label');
+  if (cmtLabel) cmtLabel.textContent = 'Comments / Rationale \u2014 ' + newName;
+
+  // Refresh derived UI
+  if (typeof updateProgress === 'function') updateProgress();
+  if (typeof updateTodoSummary === 'function') updateTodoSummary();
+  if (typeof updateAcceptedRisks === 'function') updateAcceptedRisks();
+  if (typeof updateConfigWarnings === 'function') updateConfigWarnings();
+  if (typeof updateCommentsSummary === 'function') updateCommentsSummary();
 }
 
 // ===================== SAVE / LOAD JSON =====================
@@ -8969,6 +9148,7 @@ function applyState(state) {
   // Wire audit-trail UI for any dynamically created comment textareas
   // (e.g. third-party connectors restored from the loaded state).
   if (typeof setupCommentAuditTrails === 'function') setupCommentAuditTrails();
+  if (typeof setupThirdPartyNameEditors === 'function') setupThirdPartyNameEditors();
 }
 
 function saveToJSON() {
