@@ -884,13 +884,21 @@
       gap: 6px;
     }
 
-    .manual-todo-input input {
+    .manual-todo-input input,
+    .manual-todo-input textarea {
       width: 100%;
       padding: 6px 10px;
       border: 1px solid var(--border);
       border-radius: var(--radius);
       font-size: 0.85rem;
       font-family: inherit;
+    }
+
+    .manual-todo-input textarea {
+      resize: none;
+      overflow: hidden;
+      min-height: 32px;
+      line-height: 1.45;
     }
 
     .manual-todo-input .todo-title-input {
@@ -927,6 +935,81 @@
     .manual-todo-item .todo-desc {
       color: var(--text-light);
       margin-top: 2px;
+      white-space: pre-wrap;
+    }
+
+    .manual-todo-item .todo-meta {
+      font-size: 0.72rem;
+      color: var(--text-light);
+      margin-top: 4px;
+      letter-spacing: 0.2px;
+    }
+
+    .manual-todo-item.done .todo-title,
+    .manual-todo-item.done .todo-desc {
+      text-decoration: line-through;
+      color: var(--text-light);
+    }
+
+    .manual-todo-item .btn-done-todo {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      cursor: pointer;
+      font-size: 0.95rem;
+      padding: 2px 6px;
+      border-radius: var(--radius);
+      line-height: 1;
+    }
+
+    .manual-todo-item .btn-done-todo:hover {
+      color: var(--success);
+      background: #e8f7ed;
+    }
+
+    .manual-todo-item.done .btn-done-todo {
+      color: var(--success);
+    }
+
+    .manual-todo-item.done .btn-done-todo:hover {
+      color: var(--text-light);
+      background: var(--secondary);
+    }
+
+    .todo-completed-header {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .todo-completed-header .completed-count {
+      background: var(--secondary);
+      color: var(--text-light);
+      padding: 1px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+    }
+
+    .todo-completed-header .completed-chevron {
+      transition: transform 0.15s;
+    }
+
+    .todo-completed-header.collapsed .completed-chevron {
+      transform: rotate(-90deg);
+    }
+
+    .todo-completed-header.collapsed + .manual-todo-list {
+      display: none;
     }
 
     .manual-todo-item .btn-remove-todo {
@@ -959,6 +1042,86 @@
       background: #e8f0fe;
     }
 
+    .manual-todo-item .btn-update-todo {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 2px 6px;
+      border-radius: var(--radius);
+      line-height: 1;
+    }
+
+    .manual-todo-item .btn-update-todo:hover {
+      color: var(--primary);
+      background: #e8f0fe;
+    }
+
+    .todo-updates {
+      margin-top: 6px;
+      padding-left: 10px;
+      border-left: 2px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .todo-update {
+      font-size: 0.8rem;
+      color: var(--text);
+      white-space: pre-wrap;
+    }
+
+    .todo-update-time {
+      display: block;
+      font-size: 0.7rem;
+      color: var(--text-light);
+      letter-spacing: 0.2px;
+      margin-bottom: 1px;
+    }
+
+    .todo-update-form {
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .todo-update-form textarea {
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-family: inherit;
+      resize: none;
+      overflow: hidden;
+      min-height: 28px;
+      line-height: 1.45;
+    }
+
+    .todo-update-form .todo-update-actions {
+      display: flex;
+      gap: 6px;
+      align-self: flex-end;
+    }
+
+    .todo-update-form button {
+      padding: 3px 10px;
+      font-size: 0.78rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+
+    .todo-update-form button.primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
     .todo-edit {
       flex: 1;
       display: flex;
@@ -972,6 +1135,13 @@
       border-radius: 4px;
       font-size: 0.82rem;
       font-family: inherit;
+    }
+
+    textarea.todo-edit-input {
+      resize: none;
+      overflow: hidden;
+      min-height: 28px;
+      line-height: 1.45;
     }
 
     .todo-edit-input:focus {
@@ -1206,6 +1376,91 @@
       font-size: 0.85rem;
       font-family: inherit;
       resize: vertical;
+    }
+
+    .section-comment .comment-updates {
+      margin-top: 8px;
+      padding-left: 10px;
+      border-left: 2px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .section-comment .comment-update {
+      font-size: 0.8rem;
+      color: var(--text);
+      white-space: pre-wrap;
+    }
+
+    .section-comment .comment-update-time {
+      display: block;
+      font-size: 0.7rem;
+      color: var(--text-light);
+      letter-spacing: 0.2px;
+      margin-bottom: 1px;
+    }
+
+    .section-comment .comment-update-actions-inline {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .section-comment .btn-comment-update {
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-light);
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+
+    .section-comment .btn-comment-update:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .section-comment .comment-update-form {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .section-comment .comment-update-form textarea {
+      min-height: 36px;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.82rem;
+      font-family: inherit;
+      resize: none;
+      overflow: hidden;
+      line-height: 1.45;
+    }
+
+    .section-comment .comment-update-form .actions {
+      display: flex;
+      gap: 6px;
+      align-self: flex-end;
+    }
+
+    .section-comment .comment-update-form button {
+      padding: 3px 10px;
+      font-size: 0.78rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+
+    .section-comment .comment-update-form button.primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
     }
 
     .expansion-section {
@@ -2074,11 +2329,15 @@
       <div id="manual-todo-list" class="manual-todo-list"></div>
       <div class="manual-todo-input">
         <div class="todo-fields">
-          <input type="text" id="manual-todo-title" class="todo-title-input" placeholder="Title — e.g. Configure Syslog forwarding" onkeydown="if(event.key==='Enter')document.getElementById('manual-todo-desc').focus()">
-          <input type="text" id="manual-todo-desc" placeholder="Description (optional) — e.g. Set up rsyslog on all Linux servers to forward auth.log" onkeydown="if(event.key==='Enter')addManualTodo()">
+          <input type="text" id="manual-todo-title" class="todo-title-input" placeholder="Title — e.g. Configure Syslog forwarding" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();document.getElementById('manual-todo-desc').focus();}">
+          <textarea id="manual-todo-desc" rows="1" placeholder="Description (optional, Ctrl+Enter to add) — e.g. Set up rsyslog on all Linux servers to forward auth.log" oninput="autoGrowTextarea(this)" onkeydown="handleManualTodoDescKey(event)"></textarea>
         </div>
         <button class="btn-icon" onclick="addManualTodo()" title="Add to-do item">+</button>
       </div>
+      <div class="todo-completed-header collapsed" id="todo-completed-header" onclick="toggleManualTodoCompleted()" style="display:none;">
+        <span class="completed-chevron">▼</span><span>Completed</span><span class="completed-count" id="todo-completed-count">0</span>
+      </div>
+      <div id="manual-todo-completed-list" class="manual-todo-list" style="display:none;"></div>
     </div>
   </div>
 
@@ -6420,33 +6679,238 @@ function toggleNotesEdit() {
 }
 
 // ===================== MANUAL TO DO ITEMS =====================
-function addManualTodo(title, desc) {
+function autoGrowTextarea(ta) {
+  if (!ta) return;
+  ta.style.height = 'auto';
+  ta.style.height = ta.scrollHeight + 'px';
+}
+
+function handleManualTodoDescKey(event) {
+  // Ctrl/Cmd+Enter submits the new to-do; plain Enter inserts a newline.
+  if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+    event.preventDefault();
+    addManualTodo();
+  }
+}
+
+function formatTodoDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const now = new Date();
+  const diffMs = now - d;
+  const dayMs = 86400000;
+  const diffDays = Math.floor(diffMs / dayMs);
+  if (diffDays < 1) {
+    const diffHours = Math.floor(diffMs / 3600000);
+    if (diffHours < 1) return 'just now';
+    return diffHours === 1 ? '1 hour ago' : diffHours + ' hours ago';
+  }
+  if (diffDays < 7) {
+    return diffDays === 1 ? '1 day ago' : diffDays + ' days ago';
+  }
+  return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function renderManualTodoText(item) {
+  const textDiv = item.querySelector('.todo-text');
+  if (!textDiv) return;
+  // Preserve any in-progress update form so it isn't wiped on re-render.
+  const existingForm = textDiv.querySelector('.todo-update-form');
+  textDiv.innerHTML = '';
+  const tDiv = document.createElement('div');
+  tDiv.className = 'todo-title';
+  tDiv.textContent = item.dataset.todoTitle || '';
+  textDiv.appendChild(tDiv);
+  if (item.dataset.todoDesc) {
+    const dDiv = document.createElement('div');
+    dDiv.className = 'todo-desc';
+    dDiv.textContent = item.dataset.todoDesc;
+    textDiv.appendChild(dDiv);
+  }
+
+  // Updates / audit trail
+  const updates = getManualTodoUpdates(item);
+  if (updates.length) {
+    const list = document.createElement('div');
+    list.className = 'todo-updates';
+    updates.forEach(u => {
+      const row = document.createElement('div');
+      row.className = 'todo-update';
+      const ts = document.createElement('span');
+      ts.className = 'todo-update-time';
+      ts.textContent = formatTodoDate(u.at);
+      row.appendChild(ts);
+      row.appendChild(document.createTextNode(u.text || ''));
+      list.appendChild(row);
+    });
+    textDiv.appendChild(list);
+  }
+
+  const meta = document.createElement('div');
+  meta.className = 'todo-meta';
+  const created = item.dataset.todoCreatedAt;
+  const completed = item.dataset.todoCompletedAt;
+  const parts = [];
+  if (created) parts.push('Added ' + formatTodoDate(created));
+  if (item.dataset.todoDone === '1' && completed) parts.push('completed ' + formatTodoDate(completed));
+  meta.textContent = parts.join(' • ');
+  if (parts.length) textDiv.appendChild(meta);
+
+  if (existingForm) textDiv.appendChild(existingForm);
+}
+
+function getManualTodoUpdates(item) {
+  try {
+    const raw = item.dataset.todoUpdates;
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function setManualTodoUpdates(item, updates) {
+  item.dataset.todoUpdates = JSON.stringify(updates || []);
+}
+
+function openManualTodoUpdateForm(item) {
+  const textDiv = item.querySelector('.todo-text');
+  if (!textDiv) return;
+  if (textDiv.querySelector('.todo-update-form')) return; // already open
+
+  const form = document.createElement('div');
+  form.className = 'todo-update-form';
+  const ta = document.createElement('textarea');
+  ta.rows = 1;
+  ta.placeholder = 'Update note (Ctrl+Enter to save) — e.g. raised ticket INC1234';
+  ta.addEventListener('input', function() { autoGrowTextarea(ta); });
+  ta.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); save(); }
+    else if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+  });
+  const actions = document.createElement('div');
+  actions.className = 'todo-update-actions';
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.onclick = cancel;
+  const saveBtn = document.createElement('button');
+  saveBtn.type = 'button';
+  saveBtn.className = 'primary';
+  saveBtn.textContent = 'Add update';
+  saveBtn.onclick = save;
+  actions.appendChild(cancelBtn);
+  actions.appendChild(saveBtn);
+  form.appendChild(ta);
+  form.appendChild(actions);
+  textDiv.appendChild(form);
+  ta.focus();
+  setTimeout(function() { autoGrowTextarea(ta); }, 0);
+
+  function cancel() { form.remove(); }
+  function save() {
+    const text = ta.value.trim();
+    if (!text) { cancel(); return; }
+    const updates = getManualTodoUpdates(item);
+    updates.push({ at: new Date().toISOString(), text: text });
+    setManualTodoUpdates(item, updates);
+    form.remove();
+    renderManualTodoText(item);
+  }
+}
+
+function refreshManualTodoCompletedHeader() {
+  const header = document.getElementById('todo-completed-header');
+  const list = document.getElementById('manual-todo-completed-list');
+  const countEl = document.getElementById('todo-completed-count');
+  if (!header || !list || !countEl) return;
+  const count = list.querySelectorAll('.manual-todo-item').length;
+  countEl.textContent = count;
+  if (count === 0) {
+    header.style.display = 'none';
+    list.style.display = 'none';
+  } else {
+    header.style.display = '';
+    if (!header.classList.contains('collapsed')) list.style.display = '';
+  }
+}
+
+function toggleManualTodoCompleted() {
+  const header = document.getElementById('todo-completed-header');
+  const list = document.getElementById('manual-todo-completed-list');
+  if (!header || !list) return;
+  header.classList.toggle('collapsed');
+  list.style.display = header.classList.contains('collapsed') ? 'none' : '';
+}
+
+function toggleManualTodoDone(item) {
+  const isDone = item.dataset.todoDone === '1';
+  if (isDone) {
+    // Reopen
+    item.dataset.todoDone = '0';
+    item.dataset.todoCompletedAt = '';
+    item.classList.remove('done');
+    document.getElementById('manual-todo-list').appendChild(item);
+    const doneBtn = item.querySelector('.btn-done-todo');
+    if (doneBtn) { doneBtn.textContent = '○'; doneBtn.title = 'Mark as done'; }
+  } else {
+    // Complete
+    item.dataset.todoDone = '1';
+    item.dataset.todoCompletedAt = new Date().toISOString();
+    item.classList.add('done');
+    document.getElementById('manual-todo-completed-list').appendChild(item);
+    const doneBtn = item.querySelector('.btn-done-todo');
+    if (doneBtn) { doneBtn.textContent = '↺'; doneBtn.title = 'Reopen'; }
+  }
+  renderManualTodoText(item);
+  refreshManualTodoCompletedHeader();
+  updateTodoSummary();
+}
+
+function addManualTodo(title, desc, opts) {
   const titleInput = document.getElementById('manual-todo-title');
   const descInput  = document.getElementById('manual-todo-desc');
   const todoTitle = title || (titleInput ? titleInput.value.trim() : '');
   const todoDesc  = desc  || (descInput  ? descInput.value.trim()  : '');
   if (!todoTitle) return;
-  if (titleInput) titleInput.value = '';
-  if (descInput)  descInput.value  = '';
+  const fromForm = !title;
+  if (fromForm) {
+    if (titleInput) titleInput.value = '';
+    if (descInput)  { descInput.value  = ''; autoGrowTextarea(descInput); }
+  }
 
-  const container = document.getElementById('manual-todo-list');
+  const o = opts || {};
+  const createdAt = o.createdAt || new Date().toISOString();
+  const done = o.done === true;
+  const completedAt = o.completedAt || '';
+  const updates = Array.isArray(o.updates) ? o.updates : [];
+
   const item = document.createElement('div');
-  item.className = 'manual-todo-item';
+  item.className = 'manual-todo-item' + (done ? ' done' : '');
   item.dataset.todoTitle = todoTitle;
   item.dataset.todoDesc  = todoDesc;
+  item.dataset.todoCreatedAt = createdAt;
+  item.dataset.todoDone = done ? '1' : '0';
+  item.dataset.todoCompletedAt = completedAt;
+  item.dataset.todoUpdates = JSON.stringify(updates);
 
   const textDiv = document.createElement('div');
   textDiv.className = 'todo-text';
-  const tDiv = document.createElement('div');
-  tDiv.className = 'todo-title';
-  tDiv.textContent = todoTitle;
-  textDiv.appendChild(tDiv);
-  if (todoDesc) {
-    const dDiv = document.createElement('div');
-    dDiv.className = 'todo-desc';
-    dDiv.textContent = todoDesc;
-    textDiv.appendChild(dDiv);
-  }
+  item.appendChild(textDiv);
+
+  const doneBtn = document.createElement('button');
+  doneBtn.className = 'btn-done-todo';
+  doneBtn.textContent = done ? '↺' : '○';
+  doneBtn.title = done ? 'Reopen' : 'Mark as done';
+  doneBtn.onclick = function() { toggleManualTodoDone(item); };
+
+  const updateBtn = document.createElement('button');
+  updateBtn.className = 'btn-update-todo';
+  updateBtn.textContent = '💬';
+  updateBtn.title = 'Add timestamped update';
+  updateBtn.onclick = function() { openManualTodoUpdateForm(item); };
 
   const editBtn = document.createElement('button');
   editBtn.className = 'btn-edit-todo';
@@ -6454,19 +6918,26 @@ function addManualTodo(title, desc) {
   editBtn.title = 'Edit to-do';
   editBtn.onclick = function() { editManualTodo(item); };
 
-  const btn = document.createElement('button');
-  btn.className = 'btn-remove-todo';
-  btn.textContent = '✕';
-  btn.title = 'Remove to-do';
-  btn.onclick = function() {
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'btn-remove-todo';
+  removeBtn.textContent = '✕';
+  removeBtn.title = 'Remove to-do';
+  removeBtn.onclick = function() {
     item.remove();
+    refreshManualTodoCompletedHeader();
     updateTodoSummary();
   };
 
-  item.appendChild(textDiv);
+  item.appendChild(doneBtn);
+  item.appendChild(updateBtn);
   item.appendChild(editBtn);
-  item.appendChild(btn);
-  container.appendChild(item);
+  item.appendChild(removeBtn);
+
+  const targetId = done ? 'manual-todo-completed-list' : 'manual-todo-list';
+  document.getElementById(targetId).appendChild(item);
+
+  renderManualTodoText(item);
+  refreshManualTodoCompletedHeader();
   updateTodoSummary();
 }
 
@@ -6486,27 +6957,33 @@ function editManualTodo(item) {
   titleInput.className = 'todo-edit-input';
   titleInput.value = currentTitle;
   titleInput.placeholder = 'Title';
-  const descInput = document.createElement('input');
-  descInput.type = 'text';
+  const descInput = document.createElement('textarea');
   descInput.className = 'todo-edit-input todo-edit-desc';
+  descInput.rows = 1;
   descInput.value = currentDesc;
-  descInput.placeholder = 'Description (optional)';
+  descInput.placeholder = 'Description (optional, Ctrl+Enter to save)';
+  descInput.addEventListener('input', function() { autoGrowTextarea(descInput); });
   editDiv.appendChild(titleInput);
   editDiv.appendChild(descInput);
 
   textDiv.style.display = 'none';
-  item.insertBefore(editDiv, editBtn);
+  item.insertBefore(editDiv, item.querySelector('.btn-done-todo') || editBtn);
   titleInput.focus();
+  // Defer auto-grow until the textarea is in the DOM
+  setTimeout(function() { autoGrowTextarea(descInput); }, 0);
 
   // Change edit button to save
   editBtn.textContent = '💾';
   editBtn.title = 'Save changes';
   editBtn.onclick = function() { saveManualTodoEdit(item, editDiv, titleInput, descInput, textDiv, editBtn); };
 
-  // Save on Enter from either input
-  const onEnter = function(e) { if (e.key === 'Enter') editBtn.click(); };
-  titleInput.addEventListener('keydown', onEnter);
-  descInput.addEventListener('keydown', onEnter);
+  // Save on Enter (title) or Ctrl/Cmd+Enter (description, since plain Enter inserts a newline)
+  titleInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); editBtn.click(); }
+  });
+  descInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); editBtn.click(); }
+  });
 }
 
 function saveManualTodoEdit(item, editDiv, titleInput, descInput, textDiv, editBtn) {
@@ -6517,21 +6994,9 @@ function saveManualTodoEdit(item, editDiv, titleInput, descInput, textDiv, editB
   item.dataset.todoTitle = newTitle;
   item.dataset.todoDesc = newDesc;
 
-  // Rebuild text display
-  textDiv.innerHTML = '';
-  const tDiv = document.createElement('div');
-  tDiv.className = 'todo-title';
-  tDiv.textContent = newTitle;
-  textDiv.appendChild(tDiv);
-  if (newDesc) {
-    const dDiv = document.createElement('div');
-    dDiv.className = 'todo-desc';
-    dDiv.textContent = newDesc;
-    textDiv.appendChild(dDiv);
-  }
-
   textDiv.style.display = '';
   editDiv.remove();
+  renderManualTodoText(item);
 
   // Restore edit button
   editBtn.textContent = '✎';
@@ -7815,12 +8280,128 @@ document.addEventListener('DOMContentLoaded', () => {
       updateCommentsSummary();
     }
   });
+
+  // Inject audit-trail UI under every comment textarea
+  setupCommentAuditTrails();
 });
+
+// ===================== COMMENT AUDIT TRAIL =====================
+function setupCommentAuditTrails() {
+  document.querySelectorAll('.section-comment textarea[data-connector]').forEach(ta => {
+    if (ta.dataset.auditWired === '1') return;
+    ta.dataset.auditWired = '1';
+    if (!ta.dataset.commentUpdates) ta.dataset.commentUpdates = '[]';
+
+    const wrapper = ta.parentElement; // .section-comment
+    const updatesDiv = document.createElement('div');
+    updatesDiv.className = 'comment-updates';
+    updatesDiv.style.display = 'none';
+
+    const actionsRow = document.createElement('div');
+    actionsRow.className = 'comment-update-actions-inline';
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.className = 'btn-comment-update';
+    addBtn.textContent = '💬 Add timestamped update';
+    addBtn.title = 'Append a dated note to this comment for audit trail';
+    addBtn.onclick = function() { openCommentUpdateForm(ta); };
+    actionsRow.appendChild(addBtn);
+
+    wrapper.appendChild(updatesDiv);
+    wrapper.appendChild(actionsRow);
+
+    renderCommentUpdates(ta);
+  });
+}
+
+function getCommentUpdates(ta) {
+  try {
+    const arr = JSON.parse(ta.dataset.commentUpdates || '[]');
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function setCommentUpdates(ta, updates) {
+  ta.dataset.commentUpdates = JSON.stringify(updates || []);
+}
+
+function renderCommentUpdates(ta) {
+  const wrapper = ta.parentElement;
+  if (!wrapper) return;
+  const list = wrapper.querySelector('.comment-updates');
+  if (!list) return;
+  const updates = getCommentUpdates(ta);
+  list.innerHTML = '';
+  if (!updates.length) {
+    list.style.display = 'none';
+    return;
+  }
+  list.style.display = '';
+  updates.forEach((u, idx) => {
+    const row = document.createElement('div');
+    row.className = 'comment-update';
+    const ts = document.createElement('span');
+    ts.className = 'comment-update-time';
+    ts.textContent = formatTodoDate(u.at);
+    row.appendChild(ts);
+    row.appendChild(document.createTextNode(u.text || ''));
+    list.appendChild(row);
+  });
+}
+
+function openCommentUpdateForm(ta) {
+  const wrapper = ta.parentElement;
+  if (!wrapper) return;
+  if (wrapper.querySelector('.comment-update-form')) return; // already open
+
+  const form = document.createElement('div');
+  form.className = 'comment-update-form';
+  const input = document.createElement('textarea');
+  input.rows = 1;
+  input.placeholder = 'Update note (Ctrl+Enter to save) — e.g. retention extended to 365 days on 6 May';
+  input.addEventListener('input', function() { autoGrowTextarea(input); });
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); save(); }
+    else if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+  });
+  const actions = document.createElement('div');
+  actions.className = 'actions';
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.onclick = cancel;
+  const saveBtn = document.createElement('button');
+  saveBtn.type = 'button';
+  saveBtn.className = 'primary';
+  saveBtn.textContent = 'Add update';
+  saveBtn.onclick = save;
+  actions.appendChild(cancelBtn);
+  actions.appendChild(saveBtn);
+  form.appendChild(input);
+  form.appendChild(actions);
+  wrapper.appendChild(form);
+  input.focus();
+  setTimeout(function() { autoGrowTextarea(input); }, 0);
+
+  function cancel() { form.remove(); }
+  function save() {
+    const text = input.value.trim();
+    if (!text) { cancel(); return; }
+    const updates = getCommentUpdates(ta);
+    updates.push({ at: new Date().toISOString(), text: text });
+    setCommentUpdates(ta, updates);
+    form.remove();
+    renderCommentUpdates(ta);
+    if (typeof updateCommentsSummary === 'function') updateCommentsSummary();
+  }
+}
 
 // ===================== SAVE / LOAD JSON =====================
 function gatherState() {
   const state = {
-    version: 3,
+    version: 4,
     exportedAt: new Date().toISOString(),
     meta: {
       customer: document.getElementById('customer-name').value,
@@ -7837,6 +8418,7 @@ function gatherState() {
     },
     selects: {},
     comments: {},
+    commentUpdates: {},
     retentionSections: {},
     gbdayValues: {},
     tablePlanValues: {},
@@ -7858,6 +8440,11 @@ function gatherState() {
 
   document.querySelectorAll('textarea[data-connector]').forEach(ta => {
     state.comments[ta.id] = ta.value;
+    let updates = [];
+    try { updates = JSON.parse(ta.dataset.commentUpdates || '[]'); } catch (e) { updates = []; }
+    if (Array.isArray(updates) && updates.length) {
+      state.commentUpdates[ta.id] = updates;
+    }
   });
 
   // Save workspace default retention
@@ -7982,8 +8569,17 @@ function gatherState() {
   });
 
   // Save manual to-do items
-  document.querySelectorAll('#manual-todo-list .manual-todo-item').forEach(item => {
-    state.manualTodos.push({ title: item.dataset.todoTitle, desc: item.dataset.todoDesc || '' });
+  document.querySelectorAll('#manual-todo-list .manual-todo-item, #manual-todo-completed-list .manual-todo-item').forEach(item => {
+    let updates = [];
+    try { updates = JSON.parse(item.dataset.todoUpdates || '[]'); } catch (e) { updates = []; }
+    state.manualTodos.push({
+      title: item.dataset.todoTitle,
+      desc: item.dataset.todoDesc || '',
+      createdAt: item.dataset.todoCreatedAt || '',
+      done: item.dataset.todoDone === '1',
+      completedAt: item.dataset.todoCompletedAt || '',
+      updates: Array.isArray(updates) ? updates : []
+    });
   });
 
   // Save planned expansions
@@ -8153,6 +8749,16 @@ function applyState(state) {
     }
   }
 
+  if (state.commentUpdates) {
+    for (const [id, updates] of Object.entries(state.commentUpdates)) {
+      const el = document.getElementById(id);
+      if (el && Array.isArray(updates)) {
+        el.dataset.commentUpdates = JSON.stringify(updates);
+        renderCommentUpdates(el);
+      }
+    }
+  }
+
   // Restore retention period selections (dropdowns were created by onStatusChange above)
   // Restore workspace default retention first
   if (state.meta && state.meta.workspaceRetention) {
@@ -8266,14 +8872,24 @@ function applyState(state) {
   // Restore manual to-do items
   if (state.manualTodos) {
     document.getElementById('manual-todo-list').innerHTML = '';
+    const completedList = document.getElementById('manual-todo-completed-list');
+    if (completedList) completedList.innerHTML = '';
+    const fallbackCreatedAt = state.exportedAt || new Date().toISOString();
     state.manualTodos.forEach(item => {
       if (typeof item === 'string') {
-        // Backward compat with v3 saves that stored plain strings
-        addManualTodo(item, '');
+        // v1 backward compat: plain title string
+        addManualTodo(item, '', { createdAt: fallbackCreatedAt, done: false });
       } else {
-        addManualTodo(item.title, item.desc);
+        // v3 entries had only {title, desc}; backfill the new fields.
+        addManualTodo(item.title, item.desc, {
+          createdAt: item.createdAt || fallbackCreatedAt,
+          done: item.done === true,
+          completedAt: item.completedAt || '',
+          updates: Array.isArray(item.updates) ? item.updates : []
+        });
       }
     });
+    refreshManualTodoCompletedHeader();
   }
 
   // Restore planned expansions
@@ -8350,6 +8966,9 @@ function applyState(state) {
   updateAcceptedRisks();
   updateConfigWarnings();
   updateCommentsSummary();
+  // Wire audit-trail UI for any dynamically created comment textareas
+  // (e.g. third-party connectors restored from the loaded state).
+  if (typeof setupCommentAuditTrails === 'function') setupCommentAuditTrails();
 }
 
 function saveToJSON() {
@@ -8454,13 +9073,23 @@ function exportToExcel() {
 
   // Add comments
   rows.push([]);
-  rows.push(['Tier', 'Connector', 'Comment']);
+  rows.push(['Tier', 'Connector', 'Comment', 'Updates']);
+  const fmtDay = iso => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+  };
   document.querySelectorAll('textarea[data-connector]').forEach(ta => {
-    if (ta.value.trim()) {
+    let updates = [];
+    try { updates = JSON.parse(ta.dataset.commentUpdates || '[]'); } catch (e) { updates = []; }
+    const updatesText = (Array.isArray(updates) ? updates : [])
+      .map(u => fmtDay(u.at) + ': ' + (u.text || ''))
+      .join('\n');
+    if (ta.value.trim() || updatesText) {
       const connector = ta.dataset.connector;
       const tierSection = ta.closest('.tier-section');
       const tier = tierSection ? tierSection.id.replace('tier-', 'Tier ') : '';
-      rows.push([tier, connector, ta.value.trim()]);
+      rows.push([tier, connector, ta.value.trim(), updatesText]);
     }
   });
 
@@ -8482,6 +9111,37 @@ function exportToExcel() {
       rows.push([tier, connector, category, item]);
     }
   });
+
+  // Add manual To Do items (active + completed) with timestamps
+  const manualItems = document.querySelectorAll(
+    '#manual-todo-list .manual-todo-item, #manual-todo-completed-list .manual-todo-item'
+  );
+  if (manualItems.length) {
+    rows.push([]);
+    rows.push(['TO DO — Manual Items']);
+    rows.push(['Title', 'Description', 'Created', 'Status', 'Completed', 'Updates']);
+    const fmt = iso => {
+      if (!iso) return '';
+      const d = new Date(iso);
+      return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+    };
+    manualItems.forEach(item => {
+      const done = item.dataset.todoDone === '1';
+      let updates = [];
+      try { updates = JSON.parse(item.dataset.todoUpdates || '[]'); } catch (e) { updates = []; }
+      const updatesText = (Array.isArray(updates) ? updates : [])
+        .map(u => fmt(u.at) + ': ' + (u.text || ''))
+        .join('\n');
+      rows.push([
+        item.dataset.todoTitle || '',
+        item.dataset.todoDesc || '',
+        fmt(item.dataset.todoCreatedAt),
+        done ? 'Completed' : 'Open',
+        done ? fmt(item.dataset.todoCompletedAt) : '',
+        updatesText
+      ]);
+    });
+  }
 
   // Create workbook
   const wb = XLSX.utils.book_new();
