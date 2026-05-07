@@ -5641,21 +5641,42 @@ function filterConnectors(query) {
     return;
   }
 
-  // Filter connectors by name (h3 text in header)
+  // First pass: hide every connector. We'll selectively un-hide matches and
+  // their ancestor containers below. Dynamic third-party connectors (Palo
+  // Alto, Okta, ServiceNow, ...) are rendered as nested .connector-section
+  // elements inside parent containers like #conn-thirdparty, so a simple
+  // direct-text match on the parent's h3 isn't enough — we need to propagate
+  // matches upward to keep the parent (and its body) visible and expanded.
   allConnectors.forEach(section => {
-    const header = section.querySelector('.connector-header h3');
+    section.classList.add('search-hidden');
+  });
+
+  // Second pass: identify matches and propagate visibility to ancestors.
+  allConnectors.forEach(section => {
+    const header = section.querySelector(':scope > .connector-header h3');
     const name = header ? header.textContent.toLowerCase() : '';
-    if (name.includes(q)) {
-      section.classList.remove('search-hidden', 'collapsed');
-      // Also expand parent tier
-      const tier = section.closest('.tier-section');
-      if (tier) tier.classList.remove('collapsed');
-    } else {
-      section.classList.add('search-hidden');
+    if (!name.includes(q)) return;
+
+    // Reveal and expand the matching section
+    section.classList.remove('search-hidden', 'collapsed');
+
+    // Walk up: reveal and expand every ancestor connector-section so the
+    // match is actually rendered (parent .connector-body must not be
+    // collapsed and parent must not be display:none).
+    let parent = section.parentElement;
+    while (parent) {
+      if (parent.classList && parent.classList.contains('connector-section')) {
+        parent.classList.remove('search-hidden', 'collapsed');
+      }
+      if (parent.classList && parent.classList.contains('tier-section')) {
+        parent.classList.remove('collapsed');
+        break; // tier-section is the outermost relevant container
+      }
+      parent = parent.parentElement;
     }
   });
 
-  // Hide tiers where all connectors are hidden
+  // Hide tiers where no connectors are visible.
   allTiers.forEach(tier => {
     const visible = tier.querySelectorAll('.connector-section:not(.search-hidden)');
     if (visible.length === 0) {
