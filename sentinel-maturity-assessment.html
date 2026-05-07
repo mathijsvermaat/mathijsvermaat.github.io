@@ -4421,6 +4421,9 @@
           <span class="connector-chevron">▼</span>
         </div>
         <div class="connector-body">
+          <div class="connector-note">
+            <strong>Note:</strong> Azure Firewall is both a <strong>Sentinel data connector</strong> (install the <em>Azure Firewall</em> solution from Content Hub for analytic rules and workbooks) <strong>and</strong> a resource that requires <strong>diagnostic settings</strong> on every firewall instance. Logs are emitted only when diagnostic settings are enabled in <strong>resource-specific mode</strong> (per-table <code>AZFW*</code> destinations) — not via the legacy <code>AzureDiagnostics</code> table. Both steps are required for ingestion.
+          </div>
           <div class="check-group">
             <div class="check-group-title">Connector Setup</div>
             <div class="check-item">
