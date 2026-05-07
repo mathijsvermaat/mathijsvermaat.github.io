@@ -13,7 +13,7 @@ A separate repo (`mathijsvermaat/Sentinel-Maturity`) contains the markdown guida
 1. **Never commit or push** unless explicitly asked.
 2. **Single-file architecture**: All CSS, HTML, and JS live in one file. No external files except the SheetJS CDN.
 3. **No frameworks**: Pure vanilla HTML/CSS/JS only.
-4. **Save format version**: Currently **version 3**. If you change the JSON schema, increment the version and handle backward compatibility in `applyState()`.
+4. **Save format version**: Currently **version 4**. If you change the JSON schema, increment the version and handle backward compatibility in `applyState()`. Existing migrations include v1 (checkbox booleans → select values), `archive: "Yes" → totalOverride: "override"`, `storage-t1 → storage-t-blob`, and the `purview-* → purviewip-* / purviewdm-*` split (selects, retention-prefix, comments, commentUpdates).
 5. **Spelling**: Use British English (organisation, defence, behaviour, specialised, etc.).
 6. **Do not redesign or restructure existing features** unless explicitly asked. When asked to add a wrapper, integration, or trigger for an existing feature, preserve the original layout, fields, and behaviour exactly as they are.
 
@@ -243,23 +243,33 @@ Dynamic connector IDs: `conn-{type}{N}` (e.g., `conn-thirdparty1`, `conn-thirdpa
 
 ---
 
-## Save/Load JSON Schema (Version 3)
+## Save/Load JSON Schema (Version 4)
 
 ```javascript
 {
-  version: 3,
+  version: 4,
   exportedAt: "ISO-8601",
   meta: {
     customer, assessor, date, workspace,
-    e5Licenses, p2Licenses, notes, workspaceRetention
+    e5Licenses, p2Licenses,
+    totalUsers, windowsWorkloads, linuxWorkloads,
+    msspName, notes,
+    workspaceRetention, workspaceTotalRetention
   },
   selects: { "selectId": "status value" },
   comments: { "textareaId": "comment text" },
+  commentUpdates: { "textareaId": [{ at, text }, ...] },   // v4: comment audit trail
   retentionSections: {
     "prefix": {
       override, analytics, totalOverride, total,
       change, changeAnalyticsTarget, changeAnalyticsGbday,
       changeTotalTarget, changeTotalGbday
+    }
+  },
+  tableRetention: {                                          // per-table retention overrides + planning
+    "selectId": {
+      analytics, longTerm, lake,
+      change?: { analyticsTarget, longTermTarget, lakeTarget, gbday, open }
     }
   },
   gbdayValues: { "inputId": number },
@@ -272,17 +282,21 @@ Dynamic connector IDs: `conn-{type}{N}` (e.g., `conn-thirdparty1`, `conn-thirdpa
   customAppConnectors: [...],
   thirdPartyDevOpsConnectors: [...],
   thirdPartyOTConnectors: [...],
-  manualTodos: [{ title, desc }],
+  thirdPartyTables: { "inputId": "TableName_CL" },           // editable per-section table-name
+  manualTodos: [{                                            // v4: enriched
+    title, desc, createdAt, done, completedAt,
+    updates: [{ at, text }, ...]
+  }],
   expansions: {
     "prefix": { desc, gbday, plan: "Analytics"|"Data Lake" }
   },
-  xdrTierChange: {
-    "xdr-tN": { tier: "Analytics"|"Lake", gbday: "number-as-string" }
+  xdrTierChange: {                                           // per-table tier-change plan
+    "selectId": { tier: "Analytics"|"Lake", gbday: "number-as-string" }
   }
 }
 ```
 
-**Backward compatibility**: v1 files are auto-migrated on load (checkbox booleans → select values).
+**Backward compatibility**: see `applyState()` for active migrations (v1 booleans, `archive` → `totalOverride`, `storage-t1` → `storage-t-blob`, `purview-*` → `purviewip-*` / `purviewdm-*` for selects, retention prefixes, comments and commentUpdates).
 
 ---
 
@@ -423,7 +437,9 @@ Lite Check 2 quick-actions (`Set all to Analytics 90d / Lake 365d`, `Reset reten
 
 ## Per-Table Tier-Change Pattern (Lake-capable connectors)
 
-Several connectors (Defender XDR today; Azure Activity, Entra ID, Defender for Cloud, etc. planned) expose tables that can be routed to **Analytics** or **Sentinel Data Lake**. The assessment surfaces a unified "Change tier" planning UI for these tables — identical in Full and Lite mode.
+Several connectors expose tables that can be routed to **Analytics** or **Sentinel Data Lake** (Defender XDR, Azure Activity, Entra ID, Defender for Cloud, Azure Firewall, Storage Account, third-party connectors, ...). The assessment surfaces a unified "Change tier" planning UI for these tables — identical in Full and Lite mode.
+
+> **Naming caveat:** the shared state object and helper functions are still named `xdrTierChangeState` / `setXdrTierChangePlanned` / `initXdrTierChangeControls` for historical reasons, but the implementation is **fully generic** — it decorates every `.check-group[data-tier-enabled]` regardless of connector. Treat the `xdr` prefix as legacy; do not assume XDR-specific behaviour.
 
 ### Visual anatomy (per row)
 
@@ -456,6 +472,14 @@ const xdrTierChangeState = {};   // { [selectId]: { tier, gbday } }
 ```
 
 Current tier is derived from `liteValueFromFull(sel.value)` → `'Not ingested' | 'Analytics' | 'Lake'`.
+
+**Estimated total ingest aggregation**: the to-do summary's `Estimated total ingest` line aggregates GB/day from three sources:
+
+1. "To be added" connector-setup items (with their `-gbday` and `-plan` inputs).
+2. Planned expansion todos (from `expansions[prefix]`).
+3. Per-table tier-change todos — **only** when current = `Not ingested`. Switching a table from Analytics ↔ Lake is a redistribution, not new ingest, so it is intentionally excluded.
+
+The totals split into `Analytics` and `Data Lake` based on the chosen plan/target tier; the line is rendered once at the end of `updateTodoSummary()` and only when at least one source contributes.
 
 ### Full-mode layout reuse
 
