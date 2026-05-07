@@ -113,6 +113,21 @@ sentinel-maturity-assessment.html
 </div>
 ```
 
+**Table labels**: use the bare table name (e.g. `AzureDevOpsAuditing`, `SecurityEvent`), not `… table enabled`. The longer descriptive form belongs in `data-item` (preserve existing values to keep saved-state compatible) and, if needed, in `<div class="check-detail">`.
+
+### Connector Note (info banner)
+
+Use `<div class="connector-note">` for important context that doesn't map to a single check item — e.g. a connector that requires both Sentinel onboarding **and** per-resource diagnostic settings (Azure Firewall), a preview connector only visible in the Azure portal (Defender for Cloud tenant-based), or a portal-visibility caveat. Place it as the **first child of `.connector-body`** (above the first check group). Yellow-tinted; reuse `<strong>` for emphasis and `<code>` for inline tokens like `security.microsoft.com`. Reserve for genuine onboarding gotchas — do not use for guidance that belongs inside `.check-detail`.
+
+```html
+<div class="connector-body">
+  <div class="connector-note">
+    <strong>Note:</strong> … short paragraph explaining the gotcha …
+  </div>
+  <div class="check-group">…</div>
+</div>
+```
+
 ### Status Options by Check Type
 
 | Check type | Additional options |
