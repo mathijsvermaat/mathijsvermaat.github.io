@@ -6456,6 +6456,15 @@ function updateTodoSummary() {
   const manualCount = document.querySelectorAll('#manual-todo-list .manual-todo-item').length;
   let totalCount = todoItems.length + manualCount;
 
+  // Aggregated new-ingest totals (GB/day) across all sources:
+  //  - "To be added" connector setup items
+  //  - XDR per-table tier changes (only when current = Not ingested)
+  //  - Planned expansion todos
+  // Tier-shift moves (Analytics <-> Lake) are NOT counted as new ingest.
+  let totalGbday = 0;
+  let totalAnalytics = 0;
+  let totalDataLake = 0;
+
   // Aggregate one-off long-term storage deltas from retention extensions/reductions
   // (separate from the GB/day daily-ingest total computed below).
   let retentionAddedGB = 0;
@@ -6491,10 +6500,6 @@ function updateTodoSummary() {
       grouped.get(item.connector).push(item);
     });
 
-    let totalGbday = 0;
-    let totalAnalytics = 0;
-    let totalDataLake = 0;
-
     for (const [connector, items] of grouped) {
       const group = document.createElement('div');
       group.className = 'todo-connector-group';
@@ -6527,17 +6532,6 @@ function updateTodoSummary() {
       group.appendChild(ul);
       container.appendChild(group);
     }
-
-    // Total GB/day at the bottom with per-plan breakdown
-    const totalDiv = document.createElement('div');
-    totalDiv.className = 'todo-total';
-    let totalText = `Estimated total ingest: ${totalGbday.toFixed(1)} GB/day`;
-    if (totalAnalytics > 0 || totalDataLake > 0) {
-      totalText += ` — Analytics: ${totalAnalytics.toFixed(1)} GB/day`;
-      totalText += ` · Data Lake: ${totalDataLake.toFixed(1)} GB/day`;
-    }
-    totalDiv.textContent = totalText;
-    container.appendChild(totalDiv);
   }
 
   // Retention change todos
@@ -6717,6 +6711,14 @@ function updateTodoSummary() {
     if (desc) text += ' — ' + desc;
     if (gbday > 0) text += ` (${gbday} GB/day · ${plan})`;
 
+    // Accrue into the new-ingest total. Expansion = adding GB/day to the
+    // chosen plan, regardless of current connector status.
+    if (gbday > 0) {
+      totalGbday += gbday;
+      if (plan === 'Data Lake') totalDataLake += gbday;
+      else totalAnalytics += gbday;
+    }
+
     // Find or create a group for this connector
     let group = container.querySelector(`[data-expansion-connector="${connectorName}"]`);
     if (!group) {
@@ -6736,7 +6738,10 @@ function updateTodoSummary() {
     totalCount++;
   });
 
-  // XDR per-table tier-change todos
+  // Per-table tier-change todos (XDR + every other connector that has a
+  // `data-tier-enabled` Tables group — initXdrTierChangeControls() wires the
+  // same toggle/target/GB-day UI for all of them and stores their state in
+  // the shared xdrTierChangeState object, keyed by the table's select id).
   if (typeof xdrTierChangeState === 'object' && xdrTierChangeState) {
     const labelMap = {};
     if (typeof LITE_XDR_GROUPS !== 'undefined') {
@@ -6758,6 +6763,16 @@ function updateTodoSummary() {
       let text = `📊 Change tier for ${label} — ${currentStr} → ${targetStr}`;
       if (gb > 0) text += ` (${gb} GB/day)`;
 
+      // Accrue into the new-ingest total only when the table is currently
+      // 'Not ingested' (Off) and is being switched on — that is the only
+      // case that adds genuine new ingestion. Analytics<->Lake shifts are
+      // tier moves, not new ingest.
+      if (gb > 0 && currentLite === 'off') {
+        totalGbday += gb;
+        if (s.tier === 'Lake') totalDataLake += gb;
+        else totalAnalytics += gb;
+      }
+
       let group = container.querySelector(`[data-tierchange-connector="${connectorName}"]`);
       if (!group) {
         group = document.createElement('div');
@@ -6775,6 +6790,21 @@ function updateTodoSummary() {
       group.querySelector('ul').appendChild(li);
       totalCount++;
     }
+  }
+
+  // Estimated total new ingest (GB/day) — combined across "To be added"
+  // connector items, planned expansions, and XDR tier changes that
+  // activate a previously off table.
+  if (totalGbday > 0 || totalAnalytics > 0 || totalDataLake > 0) {
+    const totalDiv = document.createElement('div');
+    totalDiv.className = 'todo-total';
+    let totalText = `Estimated total ingest: ${totalGbday.toFixed(1)} GB/day`;
+    if (totalAnalytics > 0 || totalDataLake > 0) {
+      totalText += ` — Analytics: ${totalAnalytics.toFixed(1)} GB/day`;
+      totalText += ` · Data Lake: ${totalDataLake.toFixed(1)} GB/day`;
+    }
+    totalDiv.textContent = totalText;
+    container.appendChild(totalDiv);
   }
 
   // Long-term storage delta totals from retention extensions/reductions
