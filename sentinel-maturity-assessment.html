@@ -1963,6 +1963,44 @@
       border-color: var(--accent, #0078d4);
       outline: none;
     }
+    /* Multi-table actions for third-party connectors */
+    .tp-tbl-actions {
+      margin-top: 8px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .btn-link.tp-tbl-add {
+      background: transparent;
+      border: 1px dashed var(--border);
+      color: var(--text);
+      padding: 4px 10px;
+      border-radius: var(--radius);
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .btn-link.tp-tbl-add:hover {
+      background: var(--secondary);
+      border-style: solid;
+      border-color: var(--accent, #0078d4);
+      color: var(--accent, #0078d4);
+    }
+    .tp-tbl-remove-btn {
+      margin-left: 6px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-light);
+      width: 22px; height: 22px;
+      line-height: 18px;
+      font-size: 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      vertical-align: middle;
+      padding: 0;
+    }
+    .tp-tbl-remove-btn:hover {
+      border-color: #d13438;
+      color: #d13438;
+    }
     .check-group.xdr-tbl-group .xdr-tbl-hdr {
       display: grid;
       grid-template-columns: minmax(220px, 1fr) auto auto auto;
@@ -7563,6 +7601,92 @@ function updateCommentsSummary() {
 }
 
 // ===================== THIRD-PARTY DYNAMIC CONNECTORS =====================
+
+// Shared helpers for the multi-row "Target Table" group used by every dynamic
+// third-party connector adder (TP, TI, Id, App, Collab, CustomApp, DevOps, OT).
+// Each adder embeds ${tpTableGroupHtml(prefix, safeName)} in its template so
+// the per-row markup and the "+ Add another table" button stay in sync.
+function tpTableGroupHtml(prefix, safeName) {
+  return `
+      <div class="check-group" data-tier-enabled data-tp-tables data-prefix="${prefix}" data-tp-connector="${safeName}">
+        <div class="check-group-title">Target Table</div>
+        ${tpTableRowHtml(prefix, safeName, 1)}
+        <div class="tp-tbl-actions">
+          <button type="button" class="btn-link tp-tbl-add" onclick="addTpTableRow('${prefix}')">+ Add another table</button>
+        </div>
+      </div>`;
+}
+
+function tpTableRowHtml(prefix, safeName, rowIdx) {
+  const selId = rowIdx === 1 ? `${prefix}-tbl` : `${prefix}-tbl-${rowIdx}`;
+  const inpId = rowIdx === 1 ? `${prefix}-tbl-name` : `${prefix}-tbl-name-${rowIdx}`;
+  const removeBtn = rowIdx > 1
+    ? `<button type="button" class="tp-tbl-remove-btn" onclick="removeTpTableRow('${selId}')" title="Remove this table">✕</button>`
+    : '';
+  return `<div class="check-item" data-custom-label data-tp-row="${rowIdx}">
+          <select class="status-select" id="${selId}" data-tier="2" data-connector="${safeName}" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
+            <option value="">— Not assessed —</option>
+            <option value="Configured">Configured</option>
+            <option value="Configured (Lake)">Configured (Lake)</option>
+            <option value="Not configured">Not configured</option>
+            <option value="N/A">N/A</option>
+          </select>
+          <label for="${selId}" class="tp-tbl-label"><input type="text" id="${inpId}" data-tp-table class="tp-tbl-name" placeholder="Table name — e.g. CommonSecurityLog, CrowdStrikeLogs_CL" oninput="onThirdPartyTableNameChange(this)">${removeBtn}</label>
+        </div>`;
+}
+
+// Append a new table row to a third-party connector. When loading saved state
+// the original row index can be passed so select/input ids stay stable across
+// reloads (avoids breaking state.selects / state.thirdPartyTables references).
+function addTpTableRow(prefix, explicitIdx) {
+  const group = document.querySelector(`.check-group[data-tp-tables][data-prefix="${prefix}"]`);
+  if (!group) return null;
+  const safeName = group.dataset.tpConnector || '';
+  let newIdx;
+  if (typeof explicitIdx === 'number' && explicitIdx > 1) {
+    newIdx = explicitIdx;
+  } else {
+    let maxIdx = 1;
+    group.querySelectorAll('.check-item[data-tp-row]').forEach(el => {
+      const i = parseInt(el.dataset.tpRow || '1', 10);
+      if (!isNaN(i) && i > maxIdx) maxIdx = i;
+    });
+    newIdx = maxIdx + 1;
+  }
+  const tmp = document.createElement('div');
+  tmp.innerHTML = tpTableRowHtml(prefix, safeName, newIdx).trim();
+  const row = tmp.firstElementChild;
+  const actions = group.querySelector('.tp-tbl-actions');
+  if (actions) group.insertBefore(row, actions); else group.appendChild(row);
+  if (typeof initXdrTierChangeControls === 'function') initXdrTierChangeControls();
+  updateProgress();
+  updateTodoSummary();
+  updateAcceptedRisks();
+  if (!explicitIdx) {
+    const inp = row.querySelector('input[data-tp-table]');
+    if (inp) inp.focus();
+  }
+  return row;
+}
+
+function removeTpTableRow(selectId) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  const item = sel.closest('.check-item');
+  if (!item) return;
+  // Drop any state keyed by this row's select id so totals refresh cleanly.
+  if (typeof xdrTierChangeState === 'object' && xdrTierChangeState && xdrTierChangeState[selectId]) {
+    delete xdrTierChangeState[selectId];
+  }
+  if (typeof tableRetentionState === 'object' && tableRetentionState && tableRetentionState[selectId]) {
+    delete tableRetentionState[selectId];
+  }
+  item.remove();
+  updateProgress();
+  updateTodoSummary();
+  updateAcceptedRisks();
+}
+
 let thirdPartyCounter = 0;
 
 function addThirdPartyConnector(name) {
@@ -7621,19 +7745,7 @@ function addThirdPartyConnector(name) {
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
       </div>
-      <div class="check-group" data-tier-enabled>
-        <div class="check-group-title">Target Table</div>
-        <div class="check-item" data-custom-label>
-          <select class="status-select" id="${prefix}-tbl" data-tier="2" data-connector="${safeName}" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
-            <option value="">— Not assessed —</option>
-            <option value="Configured">Configured</option>
-            <option value="Configured (Lake)">Configured (Lake)</option>
-            <option value="Not configured">Not configured</option>
-            <option value="N/A">N/A</option>
-          </select>
-          <label for="${prefix}-tbl" class="tp-tbl-label"><input type="text" id="${prefix}-tbl-name" data-tp-table class="tp-tbl-name" placeholder="Table name — e.g. CommonSecurityLog, CrowdStrikeLogs_CL" oninput="onThirdPartyTableNameChange(this)"></label>
-        </div>
-      </div>
+      ${tpTableGroupHtml(prefix, safeName)}
       <div class="check-group retention-group" data-prefix="${prefix}" data-connector="${safeName}">
         <div class="check-group-title">Retention</div>
         <div class="retention-section-inline" id="${prefix}-retention-section"></div>
@@ -7744,19 +7856,7 @@ function addThirdPartyTIConnector(name) {
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
       </div>
-      <div class="check-group" data-tier-enabled>
-        <div class="check-group-title">Target Table</div>
-        <div class="check-item" data-custom-label>
-          <select class="status-select" id="${prefix}-tbl" data-tier="2" data-connector="${safeName}" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
-            <option value="">— Not assessed —</option>
-            <option value="Configured">Configured</option>
-            <option value="Configured (Lake)">Configured (Lake)</option>
-            <option value="Not configured">Not configured</option>
-            <option value="N/A">N/A</option>
-          </select>
-          <label for="${prefix}-tbl" class="tp-tbl-label"><input type="text" id="${prefix}-tbl-name" data-tp-table class="tp-tbl-name" placeholder="Table name — e.g. CommonSecurityLog, CrowdStrikeLogs_CL" oninput="onThirdPartyTableNameChange(this)"></label>
-        </div>
-      </div>
+      ${tpTableGroupHtml(prefix, safeName)}
       <div class="check-group retention-group" data-prefix="${prefix}" data-connector="${safeName}">
         <div class="check-group-title">Retention</div>
         <div class="retention-section-inline" id="${prefix}-retention-section"></div>
@@ -7852,19 +7952,7 @@ function addThirdPartyIdConnector(name) {
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
       </div>
-      <div class="check-group" data-tier-enabled>
-        <div class="check-group-title">Target Table</div>
-        <div class="check-item" data-custom-label>
-          <select class="status-select" id="${prefix}-tbl" data-tier="2" data-connector="${safeName}" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
-            <option value="">— Not assessed —</option>
-            <option value="Configured">Configured</option>
-            <option value="Configured (Lake)">Configured (Lake)</option>
-            <option value="Not configured">Not configured</option>
-            <option value="N/A">N/A</option>
-          </select>
-          <label for="${prefix}-tbl" class="tp-tbl-label"><input type="text" id="${prefix}-tbl-name" data-tp-table class="tp-tbl-name" placeholder="Table name — e.g. CommonSecurityLog, CrowdStrikeLogs_CL" oninput="onThirdPartyTableNameChange(this)"></label>
-        </div>
-      </div>
+      ${tpTableGroupHtml(prefix, safeName)}
       <div class="check-group retention-group" data-prefix="${prefix}" data-connector="${safeName}">
         <div class="check-group-title">Retention</div>
         <div class="retention-section-inline" id="${prefix}-retention-section"></div>
@@ -7960,19 +8048,7 @@ function addThirdPartyAppConnector(name) {
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
       </div>
-      <div class="check-group" data-tier-enabled>
-        <div class="check-group-title">Target Table</div>
-        <div class="check-item" data-custom-label>
-          <select class="status-select" id="${prefix}-tbl" data-tier="2" data-connector="${safeName}" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
-            <option value="">— Not assessed —</option>
-            <option value="Configured">Configured</option>
-            <option value="Configured (Lake)">Configured (Lake)</option>
-            <option value="Not configured">Not configured</option>
-            <option value="N/A">N/A</option>
-          </select>
-          <label for="${prefix}-tbl" class="tp-tbl-label"><input type="text" id="${prefix}-tbl-name" data-tp-table class="tp-tbl-name" placeholder="Table name — e.g. CommonSecurityLog, CrowdStrikeLogs_CL" oninput="onThirdPartyTableNameChange(this)"></label>
-        </div>
-      </div>
+      ${tpTableGroupHtml(prefix, safeName)}
       <div class="check-group retention-group" data-prefix="${prefix}" data-connector="${safeName}">
         <div class="check-group-title">Retention</div>
         <div class="retention-section-inline" id="${prefix}-retention-section"></div>
@@ -8068,19 +8144,7 @@ function addThirdPartyCollabConnector(name) {
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
       </div>
-      <div class="check-group" data-tier-enabled>
-        <div class="check-group-title">Target Table</div>
-        <div class="check-item" data-custom-label>
-          <select class="status-select" id="${prefix}-tbl" data-tier="2" data-connector="${safeName}" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
-            <option value="">— Not assessed —</option>
-            <option value="Configured">Configured</option>
-            <option value="Configured (Lake)">Configured (Lake)</option>
-            <option value="Not configured">Not configured</option>
-            <option value="N/A">N/A</option>
-          </select>
-          <label for="${prefix}-tbl" class="tp-tbl-label"><input type="text" id="${prefix}-tbl-name" data-tp-table class="tp-tbl-name" placeholder="Table name — e.g. CommonSecurityLog, CrowdStrikeLogs_CL" oninput="onThirdPartyTableNameChange(this)"></label>
-        </div>
-      </div>
+      ${tpTableGroupHtml(prefix, safeName)}
       <div class="check-group retention-group" data-prefix="${prefix}" data-connector="${safeName}">
         <div class="check-group-title">Retention</div>
         <div class="retention-section-inline" id="${prefix}-retention-section"></div>
@@ -8176,19 +8240,7 @@ function addCustomAppConnector(name) {
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
       </div>
-      <div class="check-group" data-tier-enabled>
-        <div class="check-group-title">Target Table</div>
-        <div class="check-item" data-custom-label>
-          <select class="status-select" id="${prefix}-tbl" data-tier="2" data-connector="${safeName}" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
-            <option value="">— Not assessed —</option>
-            <option value="Configured">Configured</option>
-            <option value="Configured (Lake)">Configured (Lake)</option>
-            <option value="Not configured">Not configured</option>
-            <option value="N/A">N/A</option>
-          </select>
-          <label for="${prefix}-tbl" class="tp-tbl-label"><input type="text" id="${prefix}-tbl-name" data-tp-table class="tp-tbl-name" placeholder="Table name — e.g. CommonSecurityLog, CrowdStrikeLogs_CL" oninput="onThirdPartyTableNameChange(this)"></label>
-        </div>
-      </div>
+      ${tpTableGroupHtml(prefix, safeName)}
       <div class="check-group retention-group" data-prefix="${prefix}" data-connector="${safeName}">
         <div class="check-group-title">Retention</div>
         <div class="retention-section-inline" id="${prefix}-retention-section"></div>
@@ -8284,19 +8336,7 @@ function addThirdPartyDevOpsConnector(name) {
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
       </div>
-      <div class="check-group" data-tier-enabled>
-        <div class="check-group-title">Target Table</div>
-        <div class="check-item" data-custom-label>
-          <select class="status-select" id="${prefix}-tbl" data-tier="2" data-connector="${safeName}" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
-            <option value="">— Not assessed —</option>
-            <option value="Configured">Configured</option>
-            <option value="Configured (Lake)">Configured (Lake)</option>
-            <option value="Not configured">Not configured</option>
-            <option value="N/A">N/A</option>
-          </select>
-          <label for="${prefix}-tbl" class="tp-tbl-label"><input type="text" id="${prefix}-tbl-name" data-tp-table class="tp-tbl-name" placeholder="Table name — e.g. CommonSecurityLog, CrowdStrikeLogs_CL" oninput="onThirdPartyTableNameChange(this)"></label>
-        </div>
-      </div>
+      ${tpTableGroupHtml(prefix, safeName)}
       <div class="check-group retention-group" data-prefix="${prefix}" data-connector="${safeName}">
         <div class="check-group-title">Retention</div>
         <div class="retention-section-inline" id="${prefix}-retention-section"></div>
@@ -8392,19 +8432,7 @@ function addThirdPartyOTConnector(name) {
           <label for="${prefix}-ch1">Analytic rules deployed</label>
         </div>
       </div>
-      <div class="check-group" data-tier-enabled>
-        <div class="check-group-title">Target Table</div>
-        <div class="check-item" data-custom-label>
-          <select class="status-select" id="${prefix}-tbl" data-tier="2" data-connector="${safeName}" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
-            <option value="">— Not assessed —</option>
-            <option value="Configured">Configured</option>
-            <option value="Configured (Lake)">Configured (Lake)</option>
-            <option value="Not configured">Not configured</option>
-            <option value="N/A">N/A</option>
-          </select>
-          <label for="${prefix}-tbl" class="tp-tbl-label"><input type="text" id="${prefix}-tbl-name" data-tp-table class="tp-tbl-name" placeholder="Table name — e.g. CommonSecurityLog, CrowdStrikeLogs_CL" oninput="onThirdPartyTableNameChange(this)"></label>
-        </div>
-      </div>
+      ${tpTableGroupHtml(prefix, safeName)}
       <div class="check-group retention-group" data-prefix="${prefix}" data-connector="${safeName}">
         <div class="check-group-title">Retention</div>
         <div class="retention-section-inline" id="${prefix}-retention-section"></div>
@@ -8742,7 +8770,7 @@ function renameThirdPartyConnector(section, newName) {
 // ===================== SAVE / LOAD JSON =====================
 function gatherState() {
   const state = {
-    version: 4,
+    version: 5,
     exportedAt: new Date().toISOString(),
     meta: {
       customer: document.getElementById('customer-name').value,
@@ -8772,6 +8800,7 @@ function gatherState() {
     thirdPartyDevOpsConnectors: [],
     thirdPartyOTConnectors: [],
     thirdPartyTables: {},
+    thirdPartyExtraTables: {},
     manualTodos: [],
   };
 
@@ -8872,6 +8901,18 @@ function gatherState() {
   // Save third-party connector table names (editable input per section)
   document.querySelectorAll('input[data-tp-table]').forEach(inp => {
     if (inp.value) state.thirdPartyTables[inp.id] = inp.value;
+  });
+
+  // Save extra-row indices per third-party connector (rows 2..N created via
+  // "+ Add another table"). Row 1 is implicit and always exists.
+  document.querySelectorAll('.check-group[data-tp-tables][data-prefix]').forEach(group => {
+    const prefix = group.dataset.prefix;
+    const extras = [];
+    group.querySelectorAll('.check-item[data-tp-row]').forEach(item => {
+      const idx = parseInt(item.dataset.tpRow || '1', 10);
+      if (!isNaN(idx) && idx > 1) extras.push(idx);
+    });
+    if (extras.length) state.thirdPartyExtraTables[prefix] = extras.sort((a, b) => a - b);
   });
 
   // Save third-party TI dynamic connectors
@@ -8992,17 +9033,6 @@ function applyState(state) {
     state.thirdPartyConnectors.forEach(name => addThirdPartyConnector(name));
   }
 
-  // Restore third-party connector table names (after sections are recreated)
-  if (state.thirdPartyTables) {
-    for (const [id, value] of Object.entries(state.thirdPartyTables)) {
-      const inp = document.getElementById(id);
-      if (inp) {
-        inp.value = value;
-        onThirdPartyTableNameChange(inp);
-      }
-    }
-  }
-
   // Restore third-party TI dynamic connectors
   if (state.thirdPartyTIConnectors) {
     document.getElementById('thirdpartyti-connectors').innerHTML = '';
@@ -9050,6 +9080,29 @@ function applyState(state) {
     document.getElementById('thirdpartyot-connectors').innerHTML = '';
     thirdPartyOTCounter = 0;
     state.thirdPartyOTConnectors.forEach(name => addThirdPartyOTConnector(name));
+  }
+
+  // Restore extra-row table entries per third-party connector. Must run AFTER
+  // all third-party adders so the parent groups exist, and BEFORE state.selects
+  // / state.thirdPartyTables restore so the new rows have ids to populate.
+  if (state.thirdPartyExtraTables) {
+    for (const [prefix, indices] of Object.entries(state.thirdPartyExtraTables)) {
+      if (!Array.isArray(indices)) continue;
+      indices.slice().sort((a, b) => a - b).forEach(idx => addTpTableRow(prefix, idx));
+    }
+  }
+
+  // Restore third-party connector table-name inputs across all 8 connector
+  // types (TP, TI, Id, App, Collab, CustomApp, DevOps, OT) plus any extra rows
+  // recreated above. Runs after every adder so all target inputs exist.
+  if (state.thirdPartyTables) {
+    for (const [id, value] of Object.entries(state.thirdPartyTables)) {
+      const inp = document.getElementById(id);
+      if (inp) {
+        inp.value = value;
+        onThirdPartyTableNameChange(inp);
+      }
+    }
   }
 
   // Support loading v1 (checkbox) files — map checked → Configured, unchecked → Not configured

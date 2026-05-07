@@ -13,7 +13,7 @@ A separate repo (`mathijsvermaat/Sentinel-Maturity`) contains the markdown guida
 1. **Never commit or push** unless explicitly asked.
 2. **Single-file architecture**: All CSS, HTML, and JS live in one file. No external files except the SheetJS CDN.
 3. **No frameworks**: Pure vanilla HTML/CSS/JS only.
-4. **Save format version**: Currently **version 4**. If you change the JSON schema, increment the version and handle backward compatibility in `applyState()`. Existing migrations include v1 (checkbox booleans → select values), `archive: "Yes" → totalOverride: "override"`, `storage-t1 → storage-t-blob`, and the `purview-* → purviewip-* / purviewdm-*` split (selects, retention-prefix, comments, commentUpdates).
+4. **Save format version**: Currently **version 5**. If you change the JSON schema, increment the version and handle backward compatibility in `applyState()`. Existing migrations include v1 (checkbox booleans → select values), `archive: "Yes" → totalOverride: "override"`, `storage-t1 → storage-t-blob`, the `purview-* → purviewip-* / purviewdm-*` split (selects, retention-prefix, comments, commentUpdates), and v4→v5 (third-party connectors gained multi-row Target Tables; extra rows are tracked via `thirdPartyExtraTables`).
 5. **Spelling**: Use British English (organisation, defence, behaviour, specialised, etc.).
 6. **Do not redesign or restructure existing features** unless explicitly asked. When asked to add a wrapper, integration, or trigger for an existing feature, preserve the original layout, fields, and behaviour exactly as they are.
 
@@ -243,11 +243,11 @@ Dynamic connector IDs: `conn-{type}{N}` (e.g., `conn-thirdparty1`, `conn-thirdpa
 
 ---
 
-## Save/Load JSON Schema (Version 4)
+## Save/Load JSON Schema (Version 5)
 
 ```javascript
 {
-  version: 4,
+  version: 5,
   exportedAt: "ISO-8601",
   meta: {
     customer, assessor, date, workspace,
@@ -282,7 +282,8 @@ Dynamic connector IDs: `conn-{type}{N}` (e.g., `conn-thirdparty1`, `conn-thirdpa
   customAppConnectors: [...],
   thirdPartyDevOpsConnectors: [...],
   thirdPartyOTConnectors: [...],
-  thirdPartyTables: { "inputId": "TableName_CL" },           // editable per-section table-name
+  thirdPartyTables: { "inputId": "TableName_CL" },           // editable per-section table-name (row 1 + extra rows)
+  thirdPartyExtraTables: { "prefix": [2, 3, ...] },          // v5: extra Target Table rows per dynamic connector
   manualTodos: [{                                            // v4: enriched
     title, desc, createdAt, done, completedAt,
     updates: [{ at, text }, ...]
