@@ -3920,64 +3920,120 @@
 
 
 
-      <!-- ===== Microsoft Purview ===== -->
-      <div class="connector-section collapsed" id="conn-purview">
-        <div class="connector-header" onclick="toggleConnector('conn-purview')">
-          <h3>Microsoft Purview (Information Protection &amp; DLP)<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/microsoft-purview.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a>&emsp;<a href="https://learn.microsoft.com/en-us/azure/sentinel/data-connectors-reference#microsoft-purview-information-protection" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/Microsoft%20Purview%20Information%20Protection" target="_blank" onclick="event.stopPropagation()">Solution ↗</a>&emsp;<a href="https://github.com/oshezaf/sentinelninja/blob/main/Solutions%20Docs/connectors/microsoftpurviewinformationprotection.md" target="_blank" onclick="event.stopPropagation()">Ninja ↗</a></div></h3>
+      <!-- ===== Microsoft Purview (Data Map / Discovery) ===== -->
+      <div class="connector-section collapsed" id="conn-purview-dm">
+        <div class="connector-header" onclick="toggleConnector('conn-purview-dm')">
+          <h3>Microsoft Purview (Data Map / Discovery)<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/microsoft-purview-data-map.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a>&emsp;<a href="https://learn.microsoft.com/azure/sentinel/purview-solution" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/Microsoft%20Purview" target="_blank" onclick="event.stopPropagation()">Solution ↗</a></div></h3>
           <span class="cost-badge paid">Paid</span>
-          <span class="connector-progress" id="conn-purview-progress">0/0</span>
+          <span class="connector-progress" id="conn-purview-dm-progress">0/0</span>
           <span class="connector-chevron">▼</span>
         </div>
         <div class="connector-body">
+          <div class="connector-note">
+            <strong>Note:</strong> This is the <strong>Microsoft Purview</strong> connector for the <strong>Purview Data Map / Governance</strong> account. It surfaces <strong>data discovery and classification scan results</strong> (assets scanned, sensitive information types found, sensitivity labels applied) in the <code>PurviewDataSensitivityLogs</code> table. Setup is via the Purview account&rsquo;s <strong>Diagnostic settings</strong> &rarr; <code>DataSensitivityLogEvent</code> &rarr; Log Analytics workspace. This is a different connector than <strong>Microsoft Purview Information Protection (Preview)</strong> below &mdash; enable both for full coverage.
+          </div>
           <div class="check-group">
             <div class="check-group-title">Connector Setup</div>
             <div class="check-item">
-              <select class="status-select" id="purview-c1" data-tier="2" data-connector="Microsoft Purview" data-item="Connector enabled in Sentinel" onchange="onStatusChange(this)">
+              <select class="status-select" id="purviewdm-c1" data-tier="2" data-connector="Microsoft Purview" data-item="Purview account Diagnostic settings configured (DataSensitivityLogEvent &rarr; Log Analytics)" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="purview-c1">Connector enabled in Sentinel</label>
+              <label for="purviewdm-c1">Purview Diagnostic settings &rarr; Send to Log Analytics workspace<div class="check-detail">Configured on the Purview account in the Azure portal</div></label>
             </div>
           </div>
           <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
-              <select class="status-select" id="purview-t1" data-tier="2" data-connector="Microsoft Purview" data-item="MicrosoftPurviewInformationProtection table enabled" onchange="onStatusChange(this)">
+              <select class="status-select" id="purviewdm-t1" data-tier="2" data-connector="Microsoft Purview" data-item="PurviewDataSensitivityLogs table enabled" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="purview-t1">MicrosoftPurviewInformationProtection</label>
-            </div>
-            <div class="check-item">
-              <select class="status-select" id="purview-t2" data-tier="2" data-connector="Microsoft Purview" data-item="PurviewDataSensitivityLogs table enabled" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="purview-t2">PurviewDataSensitivityLogs</label>
+              <label for="purviewdm-t1">PurviewDataSensitivityLogs<div class="check-detail">Data discovery / classification scan results from Purview Data Map</div></label>
             </div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Content Hub</div>
             <div class="check-item">
-              <select class="status-select" id="purview-ch1" data-tier="2" data-connector="Microsoft Purview" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
+              <select class="status-select" id="purviewdm-ch1" data-tier="2" data-connector="Microsoft Purview" data-item="Microsoft Purview solution installed and analytic rules deployed" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="purview-ch1">Analytic rules deployed</label>
+              <label for="purviewdm-ch1">Microsoft Purview solution &mdash; analytic rules deployed</label>
             </div>
           </div>
-          <div class="check-group retention-group" data-prefix="purview" data-connector="Microsoft Purview">
+          <div class="check-group retention-group" data-prefix="purviewdm" data-connector="Microsoft Purview">
             <div class="check-group-title">Retention</div>
-            <div class="retention-section-inline" id="purview-retention-section"></div>
+            <div class="retention-section-inline" id="purviewdm-retention-section"></div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Validation</div>
             <div class="check-item">
-              <select class="status-select" id="purview-v1" data-tier="2" data-connector="Microsoft Purview" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
+              <select class="status-select" id="purviewdm-v1" data-tier="2" data-connector="Microsoft Purview" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
-              <label for="purview-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
+              <label for="purviewdm-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
             </div>
           </div>
           <div class="section-comment">
-            <label for="purview-comment">Comments / Rationale — Microsoft Purview</label>
-            <textarea id="purview-comment" data-connector="Microsoft Purview" placeholder="e.g. Sensitivity labels deployed but DLP not yet configured. Starting with IP table first."></textarea>
+            <label for="purviewdm-comment">Comments / Rationale — Microsoft Purview (Data Map)</label>
+            <textarea id="purviewdm-comment" data-connector="Microsoft Purview" placeholder="e.g. Purview scans configured for Azure SQL and ADLS; awaiting onboarding of M365 sources."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Microsoft Purview Information Protection (Preview) ===== -->
+      <div class="connector-section collapsed" id="conn-purview-ip">
+        <div class="connector-header" onclick="toggleConnector('conn-purview-ip')">
+          <h3>Microsoft Purview Information Protection (Preview)<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/microsoft-purview-information-protection.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a>&emsp;<a href="https://learn.microsoft.com/azure/sentinel/connect-microsoft-purview" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/Microsoft%20Purview%20Information%20Protection" target="_blank" onclick="event.stopPropagation()">Solution ↗</a>&emsp;<a href="https://github.com/oshezaf/sentinelninja/blob/main/Solutions%20Docs/connectors/microsoftpurviewinformationprotection.md" target="_blank" onclick="event.stopPropagation()">Ninja ↗</a></div></h3>
+          <span class="cost-badge paid">Paid</span>
+          <span class="connector-progress" id="conn-purview-ip-progress">0/0</span>
+          <span class="connector-chevron">▼</span>
+        </div>
+        <div class="connector-body">
+          <div class="connector-note">
+            <strong>Note:</strong> This is the <strong>Microsoft Purview Information Protection (Preview)</strong> connector. It surfaces <strong>sensitivity-label activity</strong> from MIP labelling clients and scanners (label apply / change / downgrade, protected document access) via the Office Management API, in the <code>MicrosoftPurviewInformationProtection</code> table. Setup is from the Sentinel <strong>Data connectors</strong> page (Azure portal) &rarr; <em>Microsoft Purview Information Protection (Preview)</em> &rarr; <strong>Connect</strong>. This connector replaces the retired <strong>Azure Information Protection (AIP)</strong> connector. It is a different connector than <strong>Microsoft Purview (Data Map / Discovery)</strong> above &mdash; enable both for full coverage.
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Connector Setup</div>
+            <div class="check-item">
+              <select class="status-select" id="purviewip-c1" data-tier="2" data-connector="Microsoft Purview Information Protection" data-item="Connector enabled in Sentinel" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="purviewip-c1">Connector enabled in Sentinel<div class="check-detail">Sentinel Data connectors &rarr; Microsoft Purview Information Protection (Preview) &rarr; Connect</div></label>
+            </div>
+          </div>
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Tables</div>
+            <div class="check-item">
+              <select class="status-select" id="purviewip-t1" data-tier="2" data-connector="Microsoft Purview Information Protection" data-item="MicrosoftPurviewInformationProtection table enabled" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="purviewip-t1">MicrosoftPurviewInformationProtection<div class="check-detail">Sensitivity-label activity from MIP clients and scanners (Office Management API)</div></label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Content Hub</div>
+            <div class="check-item">
+              <select class="status-select" id="purviewip-ch1" data-tier="2" data-connector="Microsoft Purview Information Protection" data-item="Microsoft Purview Information Protection solution installed and analytic rules deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="purviewip-ch1">Microsoft Purview Information Protection solution &mdash; analytic rules deployed</label>
+            </div>
+          </div>
+          <div class="check-group retention-group" data-prefix="purviewip" data-connector="Microsoft Purview Information Protection">
+            <div class="check-group-title">Retention</div>
+            <div class="retention-section-inline" id="purviewip-retention-section"></div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Validation</div>
+            <div class="check-item">
+              <select class="status-select" id="purviewip-v1" data-tier="2" data-connector="Microsoft Purview Information Protection" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
+              </select>
+              <label for="purviewip-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
+            </div>
+          </div>
+          <div class="section-comment">
+            <label for="purviewip-comment">Comments / Rationale — Microsoft Purview Information Protection</label>
+            <textarea id="purviewip-comment" data-connector="Microsoft Purview Information Protection" placeholder="e.g. Sensitivity labels deployed; AIP connector disabled to avoid duplication."></textarea>
           </div>
         </div>
       </div>
@@ -5958,7 +6014,7 @@ function updateProgress() {
     'conn-gen-workspace', 'conn-gen-solutions', 'conn-gen-workbooks',
     'conn-o365', 'conn-azactivity', 'conn-xdr', 'conn-entra', 'conn-winsec', 'conn-syslog', 'conn-health',
     'conn-dfc', 'conn-azfw', 'conn-waf', 'conn-vnet', 'conn-gsa', 'conn-dns', 'conn-thirdparty',
-    'conn-purview', 'conn-akv', 'conn-copilot', 'conn-intune', 'conn-ti', 'conn-thirdpartyti', 'conn-aws', 'conn-gcp',
+    'conn-purview-dm', 'conn-purview-ip', 'conn-akv', 'conn-copilot', 'conn-intune', 'conn-ti', 'conn-thirdpartyti', 'conn-aws', 'conn-gcp',
     'conn-thirdpartyid',
     'conn-iis', 'conn-mdca', 'conn-sap', 'conn-sql', 'conn-thirdpartyapp',
     'conn-teams', 'conn-thirdpartycollab', 'conn-customapp',
@@ -7121,7 +7177,8 @@ const connectorRiskTexts = {
   'Microsoft Defender for Cloud': 'No cloud workload threat alerts or security posture data in Sentinel. Misconfiguration drift, VM brute-force, storage anomalies, and container escape alerts are not correlated with other security signals.',
   'Azure Key Vault': 'No audit trail for secret, key, or certificate access. Unable to determine if attackers accessed credentials during a breach — no forensic evidence of vault access or access policy tampering.',
   'Copilot / AI Governance': 'No visibility on AI assistant usage patterns. Unable to detect data oversharing through Copilot interactions or unauthorized AI model usage — AI-related data exfiltration risk unmonitored.',
-  'Microsoft Purview': 'No tracking of sensitivity label changes or DLP policy matches. Unable to detect data staging via label downgrades or correlate data protection violations with security incidents.',
+  'Microsoft Purview': 'No data discovery or classification scan results in Sentinel. Unable to identify where sensitive information types live across the estate or correlate breached data stores with their classification — post-breach scoping of sensitive data exposure is impaired.',
+  'Microsoft Purview Information Protection': 'No tracking of sensitivity label changes from MIP labelling clients and scanners. Unable to detect data staging via label downgrades or correlate document-level data protection violations with security incidents.',
   'Microsoft Defender TI': 'No automated IOC matching across log data. Known malicious IPs, domains, and file hashes are not correlated with environment activity — known threats may go undetected across all data sources.',
   'Microsoft Intune': 'No device compliance or management data in Sentinel. Unable to verify endpoint compliance state during incidents or audit administrative actions such as policy changes and remote wipes.',
   'Amazon Web Services': 'No AWS control plane visibility. IAM privilege escalation, S3 exposure, resource changes, and GuardDuty threat detections are not ingested — AWS infrastructure blind spot for SOC operations.',
@@ -8963,6 +9020,33 @@ function applyState(state) {
       state.selects['storage-t-blob'] = state.selects['storage-t1'];
       delete state.selects['storage-t1'];
     }
+    // Migration: legacy 'purview-*' selects (single combined Purview connector)
+    // were split into 'purviewdm-*' (Data Map / Discovery) and 'purviewip-*'
+    // (Information Protection, Preview). Map the legacy keys conservatively:
+    // - tables migrate to their new owning connector (t1 -> IP, t2 -> DM)
+    // - generic setup/content-hub/validation/comment migrate to IP because
+    //   the original section was branded "Information Protection & DLP".
+    const purviewMap = {
+      'purview-c1': 'purviewip-c1',
+      'purview-t1': 'purviewip-t1',
+      'purview-t2': 'purviewdm-t1',
+      'purview-ch1': 'purviewip-ch1',
+      'purview-v1': 'purviewip-v1'
+    };
+    for (const [oldKey, newKey] of Object.entries(purviewMap)) {
+      if (state.selects[oldKey] !== undefined && state.selects[newKey] === undefined) {
+        state.selects[newKey] = state.selects[oldKey];
+        delete state.selects[oldKey];
+      }
+    }
+    // Also migrate retention selects (purview-ret-* -> purviewip-ret-*)
+    for (const k of Object.keys(state.selects)) {
+      if (k.startsWith('purview-ret-')) {
+        const nk = 'purviewip-ret-' + k.substring('purview-ret-'.length);
+        if (state.selects[nk] === undefined) state.selects[nk] = state.selects[k];
+        delete state.selects[k];
+      }
+    }
     for (const [id, value] of Object.entries(state.selects)) {
       const el = document.getElementById(id);
       if (el) {
@@ -8983,6 +9067,11 @@ function applyState(state) {
   }
 
   if (state.comments) {
+    // Migration: legacy 'purview-comment' migrates to 'purviewip-comment'
+    if (state.comments['purview-comment'] !== undefined && state.comments['purviewip-comment'] === undefined) {
+      state.comments['purviewip-comment'] = state.comments['purview-comment'];
+      delete state.comments['purview-comment'];
+    }
     for (const [id, value] of Object.entries(state.comments)) {
       const el = document.getElementById(id);
       if (el) el.value = value;
@@ -8990,6 +9079,11 @@ function applyState(state) {
   }
 
   if (state.commentUpdates) {
+    // Migration: legacy 'purview-comment' updates migrate to 'purviewip-comment'
+    if (state.commentUpdates['purview-comment'] !== undefined && state.commentUpdates['purviewip-comment'] === undefined) {
+      state.commentUpdates['purviewip-comment'] = state.commentUpdates['purview-comment'];
+      delete state.commentUpdates['purview-comment'];
+    }
     for (const [id, updates] of Object.entries(state.commentUpdates)) {
       const el = document.getElementById(id);
       if (el && Array.isArray(updates)) {
