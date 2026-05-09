@@ -60,6 +60,24 @@ export class MatchClock {
     this.firedAlarms = new Set();
   }
 
+  /**
+   * Skip forward (positive) or back (negative) by `deltaSec` seconds.
+   * Re-arms previously-fired alarms when jumping back, so they fire again.
+   */
+  adjust(deltaSec) {
+    const s = this._state();
+    s.accumulatedSec = Math.max(0, s.accumulatedSec + deltaSec);
+    // Bound by total
+    if (s.runningSinceMs) {
+      // Reset reference moment so the running calc stays correct.
+      s.runningSinceMs = Date.now();
+    }
+    // If jumping back, un-fire alarms that are now in the future
+    const newElapsed = s.accumulatedSec + (s.runningSinceMs ? 0 : 0);
+    this.firedAlarms = new Set([...this.firedAlarms].filter((a) => a <= newElapsed));
+    this._save(s);
+  }
+
   isRunning() { return !!this._state().runningSinceMs; }
 
   elapsedSec() {

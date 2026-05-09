@@ -77,11 +77,22 @@ export function viewRoster(players) {
   `;
 }
 
-export function viewSettings(teamName) {
+export function viewSettings(teamName, prefs) {
+  const p = prefs || { sound: true, vibrate: true, leadSeconds: 30 };
   return `
     <div class="card">
       <label>Teamnaam<input id="team-name" value="${escapeHtml(teamName || '')}" maxlength="40" /></label>
       <button class="primary" id="save-team">Opslaan</button>
+    </div>
+    <div class="card">
+      <h3>Wisselsignaal</h3>
+      <label class="chk inline"><input type="checkbox" id="pref-sound" ${p.sound ? 'checked' : ''}/> Geluid (3 piepjes)</label>
+      <label class="chk inline"><input type="checkbox" id="pref-vibrate" ${p.vibrate ? 'checked' : ''}/> Trillen (alleen Android)</label>
+      <label>Voorwaarschuwing (seconden vooraf)
+        <input type="number" id="pref-lead" min="0" max="120" step="5" value="${p.leadSeconds}" />
+      </label>
+      <button id="test-signal">Test signaal</button>
+      <p class="sub">Tip op iPhone: zet de telefoon NIET op stil — webapps gebruiken het mediavolume voor het signaal.</p>
     </div>
     <div class="card">
       <h3>Backup</h3>
@@ -208,6 +219,7 @@ export function viewMatchSetup(match, players, history, plan) {
       <label>Wisselinterval binnen kwart (min)
         <input type="number" id="m-int" min="1" max="20" step="1" value="${match.subIntervalMin || (qSec/60)}" />
       </label>
+      <button id="suggest-interval" class="link">Aanbevolen interval berekenen</button>
       <label>Wissels per rotatie (optioneel)
         <input type="number" id="m-spr" min="1" max="11" value="${match.subsPerRotation || ''}" placeholder="auto" />
       </label>
@@ -250,16 +262,34 @@ export function viewLive(match, players, plan, elapsedSec) {
   const slot = q.slots[curSlot === -1 ? q.slots.length - 1 : curSlot];
   const keeperId = q.keeperId;
   const fieldIds = slot.fieldIds;
-  const benchIds = match.attendingPlayerIds.filter((id) => id !== keeperId && !fieldIds.includes(id));
+  const benchIds = match.attendingPlayerIds.filter((id) => id !== keeperId && !fieldIds.includes(id) && !(match.injuredIds || []).includes(id));
 
-  // Next event
-  const allEvents = plan.quarters.flatMap((qq) => qq.subEvents);
+  // All sub events in chronological order
+  const allEvents = plan.quarters.flatMap((qq) => qq.subEvents).sort((a, b) => a.atSec - b.atSec);
   const next = allEvents.find((e) => e.atSec > elapsedSec + 0.5);
   const nextIn = next ? Math.max(0, next.atSec - elapsedSec) : 0;
 
+  const timelineHtml = allEvents.map((ev) => {
+    const remaining = totalSec - ev.atSec;
+    const isPast = ev.atSec <= elapsedSec + 0.5;
+    const isNext = next && ev === next;
+    const cls = `tl-row ${isPast ? 'past' : ''} ${isNext ? 'next' : ''}`;
+    const off = (ev.off || []).map((id) => escapeHtml(nameOf(players, id))).join('<br/>') || '<span class="sub">—</span>';
+    const on  = (ev.on  || []).map((id) => escapeHtml(nameOf(players, id))).join('<br/>') || '<span class="sub">—</span>';
+    return `<div class="${cls}">
+      <div class="tl-off">${off}</div>
+      <div class="tl-time">${fmtTime(remaining)}</div>
+      <div class="tl-on">${on}</div>
+    </div>`;
+  }).join('');
+
   return `
     <div class="clock">
-      <div class="big-time">${fmtTime(totalSec - elapsedSec)}</div>
+      <div class="clock-row">
+        <button class="iconbtn jump" id="jump-back" aria-label="10 seconden terug">«</button>
+        <div class="big-time">${fmtTime(totalSec - elapsedSec)}</div>
+        <button class="iconbtn jump" id="jump-fwd" aria-label="10 seconden vooruit">»</button>
+      </div>
       <div class="sub">Kwart ${curQ + 1} / ${plan.quarters.length} · gespeeld ${fmtTime(elapsedSec)}</div>
     </div>
 
@@ -271,17 +301,29 @@ export function viewLive(match, players, plan, elapsedSec) {
 
     <div class="card">
       <h3>🧤 Keeper</h3>
-      <div class="bigname">${escapeHtml(nameOf(players, keeperId))}</div>
+      <div class="bigname pname tappable" data-pid="${keeperId}" data-role="keeper">${escapeHtml(nameOf(players, keeperId))}</div>
     </div>
     <div class="row two">
       <div class="card">
         <h3>In het veld</h3>
-        ${fieldIds.map((id) => `<div class="pname">${escapeHtml(nameOf(players, id))}</div>`).join('')}
+        ${fieldIds.map((id) => `<div class="pname tappable" data-pid="${id}" data-role="field">${escapeHtml(nameOf(players, id))}</div>`).join('')}
       </div>
       <div class="card">
         <h3>Op de bank</h3>
-        ${benchIds.length ? benchIds.map((id) => `<div class="pname">${escapeHtml(nameOf(players, id))}</div>`).join('') : '<i class="sub">leeg</i>'}
+        ${benchIds.length ? benchIds.map((id) => `<div class="pname tappable" data-pid="${id}" data-role="bench">${escapeHtml(nameOf(players, id))}</div>`).join('') : '<i class="sub">leeg</i>'}
       </div>
+    </div>
+
+    ${(match.injuredIds && match.injuredIds.length) ? `
+    <div class="card injured-card">
+      <h3>🩹 Geblesseerd / uit wedstrijd</h3>
+      ${match.injuredIds.map((id) => `<div class="pname injured">${escapeHtml(nameOf(players, id))}</div>`).join('')}
+    </div>` : ''}
+
+    <div class="card">
+      <h3>Tijdlijn wissels</h3>
+      <div class="tl-head"><div>Eraf</div><div>Resterend</div><div>Erin</div></div>
+      <div class="timeline">${timelineHtml || '<div class="sub">Geen wissels.</div>'}</div>
     </div>
 
     <div class="row gap stick-bottom">

@@ -2,9 +2,15 @@
 
 import * as db from './db.js';
 import * as V from './views.js';
-import { buildPlan, suggestKeepers, buildHistory, totalQuarters } from './scheduler.js';
+import { buildPlan, suggestKeepers, buildHistory, totalQuarters, recommendSubInterval, applyInjury } from './scheduler.js';
 import { MatchClock } from './timer.js';
-import { unlockAudio, showAlert } from './notify.js';
+import { unlockAudio, showAlert, showActionSheet, beep, vibrate } from './notify.js';
+
+const DEFAULT_PREFS = { sound: true, vibrate: true, leadSeconds: 30 };
+
+async function getPrefs() {
+  return await db.getSetting('prefs', DEFAULT_PREFS) || DEFAULT_PREFS;
+}
 
 const view = document.getElementById('view');
 const titleEl = document.getElementById('title');
@@ -66,6 +72,7 @@ async function renderMatches(players) {
       format: { label: preset.label, onField: preset.onField, totalMinutes: preset.totalMinutes, halves: preset.halves, quartersPerHalf: preset.quartersPerHalf },
       attendingPlayerIds: [],
       keeperPerQuarter: [],
+      injuredIds: [],
       subIntervalMin: 5,
       status: 'draft',
     });
@@ -116,10 +123,29 @@ async function renderStats(players) {
 async function renderSettings() {
   titleEl.textContent = 'Instellingen';
   const teamName = await db.getSetting('teamName', '');
-  view.innerHTML = V.viewSettings(teamName);
+  const prefs = await getPrefs();
+  view.innerHTML = V.viewSettings(teamName, prefs);
   document.getElementById('save-team').addEventListener('click', async () => {
     await db.setSetting('teamName', document.getElementById('team-name').value.trim());
     showAlert('Opgeslagen', '');
+  });
+  const savePrefs = async () => {
+    const p = {
+      sound: document.getElementById('pref-sound').checked,
+      vibrate: document.getElementById('pref-vibrate').checked,
+      leadSeconds: Math.max(0, +document.getElementById('pref-lead').value || 0),
+    };
+    await db.setSetting('prefs', p);
+  };
+  document.getElementById('pref-sound').addEventListener('change', savePrefs);
+  document.getElementById('pref-vibrate').addEventListener('change', savePrefs);
+  document.getElementById('pref-lead').addEventListener('change', savePrefs);
+  document.getElementById('test-signal').addEventListener('click', async () => {
+    unlockAudio();
+    await savePrefs();
+    const p = await getPrefs();
+    if (p.sound) beep();
+    if (p.vibrate) vibrate();
   });
   document.getElementById('export').addEventListener('click', async () => {
     const data = await db.exportAll();
@@ -223,6 +249,22 @@ async function renderMatchSetup(players, id) {
     update({ keeperPerQuarter: k });
   });
 
+  $('suggest-interval')?.addEventListener('click', () => {
+    if (!canPlan(match)) {
+      showAlert('Nog niet mogelijk', 'Vul eerst de aanwezige spelers en de keepers per kwart in.');
+      return;
+    }
+    const rec = recommendSubInterval(match, history);
+    if (!rec) { showAlert('Geen aanbeveling', 'Kon geen interval berekenen.'); return; }
+    const min = Math.round(Math.min(...rec.perPlayerSec) / 60);
+    const max = Math.round(Math.max(...rec.perPlayerSec) / 60);
+    showAlert(
+      `Aanbevolen: elke ${rec.interval} min`,
+      `<div>Verschil tussen meest en minst spelende speler: <b>${Math.round(rec.spreadSec/60)} min</b> (${min}–${max} min).</div>
+       <div class="sub">Klik nogmaals na het toepassen om bevestiging te zien.</div>`
+    ).then(() => update({ subIntervalMin: rec.interval }));
+  });
+
   $('recompute')?.addEventListener('click', () => renderMatchSetup(players, id));
   $('save-match').addEventListener('click', async () => { await db.saveMatch(match); showAlert('Opgeslagen', ''); });
   $('start-match').addEventListener('click', async () => {
@@ -259,14 +301,21 @@ async function renderLive(players, id) {
   // Reuse existing clock if same match (prevents double timers across re-renders)
   if (!liveCtx || liveCtx.match.id !== id) {
     if (liveCtx) liveCtx.clock.pause();
+    const prefs = await getPrefs();
     const clock = new MatchClock(id, totalSec, () => paint(), (atSec) => onAlarm(atSec));
-    // Alarms 30s before each sub event AND at each sub event (lead-time + actual)
-    const subTimes = plan.quarters.flatMap((q) => q.subEvents.map((e) => e.atSec)).filter((t) => t > 0);
-    const leadTimes = subTimes.map((t) => Math.max(0, t - 30));
-    const alarms = [...new Set([...leadTimes, ...subTimes])].sort((a, b) => a - b);
-    clock.setAlarms(alarms);
-    liveCtx = { match, plan, players, clock };
+    liveCtx = { match, plan, players, clock, prefs, quarterBreaks: new Set() };
+    rearmAlarms();
     if (match.status === 'live' && !clock.isRunning() && clock.elapsedSec() === 0) clock.start();
+  }
+
+  function rearmAlarms() {
+    const subTimes = plan.quarters.flatMap((q) => q.subEvents.map((e) => e.atSec)).filter((t) => t > 0);
+    const leadTimes = subTimes.map((t) => Math.max(0, t - liveCtx.prefs.leadSeconds));
+    // Quarter-end breaks: every quarter end EXCEPT the very last (which is end of match).
+    const breaks = plan.quarters.slice(0, -1).map((q) => q.endSec);
+    liveCtx.quarterBreaks = new Set(breaks);
+    const alarms = [...new Set([...leadTimes, ...subTimes, ...breaks])].sort((a, b) => a - b);
+    liveCtx.clock.setAlarms(alarms);
   }
 
   function paint() {
@@ -275,9 +324,46 @@ async function renderLive(players, id) {
     document.getElementById('live-pause').addEventListener('click', () => liveCtx.clock.pause());
     document.getElementById('live-resume').addEventListener('click', () => { unlockAudio(); liveCtx.clock.start(); });
     document.getElementById('live-finish').addEventListener('click', finishMatch);
+    document.getElementById('jump-back').addEventListener('click', () => { liveCtx.clock.adjust(-10); paint(); });
+    document.getElementById('jump-fwd').addEventListener('click', () => { liveCtx.clock.adjust(+10); paint(); });
+    view.querySelectorAll('.tappable[data-pid]').forEach((el) => {
+      el.addEventListener('click', () => onPlayerTap(el.dataset.pid, el.dataset.role));
+    });
+  }
+
+  async function onPlayerTap(pid, role) {
+    const name = V.nameOf(players, pid);
+    const at = liveCtx.clock.elapsedSec();
+    const choice = await showActionSheet(`${name}`, [
+      { id: 'injury', label: '🩹 Markeer als geblesseerd', danger: true },
+      { id: 'cancel', label: 'Annuleren' },
+    ]);
+    if (choice !== 'injury') return;
+    if (!confirm(`${name} markeren als geblesseerd? Deze speler wordt uit de rest van de wedstrijd gehaald en het wisselschema wordt bijgewerkt.`)) return;
+    match.injuredIds = match.injuredIds || [];
+    if (!match.injuredIds.includes(pid)) match.injuredIds.push(pid);
+    applyInjury(plan, match, at, pid);
+    match.plan = plan;
+    await db.saveMatch(match);
+    rearmAlarms();
+    paint();
   }
 
   function onAlarm(atSec) {
+    // Quarter-end break: pause and prompt user to resume manually.
+    if (liveCtx.quarterBreaks.has(atSec)) {
+      liveCtx.clock.pause();
+      const finishedQ = plan.quarters.findIndex((q) => Math.abs(q.endSec - atSec) < 0.6);
+      const nextQ = plan.quarters[finishedQ + 1];
+      const isHalfTime = (finishedQ + 1) === (match.format.quartersPerHalf || 2);
+      const title = isHalfTime ? 'Rust — timer gepauzeerd' : `Kwart ${finishedQ + 1} afgelopen — pauze`;
+      const nextKeeperName = nextQ ? V.escapeHtml(V.nameOf(players, nextQ.keeperId)) : '';
+      const body = `<div>De timer is automatisch gepauzeerd. Druk op <b>▶ Hervat</b> om kwart ${finishedQ + 2} te starten.</div>
+                    ${nextQ ? `<div class="sub">Volgende keeper: <b>${nextKeeperName}</b></div>` : ''}`;
+      showAlert(title, body, { sound: liveCtx.prefs.sound, vib: liveCtx.prefs.vibrate });
+      paint();
+      return;
+    }
     const ev = plan.quarters.flatMap((q) => q.subEvents).find((x) => Math.abs(x.atSec - atSec) < 0.6);
     if (!ev) return;
     const elapsed = liveCtx.clock.elapsedSec();
@@ -291,7 +377,7 @@ async function renderLive(players, id) {
     const body = `<div><b>Eraf:</b> ${V.escapeHtml(off)}</div>
                   <div><b>Erin:</b> ${V.escapeHtml(on)}</div>
                   <div class="sub">Keeper: ${V.escapeHtml(keeperName)}</div>`;
-    showAlert(title, body);
+    showAlert(title, body, { sound: liveCtx.prefs.sound, vib: liveCtx.prefs.vibrate });
   }
 
   async function finishMatch() {

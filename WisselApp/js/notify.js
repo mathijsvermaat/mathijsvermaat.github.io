@@ -58,3 +58,26 @@ export function showAlert(title, bodyHtml, { sound = true, vib = true } = {}) {
     document.getElementById('alert-dismiss').addEventListener('click', dismiss);
   });
 }
+
+/**
+ * Show a small action sheet. `actions` is [{id, label, danger?}].
+ * Resolves to the chosen id (or 'cancel' if dismissed).
+ */
+export function showActionSheet(title, actions) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'sheet-overlay';
+    overlay.innerHTML = `
+      <div class="sheet">
+        <div class="sheet-title">${title.replace(/[&<>]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</div>
+        ${actions.map((a) => `<button data-id="${a.id}" class="${a.danger ? 'danger' : ''}">${a.label}</button>`).join('')}
+      </div>`;
+    document.body.appendChild(overlay);
+    const cleanup = (id) => { overlay.remove(); resolve(id); };
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) return cleanup('cancel');
+      const btn = e.target.closest('button[data-id]');
+      if (btn) cleanup(btn.dataset.id);
+    });
+  });
+}
