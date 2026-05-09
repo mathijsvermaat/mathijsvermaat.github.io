@@ -28,6 +28,10 @@ body { display: flex; flex-direction: column; min-height: 100vh; min-height: 100
 .iconbtn { background: transparent; color: var(--text); border: 0; font-size: 22px; padding: 6px 10px; border-radius: 10px; }
 .iconbtn:active { background: var(--card); }
 
+#update-banner { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; background: var(--accent); color: #08120a; font-weight: 600; font-size: 14px; }
+#update-banner[hidden] { display: none; }
+#update-banner button { background: #08120a; color: var(--accent); border: 0; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 14px; }
+
 #view { flex: 1; padding: 12px 12px 96px; overflow-y: auto; }
 
 #tabbar {
@@ -139,6 +143,10 @@ button[disabled] { opacity: 0.4; }
 .pname.injured { color: var(--sub); text-decoration: line-through; }
 .injured-card { border-color: #5a3a1a; background: #2a1f12; }
 .injured-card h3 { color: var(--warn); }
+
+.player-row { display: flex; align-items: center; gap: 10px; }
+.player-row .player-name-input { flex: 1; background: var(--bg); }
+.player-row .player-name-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 /* Action sheet */
 .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: flex-end; justify-content: center; z-index: 200; padding: 20px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }

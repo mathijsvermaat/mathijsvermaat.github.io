@@ -21,7 +21,35 @@ let liveCtx = null; // { match, plan, players, clock }
 
 // ------- Service worker -------
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js').then((reg) => {
+    // If there's already a waiting worker on first load, show the banner.
+    if (reg.waiting) showUpdateBanner(reg);
+    reg.addEventListener('updatefound', () => {
+      const sw = reg.installing;
+      if (!sw) return;
+      sw.addEventListener('statechange', () => {
+        if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+          showUpdateBanner(reg);
+        }
+      });
+    });
+  }).catch(() => {});
+  // Reload when the new SW takes control.
+  let reloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloading) return;
+    reloading = true;
+    location.reload();
+  });
+}
+
+function showUpdateBanner(reg) {
+  const banner = document.getElementById('update-banner');
+  if (!banner) return;
+  banner.hidden = false;
+  document.getElementById('update-reload').onclick = () => {
+    if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+  };
 }
 
 // ------- Router -------
@@ -108,6 +136,27 @@ async function renderRoster(players) {
       await db.deletePlayer(b.dataset.id);
       render();
     });
+  });
+
+  // Inline rename: show "Opslaan" button when value changes; commit on click or Enter or blur.
+  view.querySelectorAll('input.player-name-input').forEach((inp) => {
+    const id = inp.dataset.id;
+    const original = inp.value;
+    const saveBtn = view.querySelector(`button[data-act="save"][data-id="${id}"]`);
+    const showSave = () => { if (saveBtn) saveBtn.hidden = inp.value.trim() === original || !inp.value.trim(); };
+    const commit = async () => {
+      const name = inp.value.trim();
+      if (!name || name === original) { inp.value = original; if (saveBtn) saveBtn.hidden = true; return; }
+      const player = (await db.listPlayers()).find((x) => x.id === id);
+      if (!player) return;
+      player.firstName = name;
+      await db.savePlayer(player);
+      render();
+    };
+    inp.addEventListener('input', showSave);
+    inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); inp.blur(); commit(); } });
+    inp.addEventListener('blur', () => { if (inp.value.trim() !== original && inp.value.trim()) commit(); });
+    if (saveBtn) saveBtn.addEventListener('click', commit);
   });
 }
 
@@ -256,13 +305,18 @@ async function renderMatchSetup(players, id) {
     }
     const rec = recommendSubInterval(match, history);
     if (!rec) { showAlert('Geen aanbeveling', 'Kon geen interval berekenen.'); return; }
-    const min = Math.round(Math.min(...rec.perPlayerSec) / 60);
-    const max = Math.round(Math.max(...rec.perPlayerSec) / 60);
+    const fmt = (sec) => {
+      const m = Math.floor(sec / 60);
+      const s = Math.round(sec % 60);
+      return s === 0 ? `${m} min` : `${m}:${String(s).padStart(2, '0')} min`;
+    };
+    const minP = Math.round(Math.min(...rec.perPlayerSec) / 60);
+    const maxP = Math.round(Math.max(...rec.perPlayerSec) / 60);
     showAlert(
-      `Aanbevolen: elke ${rec.interval} min`,
-      `<div>Verschil tussen meest en minst spelende speler: <b>${Math.round(rec.spreadSec/60)} min</b> (${min}–${max} min).</div>
-       <div class="sub">Klik nogmaals na het toepassen om bevestiging te zien.</div>`
-    ).then(() => update({ subIntervalMin: rec.interval }));
+      `Aanbevolen: elke ${fmt(rec.intervalSec)}`,
+      `<div>Verschil tussen meest en minst spelende speler: <b>${Math.round(rec.spreadSec/60)} min</b> (${minP}–${maxP} min).</div>
+       <div class="sub">Bereik: 3:20 – 10:00, in stappen van 10 seconden.</div>`
+    ).then(() => update({ subIntervalMin: rec.intervalMin }));
   });
 
   $('recompute')?.addEventListener('click', () => renderMatchSetup(players, id));

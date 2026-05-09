@@ -25,37 +25,44 @@ export function quarterSeconds(format) {
 }
 
 /**
- * Recommend a substitution interval (minutes) that minimizes the spread
- * (max - min) of total minutes per player, given attendance, format, and
- * keeper plan. Tries 1..quarter-length minutes and prefers larger
- * intervals on ties (fewer disruptions).
+ * Recommend a substitution interval that minimizes the spread (max - min)
+ * of total minutes per player, given attendance, format, and keeper plan.
  *
- * Returns { interval, spreadSec, perPlayerSec, candidates }.
+ * Constraint: tries intervals between 3:20 (200s) and 10:00 (600s) in 10s
+ * steps, never exceeding the quarter length. Prefers larger intervals on
+ * ties (fewer interruptions).
+ *
+ * Returns { intervalSec, intervalMin, spreadSec, perPlayerSec, candidates }.
  */
 export function recommendSubInterval(match, history) {
   const qSec = quarterSeconds(match.format);
-  const qMin = qSec / 60;
+  const MIN_SEC = 200;            // 3:20
+  const MAX_SEC = 600;            // 10:00
+  const STEP_SEC = 10;
+  const lo = Math.min(MIN_SEC, qSec);
+  const hi = Math.min(MAX_SEC, qSec);
   const candidates = [];
-  const maxIntervalMin = Math.max(1, Math.floor(qMin));
-  // Try every interval that divides the quarter cleanly first; fall back to all integers.
-  const tries = [];
-  for (let m = 1; m <= maxIntervalMin; m++) tries.push(m);
 
-  for (const m of tries) {
-    const trial = { ...match, subIntervalMin: m };
+  for (let s = lo; s <= hi; s += STEP_SEC) {
+    const trial = { ...match, subIntervalMin: s / 60 };
     let plan;
     try { plan = buildPlan(trial, history); } catch { continue; }
     const totals = match.attendingPlayerIds.map((id) => plan.plannedSecondsPerPlayer[id].totalSec);
     const max = Math.max(...totals);
     const min = Math.min(...totals);
-    const spread = max - min;
-    candidates.push({ interval: m, spreadSec: spread, perPlayerSec: totals });
+    candidates.push({ intervalSec: s, spreadSec: max - min, perPlayerSec: totals });
   }
   if (!candidates.length) return null;
   // Prefer lowest spread; tiebreak: larger interval (fewer interruptions).
-  candidates.sort((a, b) => a.spreadSec - b.spreadSec || b.interval - a.interval);
+  candidates.sort((a, b) => a.spreadSec - b.spreadSec || b.intervalSec - a.intervalSec);
   const best = candidates[0];
-  return { interval: best.interval, spreadSec: best.spreadSec, perPlayerSec: best.perPlayerSec, candidates };
+  return {
+    intervalSec: best.intervalSec,
+    intervalMin: best.intervalSec / 60,
+    spreadSec: best.spreadSec,
+    perPlayerSec: best.perPlayerSec,
+    candidates,
+  };
 }
 
 export function matchSeconds(format) {

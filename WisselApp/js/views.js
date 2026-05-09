@@ -68,9 +68,12 @@ export function viewRoster(players) {
     </div>
     <div class="list">
       ${players.length ? players.map((p) => `
-        <div class="card row between" data-id="${p.id}">
-          <div>${escapeHtml(p.firstName)}</div>
-          <button class="link danger" data-act="del" data-id="${p.id}">Verwijderen</button>
+        <div class="card player-row" data-id="${p.id}">
+          <input class="player-name-input" data-id="${p.id}" value="${escapeHtml(p.firstName)}" maxlength="40" />
+          <div class="row gap">
+            <button class="link" data-act="save" data-id="${p.id}" hidden>Opslaan</button>
+            <button class="link danger" data-act="del" data-id="${p.id}">Verwijderen</button>
+          </div>
         </div>`).join('')
         : `<div class="empty"><p>Nog geen spelers.</p></div>`}
     </div>
@@ -216,8 +219,8 @@ export function viewMatchSetup(match, players, history, plan) {
         <label>Kwarten per helft<input type="number" id="m-qph" min="1" max="3" value="${fmt.quartersPerHalf || 2}" /></label>
       </div>
       <p class="sub">→ ${totalQ} kwarten van ${qMin} min · keeper wisselt aan elk kwart.</p>
-      <label>Wisselinterval binnen kwart (min)
-        <input type="number" id="m-int" min="1" max="20" step="1" value="${match.subIntervalMin || (qSec/60)}" />
+      <label>Wisselinterval binnen kwart (min, decimaal toegestaan)
+        <input type="number" id="m-int" min="0.5" max="20" step="0.1" value="${match.subIntervalMin || (qSec/60)}" />
       </label>
       <button id="suggest-interval" class="link">Aanbevolen interval berekenen</button>
       <label>Wissels per rotatie (optioneel)
