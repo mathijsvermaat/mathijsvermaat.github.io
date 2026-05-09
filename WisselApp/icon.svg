@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <defs>
+    <clipPath id="ballClip"><circle cx="96" cy="96" r="78"/></clipPath>
+    <radialGradient id="ballShade" cx="35%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.25"/>
+    </radialGradient>
+  </defs>
+  <rect width="192" height="192" rx="36" fill="#0f1822"/>
+
+  <!-- Soccer ball -->
+  <g>
+    <circle cx="96" cy="96" r="78" fill="#f3f4f6"/>
+    <g clip-path="url(#ballClip)" fill="#0f1822">
+      <polygon points="96,68 120,86 111,114 81,114 72,86"/>
+      <polygon points="96,12 124,32 113,60 79,60 68,32"/>
+      <polygon points="170,72 186,108 162,128 138,108 152,80"/>
+      <polygon points="148,170 116,182 96,158 116,134 148,150"/>
+      <polygon points="44,170 76,134 96,158 76,182 28,178"/>
+      <polygon points="22,72 40,80 54,108 30,128 6,108"/>
+      <g stroke="#0f1822" stroke-width="5" stroke-linecap="round" fill="none">
+        <line x1="96"  y1="68"  x2="96"  y2="60"/>
+        <line x1="120" y1="86"  x2="138" y2="80"/>
+        <line x1="111" y1="114" x2="124" y2="134"/>
+        <line x1="81"  y1="114" x2="68"  y2="134"/>
+        <line x1="72"  y1="86"  x2="54"  y2="80"/>
+      </g>
+    </g>
+    <circle cx="96" cy="96" r="78" fill="url(#ballShade)"/>
+    <circle cx="96" cy="96" r="78" fill="none" stroke="#0f1822" stroke-width="3"/>
+  </g>
+
+  <!-- Substitution boards (touching, no gap, separator stroke between) -->
+  <g>
+    <rect x="34" y="50" width="62" height="92" rx="8" fill="#ef4444"/>
+    <rect x="96" y="50" width="62" height="92" rx="8" fill="#22c55e"/>
+    <rect x="34" y="50" width="124" height="92" rx="8" fill="none" stroke="#0f1822" stroke-width="2"/>
+    <line x1="96" y1="52" x2="96" y2="140" stroke="#0f1822" stroke-width="2"/>
+    <text x="65" y="112" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="48" font-weight="800" fill="#fff" text-anchor="middle">↓</text>
+    <text x="127" y="112" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="48" font-weight="800" fill="#fff" text-anchor="middle">↑</text>
+  </g>
+</svg>
