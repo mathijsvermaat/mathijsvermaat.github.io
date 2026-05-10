@@ -80,8 +80,12 @@ export function viewRoster(players) {
   `;
 }
 
-export function viewSettings(teamName, prefs) {
+export function viewSettings(teamName, prefs, tonePresets) {
   const p = prefs || { sound: true, vibrate: true, leadSeconds: 30 };
+  const tones = (p.tones) || { sub: 'tripleHigh', pre: 'doubleLow', quarter: 'sweepDown' };
+  const toneOptions = (selected) => Object.entries(tonePresets || {})
+    .map(([id, t]) => `<option value="${id}" ${id === selected ? 'selected' : ''}>${escapeHtml(t.label)}</option>`)
+    .join('');
   return `
     <div class="card">
       <label>Teamnaam<input id="team-name" value="${escapeHtml(teamName || '')}" maxlength="40" /></label>
@@ -89,12 +93,31 @@ export function viewSettings(teamName, prefs) {
     </div>
     <div class="card">
       <h3>Wisselsignaal</h3>
-      <label class="chk inline"><input type="checkbox" id="pref-sound" ${p.sound ? 'checked' : ''}/> Geluid (3 piepjes)</label>
-      <label class="chk inline"><input type="checkbox" id="pref-vibrate" ${p.vibrate ? 'checked' : ''}/> Trillen (alleen Android)</label>
+      <label class="chk inline"><input type="checkbox" id="pref-sound" ${p.sound ? 'checked' : ''}/> Wisselsignaal aan</label>
+      <label>Toon wisselsignaal
+        <select id="tone-sub">${toneOptions(tones.sub)}</select>
+      </label>
+      <button id="test-signal">Test wissel</button>
+
+      <hr/>
+      <label class="chk inline"><input type="checkbox" id="pref-presound" ${p.preSound !== false ? 'checked' : ''}/> Voorwaarschuwing aan</label>
+      <label>Toon voorwaarschuwing
+        <select id="tone-pre">${toneOptions(tones.pre)}</select>
+      </label>
       <label>Voorwaarschuwing (seconden vooraf)
         <input type="number" id="pref-lead" min="0" max="120" step="5" value="${p.leadSeconds}" />
       </label>
-      <button id="test-signal">Test signaal</button>
+      <button id="test-pre">Test voorwaarschuwing</button>
+
+      <hr/>
+      <label class="chk inline"><input type="checkbox" id="pref-quartersound" ${p.quarterSound !== false ? 'checked' : ''}/> Kwartpauze-signaal aan</label>
+      <label>Toon kwartpauze
+        <select id="tone-quarter">${toneOptions(tones.quarter)}</select>
+      </label>
+      <button id="test-quarter">Test kwartpauze</button>
+
+      <hr/>
+      <label class="chk inline"><input type="checkbox" id="pref-vibrate" ${p.vibrate ? 'checked' : ''}/> Trillen (alleen Android)</label>
       <p class="sub">Tip op iPhone: zet de telefoon NIET op stil — webapps gebruiken het mediavolume voor het signaal.</p>
     </div>
     <div class="card">
@@ -111,6 +134,15 @@ export function viewSettings(teamName, prefs) {
       <p class="sub">iPhone: open in Safari → Deel → <b>Zet op beginscherm</b>.<br/>
       Android: menu → <b>App installeren</b>.<br/>
       Daarna werkt de app offline en draait fullscreen.</p>
+    </div>
+    <div class="card">
+      <h3>App-update</h3>
+      <p class="sub">Versie: <span id="app-version">…</span></p>
+      <div class="row gap">
+        <button id="check-update">Zoek update</button>
+        <button class="danger" id="force-update">Forceer herinstallatie</button>
+      </div>
+      <p class="sub">"Zoek update" controleert of er een nieuwe versie klaarstaat. "Forceer herinstallatie" wist de app-cache en herlaadt — je data blijft behouden.</p>
     </div>
     <div class="card">
       <h3>Alle data wissen</h3>

@@ -4,12 +4,18 @@ import * as db from './db.js';
 import * as V from './views.js';
 import { buildPlan, suggestKeepers, buildHistory, totalQuarters, recommendSubInterval, applyInjury } from './scheduler.js';
 import { MatchClock } from './timer.js';
-import { unlockAudio, showAlert, showActionSheet, beep, vibrate } from './notify.js';
+import { unlockAudio, showAlert, showActionSheet, beep, vibrate, TONE_PRESETS, DEFAULT_TONES } from './notify.js';
 
-const DEFAULT_PREFS = { sound: true, vibrate: true, leadSeconds: 30 };
+const DEFAULT_PREFS = {
+  sound: true, vibrate: true, leadSeconds: 30,
+  preSound: true, quarterSound: true,
+  tones: { ...DEFAULT_TONES },
+};
 
 async function getPrefs() {
-  return await db.getSetting('prefs', DEFAULT_PREFS) || DEFAULT_PREFS;
+  const p = await db.getSetting('prefs', DEFAULT_PREFS) || DEFAULT_PREFS;
+  // Backfill missing fields when prefs were saved by an older version.
+  return { ...DEFAULT_PREFS, ...p, tones: { ...DEFAULT_TONES, ...(p.tones || {}) } };
 }
 
 const view = document.getElementById('view');
@@ -185,7 +191,7 @@ async function renderSettings() {
   titleEl.textContent = 'Instellingen';
   const teamName = await db.getSetting('teamName', '');
   const prefs = await getPrefs();
-  view.innerHTML = V.viewSettings(teamName, prefs);
+  view.innerHTML = V.viewSettings(teamName, prefs, TONE_PRESETS);
   document.getElementById('save-team').addEventListener('click', async () => {
     await db.setSetting('teamName', document.getElementById('team-name').value.trim());
     showAlert('Opgeslagen', '');
@@ -194,19 +200,45 @@ async function renderSettings() {
     const p = {
       sound: document.getElementById('pref-sound').checked,
       vibrate: document.getElementById('pref-vibrate').checked,
+      preSound: document.getElementById('pref-presound').checked,
+      quarterSound: document.getElementById('pref-quartersound').checked,
       leadSeconds: Math.max(0, +document.getElementById('pref-lead').value || 0),
+      tones: {
+        sub: document.getElementById('tone-sub').value,
+        pre: document.getElementById('tone-pre').value,
+        quarter: document.getElementById('tone-quarter').value,
+      },
     };
     await db.setSetting('prefs', p);
   };
   document.getElementById('pref-sound').addEventListener('change', savePrefs);
   document.getElementById('pref-vibrate').addEventListener('change', savePrefs);
+  document.getElementById('pref-presound').addEventListener('change', savePrefs);
+  document.getElementById('pref-quartersound').addEventListener('change', savePrefs);
   document.getElementById('pref-lead').addEventListener('change', savePrefs);
+  document.getElementById('tone-sub').addEventListener('change', async () => { await savePrefs(); unlockAudio(); beep(document.getElementById('tone-sub').value); });
+  document.getElementById('tone-pre').addEventListener('change', async () => { await savePrefs(); unlockAudio(); beep(document.getElementById('tone-pre').value); });
+  document.getElementById('tone-quarter').addEventListener('change', async () => { await savePrefs(); unlockAudio(); beep(document.getElementById('tone-quarter').value); });
   document.getElementById('test-signal').addEventListener('click', async () => {
     unlockAudio();
     await savePrefs();
     const p = await getPrefs();
-    if (p.sound) beep();
+    if (p.sound) beep(p.tones.sub);
     if (p.vibrate) vibrate();
+  });
+  document.getElementById('test-pre').addEventListener('click', async () => {
+    unlockAudio();
+    await savePrefs();
+    const p = await getPrefs();
+    if (p.preSound) beep(p.tones.pre);
+    if (p.vibrate) vibrate([120, 80, 120]);
+  });
+  document.getElementById('test-quarter').addEventListener('click', async () => {
+    unlockAudio();
+    await savePrefs();
+    const p = await getPrefs();
+    if (p.quarterSound) beep(p.tones.quarter);
+    if (p.vibrate) vibrate([400, 120, 400]);
   });
   document.getElementById('export').addEventListener('click', async () => {
     const data = await db.exportAll();
@@ -234,6 +266,51 @@ async function renderSettings() {
     indexedDB.deleteDatabase('wisselapp');
     localStorage.clear();
     setTimeout(() => location.reload(), 300);
+  });
+
+  // Show current cache version + update controls
+  const versionEl = document.getElementById('app-version');
+  if ('caches' in window) {
+    caches.keys().then((keys) => {
+      const w = keys.find((k) => k.startsWith('wisselapp-')) || '(onbekend)';
+      if (versionEl) versionEl.textContent = w;
+    });
+  } else if (versionEl) {
+    versionEl.textContent = '(geen service worker)';
+  }
+  document.getElementById('check-update')?.addEventListener('click', async () => {
+    if (!('serviceWorker' in navigator)) { showAlert('Niet ondersteund', 'Service workers zijn niet beschikbaar.'); return; }
+    try {
+      const reg = await navigator.serviceWorker.getRegistration();
+      if (!reg) { showAlert('Geen registratie', 'De service worker is nog niet geregistreerd.'); return; }
+      await reg.update();
+      if (reg.waiting) {
+        showUpdateBanner(reg);
+        showAlert('Update klaar', 'Een nieuwe versie staat klaar. Tik op "Herlaad" in de groene balk bovenaan.');
+      } else if (reg.installing) {
+        showAlert('Update wordt opgehaald', 'Een moment… de balk verschijnt zodra de update klaar is.');
+      } else {
+        showAlert('Geen update', 'Je hebt al de nieuwste versie.');
+      }
+    } catch (err) {
+      showAlert('Fout', String(err.message || err));
+    }
+  });
+  document.getElementById('force-update')?.addEventListener('click', async () => {
+    if (!confirm('Forceer herinstallatie van de app? De cache wordt gewist en de pagina herlaadt. Je spelers, wedstrijden en instellingen blijven behouden.')) return;
+    try {
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+    } catch (err) {
+      console.warn('force-update cleanup failed', err);
+    }
+    setTimeout(() => location.reload(), 200);
   });
 }
 
@@ -393,10 +470,15 @@ async function renderLive(players, id) {
 
   function rearmAlarms() {
     const subTimes = plan.quarters.flatMap((q) => q.subEvents.map((e) => e.atSec)).filter((t) => t > 0);
-    const leadTimes = subTimes.map((t) => Math.max(0, t - liveCtx.prefs.leadSeconds));
+    const leadTimes = subTimes
+      .map((t) => Math.max(0, t - liveCtx.prefs.leadSeconds))
+      // Drop lead alarms that collide with the sub itself or another event.
+      .filter((t) => t > 0 && !subTimes.includes(t));
     // Quarter-end breaks: every quarter end EXCEPT the very last (which is end of match).
     const breaks = plan.quarters.slice(0, -1).map((q) => q.endSec);
     liveCtx.quarterBreaks = new Set(breaks);
+    liveCtx.subTimes = new Set(subTimes);
+    liveCtx.leadTimes = new Set(leadTimes);
     const alarms = [...new Set([...leadTimes, ...subTimes, ...breaks])].sort((a, b) => a - b);
     liveCtx.clock.setAlarms(alarms);
   }
@@ -444,24 +526,38 @@ async function renderLive(players, id) {
       const nextKeeperName = nextQ ? V.escapeHtml(V.nameOf(players, nextQ.keeperId)) : '';
       const body = `<div>De timer is automatisch gepauzeerd. Druk op <b>▶ Hervat</b> om kwart ${finishedQ + 2} te starten.</div>
                     ${nextQ ? `<div class="sub">Volgende keeper: <b>${nextKeeperName}</b></div>` : ''}`;
-      showAlert(title, body, { sound: liveCtx.prefs.sound, vib: liveCtx.prefs.vibrate });
+      showAlert(title, body, { sound: liveCtx.prefs.quarterSound !== false, vib: liveCtx.prefs.vibrate, tone: liveCtx.prefs.tones?.quarter || 'sweepDown' });
       paint();
+      return;
+    }
+    // Pre-notification: lead time before an upcoming sub event.
+    if (liveCtx.leadTimes && liveCtx.leadTimes.has(atSec)) {
+      const target = atSec + liveCtx.prefs.leadSeconds;
+      const ev = plan.quarters.flatMap((q) => q.subEvents).find((x) => Math.abs(x.atSec - target) < 0.6);
+      if (!ev) return;
+      const off = (ev.off || []).map((id) => V.nameOf(players, id)).join(', ') || '—';
+      const on = (ev.on || []).map((id) => V.nameOf(players, id)).join(', ') || '—';
+      const keeperName = V.nameOf(players, ev.keeperId);
+      const lead = Math.max(0, target - liveCtx.clock.elapsedSec());
+      const title = ev.type === 'quarter'
+        ? `Maak je klaar: kwartwissel over ${Math.round(lead)}s`
+        : `Maak je klaar: wissel over ${Math.round(lead)}s`;
+      const body = `<div><b>Eraf:</b> ${V.escapeHtml(off)}</div>
+                    <div><b>Erin:</b> ${V.escapeHtml(on)}</div>
+                    <div class="sub">Keeper: ${V.escapeHtml(keeperName)}</div>`;
+      showAlert(title, body, { sound: liveCtx.prefs.preSound !== false, vib: liveCtx.prefs.vibrate, tone: liveCtx.prefs.tones?.pre || 'doubleLow' });
       return;
     }
     const ev = plan.quarters.flatMap((q) => q.subEvents).find((x) => Math.abs(x.atSec - atSec) < 0.6);
     if (!ev) return;
-    const elapsed = liveCtx.clock.elapsedSec();
-    const lead = Math.max(0, atSec - elapsed);
     const off = (ev.off || []).map((id) => V.nameOf(players, id)).join(', ') || '—';
     const on = (ev.on || []).map((id) => V.nameOf(players, id)).join(', ') || '—';
     const keeperName = V.nameOf(players, ev.keeperId);
-    const title = ev.type === 'quarter'
-      ? (lead > 5 ? `Kwartwissel over ${Math.round(lead)}s` : 'Kwartwissel — nu!')
-      : (lead > 5 ? `Wissel over ${Math.round(lead)}s` : 'Wisselen — nu!');
+    const title = ev.type === 'quarter' ? 'Kwartwissel — nu!' : 'Wisselen — nu!';
     const body = `<div><b>Eraf:</b> ${V.escapeHtml(off)}</div>
                   <div><b>Erin:</b> ${V.escapeHtml(on)}</div>
                   <div class="sub">Keeper: ${V.escapeHtml(keeperName)}</div>`;
-    showAlert(title, body, { sound: liveCtx.prefs.sound, vib: liveCtx.prefs.vibrate });
+    showAlert(title, body, { sound: liveCtx.prefs.sound, vib: liveCtx.prefs.vibrate, tone: liveCtx.prefs.tones?.sub || 'tripleHigh' });
   }
 
   async function finishMatch() {
