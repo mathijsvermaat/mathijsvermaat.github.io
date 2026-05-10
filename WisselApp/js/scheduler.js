@@ -409,14 +409,20 @@ export function recomputePlanMeta(plan, match, fromSec = 0) {
 
 /**
  * Aggregate playtime history across all played matches.
- * Uses match.actualPlaytime if present (recorded during live match),
- * else falls back to plannedSecondsPerPlayer.
+ * Includes:
+ *  - finished matches (using actualPlaytime, falling back to plan)
+ *  - live matches that have an actualPlaytime snapshot (auto-saved during play)
  */
 export function buildHistory(matches) {
   const h = {};
   for (const m of matches) {
-    if (m.status !== 'finished') continue;
-    const src = m.actualPlaytime || (m.plan && m.plan.plannedSecondsPerPlayer) || {};
+    let src = null;
+    if (m.status === 'finished') {
+      src = m.actualPlaytime || (m.plan && m.plan.plannedSecondsPerPlayer) || null;
+    } else if (m.status === 'live' && m.actualPlaytime) {
+      src = m.actualPlaytime;
+    }
+    if (!src) continue;
     for (const [pid, v] of Object.entries(src)) {
       if (!h[pid]) h[pid] = { fieldSeconds: 0, keeperSeconds: 0, totalSeconds: 0, keeperGames: 0, games: 0 };
       h[pid].fieldSeconds += v.fieldSec || 0;

@@ -75,6 +75,16 @@ input, select, textarea {
   font-family: inherit;
 }
 input[type=number] { max-width: 100%; }
+/* iOS Safari renders date inputs with extra intrinsic padding/min-width and
+   centers their text. Normalize so they match the other fields. */
+input[type=date] {
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: left;
+  min-height: 44px;
+  display: block;
+}
+input[type=date]::-webkit-date-and-time-value { text-align: left; }
 button {
   background: var(--card); color: var(--text); border: 1px solid var(--line);
   padding: 12px 16px; border-radius: 10px; font-size: 15px; font-weight: 500;
@@ -128,6 +138,8 @@ button[disabled] { opacity: 0.4; }
 /* Live screen */
 .clock { text-align: center; padding: 12px 0 18px; }
 .clock-row { display: flex; align-items: center; justify-content: center; gap: 14px; }
+.live-controls { justify-content: center; margin-top: 10px; }
+.live-controls button { flex: 1; max-width: 140px; }
 .iconbtn.jump { font-size: 26px; color: var(--accent); padding: 8px 14px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); }
 .iconbtn.jump:active { background: var(--bg2); }
 .big-time { font-size: 64px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--accent); letter-spacing: 1px; }

@@ -190,12 +190,17 @@ export function viewMatchSetup(match, players, history, plan) {
           </div>
         `).join('')}
         <h4>Geplande speeltijd</h4>
+        <p class="sub">${match.ignoreHistory
+          ? 'Geschiedenis wordt <b>genegeerd</b>: minuten worden alleen binnen deze wedstrijd zo eerlijk mogelijk verdeeld.'
+          : 'De planning verdeelt minuten zo eerlijk mogelijk binnen deze wedstrijd én verrekent de totalen uit eerdere wedstrijden: spelers met minder historische speeltijd krijgen voorrang.'}</p>
         <table class="stats">
-          <thead><tr><th>Speler</th><th>Veld</th><th>Keeper</th><th>Totaal</th></tr></thead>
+          <thead><tr><th>Speler</th><th>Historie</th><th>Veld</th><th>Keeper</th><th>Deze wedstr.</th><th>Totaal na</th></tr></thead>
           <tbody>
             ${match.attendingPlayerIds.map((id) => {
               const v = plan.plannedSecondsPerPlayer[id];
-              return `<tr><td>${escapeHtml(nameOf(players, id))}</td><td>${fmtMin(v.fieldSec)}</td><td>${fmtMin(v.keeperSec)}</td><td>${fmtMin(v.totalSec)}</td></tr>`;
+              const hist = history[id]?.totalSeconds || 0;
+              const after = hist + (v.totalSec || 0);
+              return `<tr><td>${escapeHtml(nameOf(players, id))}</td><td>${fmtMin(hist)}</td><td>${fmtMin(v.fieldSec)}</td><td>${fmtMin(v.keeperSec)}</td><td>${fmtMin(v.totalSec)}</td><td>${fmtMin(after)}</td></tr>`;
             }).join('')}
           </tbody>
         </table>
@@ -226,6 +231,7 @@ export function viewMatchSetup(match, players, history, plan) {
       <label>Wissels per rotatie (optioneel)
         <input type="number" id="m-spr" min="1" max="11" value="${match.subsPerRotation || ''}" placeholder="auto" />
       </label>
+      <label class="chk inline"><input type="checkbox" id="m-ignore-hist" ${match.ignoreHistory ? 'checked' : ''}/> Negeer geschiedenis (verdeel alleen binnen deze wedstrijd)</label>
     </div>
 
     <div class="card">
@@ -294,6 +300,11 @@ export function viewLive(match, players, plan, elapsedSec) {
         <button class="iconbtn jump" id="jump-fwd" aria-label="10 seconden vooruit">»</button>
       </div>
       <div class="sub">Kwart ${curQ + 1} / ${plan.quarters.length} · gespeeld ${fmtTime(elapsedSec)}</div>
+      <div class="row gap live-controls">
+        <button id="live-pause">⏸ Pauze</button>
+        <button id="live-resume" class="primary">▶ Hervat</button>
+        <button id="live-finish" class="danger">Beëindig</button>
+      </div>
     </div>
 
     <div class="card next-sub ${nextIn < 30 ? 'soon' : ''}">
@@ -327,12 +338,6 @@ export function viewLive(match, players, plan, elapsedSec) {
       <h3>Tijdlijn wissels</h3>
       <div class="tl-head"><div>Eraf</div><div>Resterend</div><div>Erin</div></div>
       <div class="timeline">${timelineHtml || '<div class="sub">Geen wissels.</div>'}</div>
-    </div>
-
-    <div class="row gap stick-bottom">
-      <button id="live-pause">⏸ Pauze</button>
-      <button id="live-resume" class="primary">▶ Hervat</button>
-      <button id="live-finish" class="danger">Beëindig</button>
     </div>
   `;
 }

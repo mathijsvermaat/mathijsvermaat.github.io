@@ -62,16 +62,28 @@ function setRoute(name, params = {}) {
 }
 
 backBtn.addEventListener('click', () => {
-  if (liveCtx) { liveCtx.clock.pause(); liveCtx = null; }
+  if (liveCtx) { liveCtx.clock.pause(); persistLiveOnLeave(); liveCtx = null; }
   setRoute('matches');
 });
 
 document.querySelectorAll('#tabbar .tab').forEach((b) => {
   b.addEventListener('click', () => {
-    if (liveCtx) { liveCtx.clock.pause(); liveCtx = null; }
+    if (liveCtx) { liveCtx.clock.pause(); persistLiveOnLeave(); liveCtx = null; }
     setRoute(b.dataset.route);
   });
 });
+
+// Best-effort save when leaving an active live match (back / tab switch).
+function persistLiveOnLeave() {
+  try {
+    const ctx = liveCtx;
+    if (!ctx) return;
+    const elapsed = ctx.clock.elapsedSec();
+    ctx.match.actualPlaytime = computeActualPlaytime(ctx.plan, ctx.match, elapsed);
+    ctx.match.elapsedSec = elapsed;
+    db.saveMatch(ctx.match);
+  } catch {}
+}
 
 // ------- Render dispatch -------
 async function render() {
@@ -234,11 +246,13 @@ async function renderMatchSetup(players, id) {
   // Compute history from FINISHED matches only (excluding this one)
   const allMatches = await db.listMatches();
   const history = buildHistory(allMatches.filter((m) => m.id !== id));
+  // Effective history used for planning: empty when the user wants to ignore history.
+  const effHistory = match.ignoreHistory ? {} : history;
 
   // Try to build a plan if everything is set
   let plan = null;
   if (canPlan(match)) {
-    try { plan = buildPlan(match, history); match.plan = plan; await db.saveMatch({ ...match, status: 'ready' }); }
+    try { plan = buildPlan(match, effHistory); match.plan = plan; await db.saveMatch({ ...match, status: 'ready' }); }
     catch (e) { console.warn(e); }
   }
 
@@ -292,9 +306,11 @@ async function renderMatchSetup(players, id) {
     });
   });
 
+  $('m-ignore-hist')?.addEventListener('change', (e) => update({ ignoreHistory: !!e.target.checked }));
+
   $('suggest-keepers')?.addEventListener('click', () => {
     if (!match.attendingPlayerIds.length) return;
-    const k = suggestKeepers(match.attendingPlayerIds, history, match.format);
+    const k = suggestKeepers(match.attendingPlayerIds, effHistory, match.format);
     update({ keeperPerQuarter: k });
   });
 
@@ -303,7 +319,7 @@ async function renderMatchSetup(players, id) {
       showAlert('Nog niet mogelijk', 'Vul eerst de aanwezige spelers en de keepers per kwart in.');
       return;
     }
-    const rec = recommendSubInterval(match, history);
+    const rec = recommendSubInterval(match, effHistory);
     if (!rec) { showAlert('Geen aanbeveling', 'Kon geen interval berekenen.'); return; }
     const fmt = (sec) => {
       const m = Math.floor(sec / 60);
@@ -357,9 +373,22 @@ async function renderLive(players, id) {
     if (liveCtx) liveCtx.clock.pause();
     const prefs = await getPrefs();
     const clock = new MatchClock(id, totalSec, () => paint(), (atSec) => onAlarm(atSec));
-    liveCtx = { match, plan, players, clock, prefs, quarterBreaks: new Set() };
+    liveCtx = { match, plan, players, clock, prefs, quarterBreaks: new Set(), lastPersistMs: 0 };
     rearmAlarms();
     if (match.status === 'live' && !clock.isRunning() && clock.elapsedSec() === 0) clock.start();
+  }
+
+  // Persist live playtime to DB so history is preserved even if user
+  // never taps "Beëindig". Throttled to once every ~10s while painting.
+  async function persistLiveSnapshot(force = false) {
+    if (!liveCtx || liveCtx.match.id !== id) return;
+    const now = Date.now();
+    if (!force && now - liveCtx.lastPersistMs < 10000) return;
+    liveCtx.lastPersistMs = now;
+    const elapsed = liveCtx.clock.elapsedSec();
+    match.actualPlaytime = computeActualPlaytime(plan, match, elapsed);
+    match.elapsedSec = elapsed;
+    try { await db.saveMatch(match); } catch {}
   }
 
   function rearmAlarms() {
@@ -375,7 +404,7 @@ async function renderLive(players, id) {
   function paint() {
     const e = liveCtx.clock.elapsedSec();
     view.innerHTML = V.viewLive(match, players, plan, e);
-    document.getElementById('live-pause').addEventListener('click', () => liveCtx.clock.pause());
+    document.getElementById('live-pause').addEventListener('click', () => { liveCtx.clock.pause(); persistLiveSnapshot(true); });
     document.getElementById('live-resume').addEventListener('click', () => { unlockAudio(); liveCtx.clock.start(); });
     document.getElementById('live-finish').addEventListener('click', finishMatch);
     document.getElementById('jump-back').addEventListener('click', () => { liveCtx.clock.adjust(-10); paint(); });
@@ -383,6 +412,7 @@ async function renderLive(players, id) {
     view.querySelectorAll('.tappable[data-pid]').forEach((el) => {
       el.addEventListener('click', () => onPlayerTap(el.dataset.pid, el.dataset.role));
     });
+    persistLiveSnapshot();
   }
 
   async function onPlayerTap(pid, role) {
@@ -473,7 +503,8 @@ function computeActualPlaytime(plan, match, elapsed) {
 }
 
 // Pause clock if user navigates away to free wake lock
-window.addEventListener('beforeunload', () => { liveCtx?.clock.pause(); });
+window.addEventListener('beforeunload', () => { liveCtx?.clock.pause(); persistLiveOnLeave(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) persistLiveOnLeave(); });
 
 // Start
 setRoute('matches');
