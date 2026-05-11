@@ -82,3 +82,26 @@ An interactive assessment checklist for the [Sentinel Maturity Model](https://gi
 
 **Usage:**
 Navigate to `https://mathijsvermaat.github.io/sentinel-maturity-assessment.html` or open the file locally. Fill in the assessment metadata, work through each connector's checklist, add comments, and export the results.
+
+### WisselApp (`WisselApp/`)
+
+A substitution and playing-time planner for youth football (jeugdvoetbal), delivered as a fully offline Progressive Web App. See [WisselApp/README.md](WisselApp/README.md) for the full Dutch documentation.
+
+**Purpose:** Help coaches fairly distribute playing time, goalkeeper rotations, and substitutions across matches, with a live match screen that survives screen lock.
+
+**Features:**
+- Player roster (first names only — privacy-friendly)
+- Matches per date with configurable format, halves, quarters, and substitution interval
+- Goalkeeper-per-quarter selection with suggestions based on historical goalkeeper time
+- Fair substitution schedule that accounts for prior playing time across matches
+- Live match screen with large clock, current field/bench/goalkeeper, countdown to next substitution, and audible/visual/vibration alarm 30 seconds before and at the moment of switching
+- Lock-screen-proof timestamp-based timer (locking the phone does not reset the match)
+- Playing-time statistics across all matches
+- JSON backup export/import
+- Installable as a PWA on iOS and Android, works offline via service worker
+
+**Privacy:**
+All data (players, matches, playing time) is stored locally in IndexedDB on the device. No backend, no cloud — the only network traffic is downloading the static app files from GitHub Pages.
+
+**Usage:**
+Navigate to `https://mathijsvermaat.github.io/WisselApp/` and add it to your home screen (iOS Safari: Share → *Add to Home Screen*; Android Chrome: menu → *Install app*).
