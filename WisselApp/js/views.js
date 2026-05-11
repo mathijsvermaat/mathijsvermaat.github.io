@@ -153,21 +153,22 @@ export function viewSettings(teamName, prefs, tonePresets) {
 
 export function viewStats(players, history) {
   const rows = players.map((p) => {
-    const h = history[p.id] || { totalSeconds: 0, fieldSeconds: 0, keeperSeconds: 0, games: 0, keeperGames: 0 };
+    const h = history[p.id] || { totalSeconds: 0, fieldSeconds: 0, keeperSeconds: 0, games: 0, keeperGames: 0, goals: 0 };
     return `<tr>
       <td>${escapeHtml(p.firstName)}</td>
       <td>${h.games}</td>
       <td>${fmtMin(h.totalSeconds)}</td>
       <td>${fmtMin(h.keeperSeconds)}</td>
       <td>${h.keeperGames}</td>
+      <td>${h.goals || 0}</td>
     </tr>`;
   }).join('');
   return `
     <div class="card">
       <h3>Speeltijd over alle wedstrijden</h3>
       <table class="stats">
-        <thead><tr><th>Speler</th><th>Wedstr.</th><th>Totaal</th><th>Keeper</th><th>Keeper×</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="5" class="empty-cell">Geen data</td></tr>'}</tbody>
+        <thead><tr><th>Speler</th><th>Wedstr.</th><th>Totaal</th><th>Keeper</th><th>Keeper×</th><th>⚽</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="6" class="empty-cell">Geen data</td></tr>'}</tbody>
       </table>
     </div>
   `;
@@ -339,6 +340,8 @@ export function viewLive(match, players, plan, elapsedSec) {
       </div>
     </div>
 
+    ${renderScoreCard(match, players)}
+
     <div class="card next-sub ${nextIn < 30 ? 'soon' : ''}">
       <div class="sub">Volgende wissel over</div>
       <div class="big-time small">${fmtTime(nextIn)}</div>
@@ -379,4 +382,54 @@ function renderNext(ev, players) {
   const on  = ev.on?.length  ? `<div><b>Erin:</b> ${ev.on.map((id) => escapeHtml(nameOf(players, id))).join(', ')}</div>` : '';
   const kind = ev.type === 'quarter' ? `<div class="sub">Kwartwissel — keeper: ${escapeHtml(nameOf(players, ev.keeperId))}</div>` : '';
   return kind + off + on;
+}
+
+export function computeScore(match) {
+  const goals = match.goals || [];
+  return {
+    us: goals.filter((g) => g.team === 'us').length,
+    opp: goals.filter((g) => g.team === 'opp').length,
+  };
+}
+
+function renderScoreCard(match, players) {
+  const score = computeScore(match);
+  const goals = (match.goals || []).slice().sort((a, b) => a.atSec - b.atSec);
+  const teamName = match.teamName || 'Wij';
+  const oppName = match.opponent ? escapeHtml(match.opponent) : 'Tegenstander';
+  const goalsHtml = goals.length ? goals.map((g) => {
+    const who = g.team === 'opp'
+      ? `<span class="goal-opp">${oppName}</span>`
+      : (g.scorerId
+        ? `<span class="goal-us">${escapeHtml(nameOf(players, g.scorerId))}</span>`
+        : `<span class="goal-us">Onbekend</span>`);
+    return `<div class="goal-row" data-gid="${g.id}">
+      <span class="goal-time">${fmtTime(g.atSec)}</span>
+      <span class="goal-who">${who}</span>
+      <span class="goal-actions">
+        <button class="link" data-act="goal-edit" data-gid="${g.id}">✎</button>
+        <button class="link danger" data-act="goal-del" data-gid="${g.id}">✕</button>
+      </span>
+    </div>`;
+  }).join('') : '<div class="sub">Nog geen doelpunten.</div>';
+  return `
+    <div class="card score-card">
+      <div class="score-row">
+        <div class="score-side">
+          <div class="score-label">${escapeHtml(teamName)}</div>
+          <div class="score-num">${score.us}</div>
+        </div>
+        <div class="score-sep">–</div>
+        <div class="score-side">
+          <div class="score-label">${oppName}</div>
+          <div class="score-num">${score.opp}</div>
+        </div>
+      </div>
+      <div class="row gap score-actions">
+        <button id="goal-us" class="primary">⚽ Wij scoren</button>
+        <button id="goal-opp">+ Tegenstander</button>
+      </div>
+      <div class="goals-list">${goalsHtml}</div>
+    </div>
+  `;
 }

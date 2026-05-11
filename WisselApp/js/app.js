@@ -491,6 +491,14 @@ async function renderLive(players, id) {
     document.getElementById('live-finish').addEventListener('click', finishMatch);
     document.getElementById('jump-back').addEventListener('click', () => { liveCtx.clock.adjust(-10); paint(); });
     document.getElementById('jump-fwd').addEventListener('click', () => { liveCtx.clock.adjust(+10); paint(); });
+    document.getElementById('goal-us')?.addEventListener('click', () => onAddGoalUs());
+    document.getElementById('goal-opp')?.addEventListener('click', () => onAddGoalOpp());
+    view.querySelectorAll('button[data-act="goal-edit"]').forEach((b) => {
+      b.addEventListener('click', (ev) => { ev.stopPropagation(); onEditGoal(b.dataset.gid); });
+    });
+    view.querySelectorAll('button[data-act="goal-del"]').forEach((b) => {
+      b.addEventListener('click', (ev) => { ev.stopPropagation(); onDeleteGoal(b.dataset.gid); });
+    });
     view.querySelectorAll('.tappable[data-pid]').forEach((el) => {
       el.addEventListener('click', () => onPlayerTap(el.dataset.pid, el.dataset.role));
     });
@@ -501,9 +509,14 @@ async function renderLive(players, id) {
     const name = V.nameOf(players, pid);
     const at = liveCtx.clock.elapsedSec();
     const choice = await showActionSheet(`${name}`, [
+      { id: 'goal', label: '⚽ Doelpunt' },
       { id: 'injury', label: '🩹 Markeer als geblesseerd', danger: true },
       { id: 'cancel', label: 'Annuleren' },
     ]);
+    if (choice === 'goal') {
+      await addGoal({ scorerId: pid, team: 'us', atSec: at });
+      return;
+    }
     if (choice !== 'injury') return;
     if (!confirm(`${name} markeren als geblesseerd? Deze speler wordt uit de rest van de wedstrijd gehaald en het wisselschema wordt bijgewerkt.`)) return;
     match.injuredIds = match.injuredIds || [];
@@ -512,6 +525,72 @@ async function renderLive(players, id) {
     match.plan = plan;
     await db.saveMatch(match);
     rearmAlarms();
+    paint();
+  }
+
+  function genGoalId() {
+    return 'g_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7);
+  }
+
+  async function addGoal({ scorerId, team, atSec }) {
+    match.goals = match.goals || [];
+    match.goals.push({ id: genGoalId(), atSec: Math.round(atSec), team, scorerId: scorerId || null });
+    await db.saveMatch(match);
+    paint();
+  }
+
+  async function onAddGoalUs() {
+    const at = liveCtx.clock.elapsedSec();
+    // Build scorer picker: all attending players, plus "Onbekend".
+    const attending = match.attendingPlayerIds
+      .filter((id) => !(match.injuredIds || []).includes(id));
+    const actions = attending.map((id) => ({ id: `p:${id}`, label: `⚽ ${V.nameOf(players, id)}` }));
+    actions.push({ id: 'unknown', label: 'Onbekende speler' });
+    actions.push({ id: 'cancel', label: 'Annuleren' });
+    const choice = await showActionSheet('Wie scoorde?', actions);
+    if (choice === 'cancel' || !choice) return;
+    const scorerId = choice === 'unknown' ? null : choice.slice(2);
+    await addGoal({ scorerId, team: 'us', atSec: at });
+  }
+
+  async function onAddGoalOpp() {
+    const at = liveCtx.clock.elapsedSec();
+    await addGoal({ scorerId: null, team: 'opp', atSec: at });
+  }
+
+  async function onEditGoal(gid) {
+    const goal = (match.goals || []).find((g) => g.id === gid);
+    if (!goal) return;
+    const attending = match.attendingPlayerIds;
+    const actions = [];
+    if (goal.team === 'us') {
+      actions.push(...attending.map((id) => ({ id: `p:${id}`, label: `${id === goal.scorerId ? '✓ ' : ''}⚽ ${V.nameOf(players, id)}` })));
+      actions.push({ id: 'unknown', label: `${goal.scorerId == null ? '✓ ' : ''}Onbekende speler` });
+      actions.push({ id: 'flip', label: '↔ Wijzig naar tegenstander' });
+    } else {
+      actions.push({ id: 'flip', label: '↔ Wijzig naar ons doelpunt' });
+    }
+    actions.push({ id: 'cancel', label: 'Annuleren' });
+    const choice = await showActionSheet('Doelpunt aanpassen', actions);
+    if (!choice || choice === 'cancel') return;
+    if (choice === 'flip') {
+      goal.team = goal.team === 'us' ? 'opp' : 'us';
+      if (goal.team === 'opp') goal.scorerId = null;
+    } else if (choice === 'unknown') {
+      goal.scorerId = null;
+      goal.team = 'us';
+    } else if (choice.startsWith('p:')) {
+      goal.scorerId = choice.slice(2);
+      goal.team = 'us';
+    }
+    await db.saveMatch(match);
+    paint();
+  }
+
+  async function onDeleteGoal(gid) {
+    if (!confirm('Doelpunt verwijderen?')) return;
+    match.goals = (match.goals || []).filter((g) => g.id !== gid);
+    await db.saveMatch(match);
     paint();
   }
 

@@ -422,14 +422,23 @@ export function buildHistory(matches) {
     } else if (m.status === 'live' && m.actualPlaytime) {
       src = m.actualPlaytime;
     }
-    if (!src) continue;
-    for (const [pid, v] of Object.entries(src)) {
-      if (!h[pid]) h[pid] = { fieldSeconds: 0, keeperSeconds: 0, totalSeconds: 0, keeperGames: 0, games: 0 };
-      h[pid].fieldSeconds += v.fieldSec || 0;
-      h[pid].keeperSeconds += v.keeperSec || 0;
-      h[pid].totalSeconds += v.totalSec || ((v.fieldSec || 0) + (v.keeperSec || 0));
-      h[pid].games += 1;
-      if ((v.keeperSec || 0) > 0) h[pid].keeperGames += 1;
+    if (src) {
+      for (const [pid, v] of Object.entries(src)) {
+        if (!h[pid]) h[pid] = { fieldSeconds: 0, keeperSeconds: 0, totalSeconds: 0, keeperGames: 0, games: 0, goals: 0 };
+        h[pid].fieldSeconds += v.fieldSec || 0;
+        h[pid].keeperSeconds += v.keeperSec || 0;
+        h[pid].totalSeconds += v.totalSec || ((v.fieldSec || 0) + (v.keeperSec || 0));
+        h[pid].games += 1;
+        if ((v.keeperSec || 0) > 0) h[pid].keeperGames += 1;
+      }
+    }
+    // Aggregate goals (from finished or in-progress matches).
+    if (Array.isArray(m.goals)) {
+      for (const g of m.goals) {
+        if (g.team !== 'us' || !g.scorerId) continue;
+        if (!h[g.scorerId]) h[g.scorerId] = { fieldSeconds: 0, keeperSeconds: 0, totalSeconds: 0, keeperGames: 0, games: 0, goals: 0 };
+        h[g.scorerId].goals = (h[g.scorerId].goals || 0) + 1;
+      }
     }
   }
   return h;
