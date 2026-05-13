@@ -2809,6 +2809,10 @@
         </div>
         <div class="connector-body">
 
+          <div class="connector-note">
+            <strong>How to verify per-subscription delivery:</strong> in the <a href="https://portal.azure.com" target="_blank" rel="noopener">Azure portal</a> open <strong>Activity log</strong> (subscription scope) and choose <strong>Export Activity Logs</strong> at the top. This shows the diagnostic-setting that streams the subscription's Activity log to your Sentinel Log Analytics workspace — confirm a setting exists, points to the correct workspace, and has the required log categories enabled. Repeat per subscription, or use the <a href="https://github.com/mathijsvermaat/azure-activity-log-sentinel-audit" target="_blank" rel="noopener">Azure Activity Log Sentinel Audit</a> script to enumerate coverage at scale.
+          </div>
+
           <div class="check-group">
             <div class="check-group-title">Connector Setup</div>
             <div class="check-item">
