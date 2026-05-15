@@ -126,9 +126,70 @@ async function renderMatches(players) {
   });
   view.querySelectorAll('.match').forEach((el) => {
     el.addEventListener('click', () => {
+      // Don't navigate if this row is currently swiped open.
+      if (el.classList.contains('swiped')) {
+        el.classList.remove('swiped');
+        return;
+      }
       const m = matches.find((x) => x.id === el.dataset.id);
       if (m && m.status === 'live') setRoute('live', { id: m.id });
       else setRoute('matchSetup', { id: el.dataset.id });
+    });
+  });
+
+  // Swipe-to-reveal trash button on each match row.
+  view.querySelectorAll('.swipe-wrap').forEach((wrap) => {
+    const card = wrap.querySelector('.swipe-card');
+    if (!card) return;
+    let startX = 0, startY = 0, dx = 0, tracking = false, locked = null;
+    const THRESHOLD = 60; // px to snap open
+    const onStart = (e) => {
+      const t = e.touches ? e.touches[0] : e;
+      startX = t.clientX; startY = t.clientY; dx = 0; tracking = true; locked = null;
+      card.style.transition = 'none';
+    };
+    const onMove = (e) => {
+      if (!tracking) return;
+      const t = e.touches ? e.touches[0] : e;
+      const ddx = t.clientX - startX;
+      const ddy = t.clientY - startY;
+      if (locked === null && (Math.abs(ddx) > 6 || Math.abs(ddy) > 6)) {
+        locked = Math.abs(ddx) > Math.abs(ddy) ? 'x' : 'y';
+      }
+      if (locked !== 'x') return;
+      dx = Math.min(0, ddx); // only left
+      card.style.transform = `translateX(${dx}px)`;
+      if (e.cancelable) e.preventDefault();
+    };
+    const onEnd = () => {
+      if (!tracking) return;
+      tracking = false;
+      card.style.transition = 'transform 0.18s ease';
+      if (dx < -THRESHOLD) {
+        card.style.transform = 'translateX(-72px)';
+        card.classList.add('swiped');
+      } else {
+        card.style.transform = 'translateX(0)';
+        card.classList.remove('swiped');
+      }
+    };
+    card.addEventListener('touchstart', onStart, { passive: true });
+    card.addEventListener('touchmove', onMove, { passive: false });
+    card.addEventListener('touchend', onEnd);
+    card.addEventListener('touchcancel', onEnd);
+    // Mouse fallback for desktop testing
+    card.addEventListener('mousedown', (e) => { onStart(e); const mm = (ev) => onMove(ev); const mu = () => { onEnd(); window.removeEventListener('mousemove', mm); window.removeEventListener('mouseup', mu); }; window.addEventListener('mousemove', mm); window.addEventListener('mouseup', mu); });
+  });
+
+  view.querySelectorAll('button[data-act="match-del"]').forEach((b) => {
+    b.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const mid = b.dataset.id;
+      const m = matches.find((x) => x.id === mid);
+      const label = m?.opponent || 'deze wedstrijd';
+      if (!confirm(`Wedstrijd "${label}" verwijderen? Dit kan niet ongedaan worden gemaakt.`)) return;
+      await db.deleteMatch(mid);
+      render();
     });
   });
 }
@@ -417,9 +478,12 @@ async function renderMatchSetup(players, id) {
   $('start-match').addEventListener('click', async () => {
     if (!plan) { showAlert('Niet klaar', 'Vul eerst spelers en keepers in.'); return; }
     unlockAudio(); // user gesture — needed for iOS audio later
-    match.status = 'live';
-    match.startedAt = new Date().toISOString();
-    await db.saveMatch(match);
+    // Don't auto-start the clock; only navigate. The user starts the match
+    // manually from the live screen with ▶ Hervat.
+    if (match.status === 'draft' || match.status === 'ready') {
+      match.status = 'ready';
+      await db.saveMatch(match);
+    }
     setRoute('live', { id: match.id });
   });
   $('del-match').addEventListener('click', async () => {
@@ -487,7 +551,15 @@ async function renderLive(players, id) {
     const e = liveCtx.clock.elapsedSec();
     view.innerHTML = V.viewLive(match, players, plan, e);
     document.getElementById('live-pause').addEventListener('click', () => { liveCtx.clock.pause(); persistLiveSnapshot(true); });
-    document.getElementById('live-resume').addEventListener('click', () => { unlockAudio(); liveCtx.clock.start(); });
+    document.getElementById('live-resume').addEventListener('click', async () => {
+      unlockAudio();
+      if (match.status !== 'live') {
+        match.status = 'live';
+        if (!match.startedAt) match.startedAt = new Date().toISOString();
+        await db.saveMatch(match);
+      }
+      liveCtx.clock.start();
+    });
     document.getElementById('live-finish').addEventListener('click', finishMatch);
     document.getElementById('jump-back').addEventListener('click', () => { liveCtx.clock.adjust(-10); paint(); });
     document.getElementById('jump-fwd').addEventListener('click', () => { liveCtx.clock.adjust(+10); paint(); });

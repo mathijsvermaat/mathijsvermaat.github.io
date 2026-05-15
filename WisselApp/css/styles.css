@@ -160,6 +160,17 @@ button[disabled] { opacity: 0.4; }
 .player-row .player-name-input { flex: 1; background: var(--bg); }
 .player-row .player-name-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
+/* Swipe-to-delete (match list) */
+.swipe-wrap { position: relative; overflow: hidden; border-radius: 12px; }
+.swipe-wrap .swipe-card { position: relative; z-index: 2; transform: translateX(0); touch-action: pan-y; will-change: transform; }
+.swipe-wrap .swipe-card.swiped { box-shadow: 0 0 0 1px var(--danger) inset; }
+.swipe-action {
+  position: absolute; right: 0; top: 0; bottom: 0; width: 72px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--danger); color: #fff; border: 0; border-radius: 0 12px 12px 0;
+  font-size: 22px; z-index: 1; cursor: pointer;
+}
+
 /* Score card */
 .score-card { text-align: center; }
 .score-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; margin-bottom: 8px; }

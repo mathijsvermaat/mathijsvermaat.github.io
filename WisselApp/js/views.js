@@ -37,13 +37,16 @@ export function viewMatches(matches, players) {
   return `
     <div class="list">
       ${matches.map((m) => `
-        <div class="card match" data-id="${m.id}">
-          <div class="row between">
-            <div>
-              <div class="title">${escapeHtml(m.opponent || 'Wedstrijd')}</div>
-              <div class="sub">${escapeHtml(m.date || '')} · ${escapeHtml(m.format?.label || '')}</div>
+        <div class="swipe-wrap" data-id="${m.id}">
+          <button class="swipe-action danger" data-act="match-del" data-id="${m.id}" aria-label="Verwijderen">🗑</button>
+          <div class="card match swipe-card" data-id="${m.id}">
+            <div class="row between">
+              <div>
+                <div class="title">${escapeHtml(m.opponent || 'Wedstrijd')}</div>
+                <div class="sub">${escapeHtml(m.date || '')} · ${escapeHtml(m.format?.label || '')}</div>
+              </div>
+              <div class="status status-${m.status || 'draft'}">${statusLabel(m.status)}</div>
             </div>
-            <div class="status status-${m.status || 'draft'}">${statusLabel(m.status)}</div>
           </div>
         </div>`).join('')}
     </div>
@@ -283,7 +286,7 @@ export function viewMatchSetup(match, players, history, plan) {
     <div class="row gap stick-bottom">
       <button id="recompute">Herbereken schema</button>
       <button class="primary" id="save-match">Opslaan</button>
-      <button class="primary big" id="start-match" ${plan ? '' : 'disabled'}>▶ Start wedstrijd</button>
+      <button class="primary big" id="start-match" ${plan ? '' : 'disabled'}>Ga naar wedstrijd</button>
     </div>
     <div class="row gap">
       <button class="danger" id="del-match">Wedstrijd verwijderen</button>
