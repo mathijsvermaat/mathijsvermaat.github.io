@@ -64,8 +64,23 @@ export async function getMatch(id) {
   return reqP(s.get(id));
 }
 export async function saveMatch(m) {
-  const s = await tx('matches', 'readwrite');
   if (!m.id) m.id = uid();
+  // Safeguard: never overwrite a non-zero actualPlaytime with an all-zero
+  // one. This protects finished matches from being corrupted by stray
+  // re-renders that compute playtime from a fresh (elapsed=0) clock.
+  if (m.actualPlaytime && Object.values(m.actualPlaytime).every((v) => !v || ((v.totalSec || 0) === 0 && (v.fieldSec || 0) === 0 && (v.keeperSec || 0) === 0))) {
+    try {
+      const sRead = await tx('matches');
+      const prev = await reqP(sRead.get(m.id));
+      const prevAp = prev && prev.actualPlaytime;
+      const prevHasData = prevAp && Object.values(prevAp).some((v) => v && ((v.totalSec || 0) > 0 || (v.fieldSec || 0) > 0 || (v.keeperSec || 0) > 0));
+      if (prevHasData) {
+        console.warn('saveMatch: blocked overwrite of actualPlaytime with all-zero values for match', m.id);
+        m.actualPlaytime = prevAp;
+      }
+    } catch (err) { console.warn('saveMatch safeguard read failed', err); }
+  }
+  const s = await tx('matches', 'readwrite');
   await reqP(s.put(m));
   return m;
 }

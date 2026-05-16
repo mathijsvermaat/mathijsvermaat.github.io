@@ -768,16 +768,29 @@ window.addEventListener('beforeunload', () => { liveCtx?.clock.pause(); persistL
 document.addEventListener('visibilitychange', () => { if (document.hidden) persistLiveOnLeave(); });
 
 // Migrate legacy/corrupted matches: any match with `finishedAt` set but a
-// non-finished status is forced back to 'finished' so it shows up correctly
-// in the matches list and routes to the read-only live view.
+// non-finished status is forced back to 'finished'. Also: if such a match has
+// an all-zero `actualPlaytime` but a valid plan and `elapsedSec > 0`, the
+// playtime totals are recomputed from the plan so the stats overview is
+// restored (this fixes matches damaged by older versions that overwrote
+// `actualPlaytime` while the user reopened a finished match).
 async function migrateFinishedMatches() {
   try {
     const list = await db.listMatches();
     for (const m of list) {
+      let changed = false;
       if (m.finishedAt && m.status !== 'finished') {
         m.status = 'finished';
-        await db.saveMatch(m);
+        changed = true;
       }
+      const ap = m.actualPlaytime;
+      const apEmpty = !ap || Object.values(ap).every((v) => !v || ((v.totalSec || 0) === 0 && (v.fieldSec || 0) === 0 && (v.keeperSec || 0) === 0));
+      if (m.status === 'finished' && apEmpty && m.plan && (m.elapsedSec || 0) > 0) {
+        try {
+          m.actualPlaytime = computeActualPlaytime(m.plan, m, m.elapsedSec);
+          changed = true;
+        } catch (err) { console.warn('recompute actualPlaytime failed', err); }
+      }
+      if (changed) await db.saveMatch(m);
     }
   } catch (err) { console.warn('migration failed', err); }
 }
