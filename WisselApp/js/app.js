@@ -132,7 +132,7 @@ async function renderMatches(players) {
         return;
       }
       const m = matches.find((x) => x.id === el.dataset.id);
-      if (m && m.status === 'live') setRoute('live', { id: m.id });
+      if (m && (m.status === 'live' || m.status === 'finished')) setRoute('live', { id: m.id });
       else setRoute('matchSetup', { id: el.dataset.id });
     });
   });
@@ -390,8 +390,16 @@ async function renderMatchSetup(players, id) {
   // Try to build a plan if everything is set
   let plan = null;
   if (canPlan(match)) {
-    try { plan = buildPlan(match, effHistory); match.plan = plan; await db.saveMatch({ ...match, status: 'ready' }); }
-    catch (e) { console.warn(e); }
+    try {
+      plan = buildPlan(match, effHistory);
+      match.plan = plan;
+      // Never overwrite a finished match's status (preserves history).
+      if (match.status !== 'finished') {
+        await db.saveMatch({ ...match, status: 'ready' });
+      } else {
+        await db.saveMatch(match);
+      }
+    } catch (e) { console.warn(e); }
   }
 
   view.innerHTML = V.viewMatchSetup(match, players, history, plan);
@@ -480,7 +488,7 @@ async function renderMatchSetup(players, id) {
     unlockAudio(); // user gesture — needed for iOS audio later
     // Don't auto-start the clock; only navigate. The user starts the match
     // manually from the live screen with ▶ Hervat.
-    if (match.status === 'draft' || match.status === 'ready') {
+    if (match.status === 'draft') {
       match.status = 'ready';
       await db.saveMatch(match);
     }
@@ -514,8 +522,9 @@ async function renderLive(players, id) {
     if (liveCtx) liveCtx.clock.pause();
     const prefs = await getPrefs();
     const clock = new MatchClock(id, totalSec, () => paint(), (atSec) => onAlarm(atSec));
+    if (match.status === 'finished') clock.pause();
     liveCtx = { match, plan, players, clock, prefs, quarterBreaks: new Set(), lastPersistMs: 0 };
-    rearmAlarms();
+    if (match.status !== 'finished') rearmAlarms();
     if (match.status === 'live' && !clock.isRunning() && clock.elapsedSec() === 0) clock.start();
   }
 
@@ -548,21 +557,24 @@ async function renderLive(players, id) {
   }
 
   function paint() {
-    const e = liveCtx.clock.elapsedSec();
+    const isFinished = match.status === 'finished';
+    const e = isFinished ? (typeof match.elapsedSec === 'number' ? match.elapsedSec : liveCtx.clock.elapsedSec()) : liveCtx.clock.elapsedSec();
     view.innerHTML = V.viewLive(match, players, plan, e);
-    document.getElementById('live-pause').addEventListener('click', () => { liveCtx.clock.pause(); persistLiveSnapshot(true); });
-    document.getElementById('live-resume').addEventListener('click', async () => {
-      unlockAudio();
-      if (match.status !== 'live') {
-        match.status = 'live';
-        if (!match.startedAt) match.startedAt = new Date().toISOString();
-        await db.saveMatch(match);
-      }
-      liveCtx.clock.start();
-    });
-    document.getElementById('live-finish').addEventListener('click', finishMatch);
-    document.getElementById('jump-back').addEventListener('click', () => { liveCtx.clock.adjust(-10); paint(); });
-    document.getElementById('jump-fwd').addEventListener('click', () => { liveCtx.clock.adjust(+10); paint(); });
+    if (!isFinished) {
+      document.getElementById('live-pause').addEventListener('click', () => { liveCtx.clock.pause(); persistLiveSnapshot(true); });
+      document.getElementById('live-resume').addEventListener('click', async () => {
+        unlockAudio();
+        if (match.status !== 'live') {
+          match.status = 'live';
+          if (!match.startedAt) match.startedAt = new Date().toISOString();
+          await db.saveMatch(match);
+        }
+        liveCtx.clock.start();
+      });
+      document.getElementById('live-finish').addEventListener('click', finishMatch);
+      document.getElementById('jump-back').addEventListener('click', () => { liveCtx.clock.adjust(-10); paint(); });
+      document.getElementById('jump-fwd').addEventListener('click', () => { liveCtx.clock.adjust(+10); paint(); });
+    }
     document.getElementById('goal-us')?.addEventListener('click', () => onAddGoalUs());
     document.getElementById('goal-opp')?.addEventListener('click', () => onAddGoalOpp());
     view.querySelectorAll('button[data-act="goal-edit"]').forEach((b) => {
@@ -571,10 +583,12 @@ async function renderLive(players, id) {
     view.querySelectorAll('button[data-act="goal-del"]').forEach((b) => {
       b.addEventListener('click', (ev) => { ev.stopPropagation(); onDeleteGoal(b.dataset.gid); });
     });
-    view.querySelectorAll('.tappable[data-pid]').forEach((el) => {
-      el.addEventListener('click', () => onPlayerTap(el.dataset.pid, el.dataset.role));
-    });
-    persistLiveSnapshot();
+    if (!isFinished) {
+      view.querySelectorAll('.tappable[data-pid]').forEach((el) => {
+        el.addEventListener('click', () => onPlayerTap(el.dataset.pid, el.dataset.role));
+      });
+      persistLiveSnapshot();
+    }
   }
 
   async function onPlayerTap(pid, role) {
@@ -753,5 +767,20 @@ function computeActualPlaytime(plan, match, elapsed) {
 window.addEventListener('beforeunload', () => { liveCtx?.clock.pause(); persistLiveOnLeave(); });
 document.addEventListener('visibilitychange', () => { if (document.hidden) persistLiveOnLeave(); });
 
+// Migrate legacy/corrupted matches: any match with `finishedAt` set but a
+// non-finished status is forced back to 'finished' so it shows up correctly
+// in the matches list and routes to the read-only live view.
+async function migrateFinishedMatches() {
+  try {
+    const list = await db.listMatches();
+    for (const m of list) {
+      if (m.finishedAt && m.status !== 'finished') {
+        m.status = 'finished';
+        await db.saveMatch(m);
+      }
+    }
+  } catch (err) { console.warn('migration failed', err); }
+}
+
 // Start
-setRoute('matches');
+migrateFinishedMatches().finally(() => setRoute('matches'));

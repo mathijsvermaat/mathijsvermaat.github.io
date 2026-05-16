@@ -328,28 +328,39 @@ export function viewLive(match, players, plan, elapsedSec) {
     </div>`;
   }).join('');
 
+  const isFinished = match.status === 'finished';
+  const finishedAtTxt = match.finishedAt ? new Date(match.finishedAt).toLocaleString('nl-NL') : '';
+
   return `
-    <div class="clock">
-      <div class="clock-row">
-        <button class="iconbtn jump" id="jump-back" aria-label="10 seconden terug">«</button>
-        <div class="big-time">${fmtTime(totalSec - elapsedSec)}</div>
-        <button class="iconbtn jump" id="jump-fwd" aria-label="10 seconden vooruit">»</button>
+    ${isFinished ? `
+      <div class="clock finished-banner">
+        <div class="sub">Wedstrijd beëindigd${finishedAtTxt ? ' op ' + escapeHtml(finishedAtTxt) : ''}</div>
+        <div class="big-time small">Gespeeld: ${fmtTime(Math.min(elapsedSec, totalSec))}</div>
       </div>
-      <div class="sub">Kwart ${curQ + 1} / ${plan.quarters.length} · gespeeld ${fmtTime(elapsedSec)}</div>
-      <div class="row gap live-controls">
-        <button id="live-pause">⏸ Pauze</button>
-        <button id="live-resume" class="primary">▶ Hervat</button>
-        <button id="live-finish" class="danger">Beëindig</button>
+    ` : `
+      <div class="clock">
+        <div class="clock-row">
+          <button class="iconbtn jump" id="jump-back" aria-label="10 seconden terug">«</button>
+          <div class="big-time">${fmtTime(totalSec - elapsedSec)}</div>
+          <button class="iconbtn jump" id="jump-fwd" aria-label="10 seconden vooruit">»</button>
+        </div>
+        <div class="sub">Kwart ${curQ + 1} / ${plan.quarters.length} · gespeeld ${fmtTime(elapsedSec)}</div>
+        <div class="row gap live-controls">
+          <button id="live-pause">⏸ Pauze</button>
+          <button id="live-resume" class="primary">▶ Hervat</button>
+          <button id="live-finish" class="danger">Beëindig</button>
+        </div>
       </div>
-    </div>
+    `}
 
     ${renderScoreCard(match, players)}
 
+    ${isFinished ? '' : `
     <div class="card next-sub ${nextIn < 30 ? 'soon' : ''}">
       <div class="sub">Volgende wissel over</div>
       <div class="big-time small">${fmtTime(nextIn)}</div>
       ${next ? renderNext(next, players) : '<div class="sub">Geen wissels meer</div>'}
-    </div>
+    </div>`}
 
     <div class="card">
       <h3>🧤 Keeper</h3>
