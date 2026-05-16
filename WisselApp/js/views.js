@@ -299,6 +299,10 @@ export function viewMatchSetup(match, players, history, plan) {
 export function viewLive(match, players, plan, elapsedSec) {
   const fmt = match.format;
   const totalSec = fmt.totalMinutes * 60;
+  const isFinishedView = match.status === 'finished';
+  // For a finished match every sub already happened: render the timeline as
+  // if we are at the end of the match, regardless of what `elapsedSec` is.
+  const timelineElapsed = isFinishedView ? totalSec : elapsedSec;
   // Find current quarter & slot
   let curQ = plan.quarters.findIndex((q) => elapsedSec < q.endSec);
   if (curQ === -1) curQ = plan.quarters.length - 1;
@@ -311,12 +315,12 @@ export function viewLive(match, players, plan, elapsedSec) {
 
   // All sub events in chronological order
   const allEvents = plan.quarters.flatMap((qq) => qq.subEvents).sort((a, b) => a.atSec - b.atSec);
-  const next = allEvents.find((e) => e.atSec > elapsedSec + 0.5);
+  const next = isFinishedView ? null : allEvents.find((e) => e.atSec > elapsedSec + 0.5);
   const nextIn = next ? Math.max(0, next.atSec - elapsedSec) : 0;
 
   const timelineHtml = allEvents.map((ev) => {
     const remaining = totalSec - ev.atSec;
-    const isPast = ev.atSec <= elapsedSec + 0.5;
+    const isPast = ev.atSec <= timelineElapsed + 0.5;
     const isNext = next && ev === next;
     const cls = `tl-row ${isPast ? 'past' : ''} ${isNext ? 'next' : ''}`;
     const off = (ev.off || []).map((id) => escapeHtml(nameOf(players, id))).join('<br/>') || '<span class="sub">—</span>';
