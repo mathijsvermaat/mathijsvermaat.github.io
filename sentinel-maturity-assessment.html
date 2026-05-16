@@ -5739,8 +5739,10 @@ function filterConnectors(query) {
     const name = header ? header.textContent.toLowerCase() : '';
     if (!name.includes(q)) return;
 
-    // Reveal and expand the matching section
-    section.classList.remove('search-hidden', 'collapsed');
+    // Reveal the matching section but keep its own collapsed state intact —
+    // we don't auto-expand matches so the user can still scan a short list
+    // of header-only matches without having to scroll past expanded bodies.
+    section.classList.remove('search-hidden');
 
     // Walk up: reveal and expand every ancestor connector-section so the
     // match is actually rendered (parent .connector-body must not be
