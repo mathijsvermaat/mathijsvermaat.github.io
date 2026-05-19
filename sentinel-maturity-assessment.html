@@ -3902,13 +3902,16 @@
               <label for="akv-c1">Diagnostic settings configured (resource-specific)<div class="check-detail">Use AKVAuditLogs, not AzureDiagnostics</div></label>
             </div>
           </div>
-          <div class="check-group" data-tier-enabled>
-            <div class="check-group-title">Target Table</div>
-            <div class="check-item">
-              <select class="status-select" id="akv-tbl" data-tier="2" data-connector="Azure Key Vault" data-item="AzureDiagnostics table tier" onchange="onStatusChange(this)">
+          <div class="check-group" data-tier-enabled data-tp-tables data-prefix="akv" data-tp-connector="Azure Key Vault" data-tp-tier="2">
+            <div class="check-group-title">Target Table<div class="check-detail">Sentinel Key Vault connector uses Azure-diagnostics mode and writes to <code>AzureDiagnostics</code> (filter <code>ResourceProvider == "MICROSOFT.KEYVAULT"</code>). Resource-specific mode writes to <code>AZKVAuditLogs</code> and <code>AZKVPolicyEvaluationDetailsLogs</code>. Edit the table name to match your deployment.</div></div>
+            <div class="check-item" data-custom-label data-tp-row="1">
+              <select class="status-select" id="akv-tbl" data-tier="2" data-connector="Azure Key Vault" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="akv-tbl">AzureDiagnostics<div class="check-detail">Key Vault audit logs land in AzureDiagnostics (filter ResourceProvider == "MICROSOFT.KEYVAULT")</div></label>
+              <label for="akv-tbl" class="tp-tbl-label"><input type="text" id="akv-tbl-name" data-tp-table class="tp-tbl-name" value="AzureDiagnostics" placeholder="Table name — e.g. AzureDiagnostics, AZKVAuditLogs" oninput="onThirdPartyTableNameChange(this)"></label>
+            </div>
+            <div class="tp-tbl-actions">
+              <button type="button" class="btn-link tp-tbl-add" onclick="addTpTableRow('akv')">+ Add another table</button>
             </div>
           </div>
           <div class="check-group">
@@ -4567,13 +4570,16 @@
               <label for="waf-c2">Diagnostic settings on Front Door<div class="check-detail">If using Azure Front Door with WAF policy</div></label>
             </div>
           </div>
-          <div class="check-group" data-tier-enabled>
-            <div class="check-group-title">Target Table</div>
-            <div class="check-item">
-              <select class="status-select" id="waf-tbl" data-tier="2" data-connector="Azure WAF" data-item="AzureDiagnostics table tier" onchange="onStatusChange(this)">
+          <div class="check-group" data-tier-enabled data-tp-tables data-prefix="waf" data-tp-connector="Azure WAF" data-tp-tier="2">
+            <div class="check-group-title">Target Table<div class="check-detail">Sentinel WAF connector uses Azure-diagnostics mode and writes to <code>AzureDiagnostics</code> (<code>ResourceType in APPLICATIONGATEWAYS, CDNWEBAPPLICATIONFIREWALLPOLICIES, FRONTDOORS</code>). Resource-specific App Gateway tables: <code>AGWAccessLogs</code>, <code>AGWFirewallLogs</code>, <code>AGWPerformanceLogs</code>. Front Door / CDN: <code>AzureFrontDoorAccessLog</code>, <code>AzureFrontDoorWebApplicationFirewallLog</code>. Edit the table name to match your deployment.</div></div>
+            <div class="check-item" data-custom-label data-tp-row="1">
+              <select class="status-select" id="waf-tbl" data-tier="2" data-connector="Azure WAF" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="waf-tbl">AzureDiagnostics<div class="check-detail">Recommended categories: ApplicationGatewayAccessLog, ApplicationGatewayFirewallLog, FrontdoorAccessLog, FrontdoorWebApplicationFirewallLog, WebApplicationFirewallLogs</div></label>
+              <label for="waf-tbl" class="tp-tbl-label"><input type="text" id="waf-tbl-name" data-tp-table class="tp-tbl-name" value="AzureDiagnostics" placeholder="Table name — e.g. AzureDiagnostics, AGWFirewallLogs" oninput="onThirdPartyTableNameChange(this)"></label>
+            </div>
+            <div class="tp-tbl-actions">
+              <button type="button" class="btn-link tp-tbl-add" onclick="addTpTableRow('waf')">+ Add another table</button>
             </div>
           </div>
           <div class="check-group">
@@ -4630,13 +4636,16 @@
               <label for="dns-c2">Azure DNS diagnostic settings<div class="check-detail">Private DNS zones / DNS Resolver</div></label>
             </div>
           </div>
-          <div class="check-group" data-tier-enabled>
-            <div class="check-group-title">Target Table</div>
-            <div class="check-item">
-              <select class="status-select" id="dns-tbl" data-tier="2" data-connector="DNS Security Logs" data-item="DnsEvents table tier" onchange="onStatusChange(this)">
+          <div class="check-group" data-tier-enabled data-tp-tables data-prefix="dns" data-tp-connector="DNS Security Logs" data-tp-tier="2">
+            <div class="check-group-title">Target Table<div class="check-detail">Windows DNS connector (AMA) writes to <code>DnsEvents</code> (queries / analytic events) and <code>DnsInventory</code> (resource records). Edit the table name to match your deployment and add a row for the second table.</div></div>
+            <div class="check-item" data-custom-label data-tp-row="1">
+              <select class="status-select" id="dns-tbl" data-tier="2" data-connector="DNS Security Logs" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="dns-tbl">DnsEvents<div class="check-detail">Primary DNS logs target table</div></label>
+              <label for="dns-tbl" class="tp-tbl-label"><input type="text" id="dns-tbl-name" data-tp-table class="tp-tbl-name" value="DnsEvents" placeholder="Table name — e.g. DnsEvents, DnsInventory" oninput="onThirdPartyTableNameChange(this)"></label>
+            </div>
+            <div class="tp-tbl-actions">
+              <button type="button" class="btn-link tp-tbl-add" onclick="addTpTableRow('dns')">+ Add another table</button>
             </div>
           </div>
           <div class="check-group">
@@ -4678,13 +4687,16 @@
           <span class="connector-chevron">▼</span>
         </div>
         <div class="connector-body">
+          <div class="connector-note">
+            <strong>Note:</strong> GSA does <em>not</em> have a Sentinel data connector. Logs are streamed via <strong>Microsoft Entra diagnostic settings</strong> (Entra ID &rarr; Monitoring &amp; health &rarr; Diagnostic settings) &mdash; categories: <code>NetworkAccessTrafficLogs</code>, <code>RemoteNetworkHealthLogs</code>, <code>NetworkAccessAlerts</code>, <code>NetworkAccessConnectionEvents</code>, <code>EnrichedOffice365AuditLogs</code>. A Sentinel content-hub <strong>solution</strong> (&ldquo;Global Secure Access&rdquo;) provides the workbooks and analytics rules on top.
+          </div>
           <div class="check-group">
             <div class="check-group-title">Connector Setup</div>
             <div class="check-item">
-              <select class="status-select" id="gsa-c1" data-tier="2" data-connector="Global Secure Access" data-item="Connector enabled in Sentinel" onchange="onStatusChange(this)">
+              <select class="status-select" id="gsa-c1" data-tier="2" data-connector="Global Secure Access" data-item="Entra diagnostic settings configured for GSA categories" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="gsa-c1">Connector enabled in Sentinel</label>
+              <label for="gsa-c1">Entra diagnostic settings configured for GSA categories<div class="check-detail">There is no Sentinel data connector. Configure in Entra ID → Monitoring &amp; health → Diagnostic settings → send <code>NetworkAccessTrafficLogs</code> (and optionally <code>RemoteNetworkHealthLogs</code>, <code>NetworkAccessAlerts</code>, <code>NetworkAccessConnectionEvents</code>, <code>EnrichedOffice365AuditLogs</code>) to the Sentinel Log Analytics workspace.</div></label>
             </div>
           </div>
           <div class="check-group" data-tier-enabled>
@@ -4699,10 +4711,10 @@
           <div class="check-group">
             <div class="check-group-title">Content Hub</div>
             <div class="check-item">
-              <select class="status-select" id="gsa-ch1" data-tier="2" data-connector="Global Secure Access" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
+              <select class="status-select" id="gsa-ch1" data-tier="2" data-connector="Global Secure Access" data-item="Global Secure Access solution installed and analytic rules deployed" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="gsa-ch1">Analytic rules deployed</label>
+              <label for="gsa-ch1">Global Secure Access solution installed &amp; analytic rules deployed<div class="check-detail">Install the "Global Secure Access" solution from the Sentinel content hub (provides 2 workbooks + 4 analytics rules).</div></label>
             </div>
           </div>
           <div class="check-group retention-group" data-prefix="gsa" data-connector="Global Secure Access">
@@ -4965,13 +4977,16 @@
               <label for="sap-c1">SAP data connector agent deployed<div class="check-detail">Container-based agent collecting SAP audit log, security log, and change documents</div></label>
             </div>
           </div>
-          <div class="check-group" data-tier-enabled>
-            <div class="check-group-title">Tables</div>
-            <div class="check-item">
-              <select class="status-select" id="sap-t1" data-tier="3" data-connector="SAP" data-item="SAPAuditLog table enabled" onchange="onStatusChange(this)">
+          <div class="check-group" data-tier-enabled data-tp-tables data-prefix="sap" data-tp-connector="SAP" data-tp-tier="3">
+            <div class="check-group-title">Tables<div class="check-detail">Agentless connector ingests workspace-native tables (e.g. <code>ABAPAuditLog</code>, <code>ABAPAuthorizationDetails</code>, <code>ABAPChangeDocsLog</code>, <code>ABAPUserDetails</code>). Agent-based connector ingests custom <code>*_CL</code> tables (e.g. <code>ABAPAuditLog_CL</code>) queried via SAP solution functions (<code>SAPAuditLog</code>, <code>SAPAppLog</code>, …). Edit the table name to match your deployment and add rows for additional tables.</div></div>
+            <div class="check-item" data-custom-label data-tp-row="1">
+              <select class="status-select" id="sap-tbl" data-tier="3" data-connector="SAP" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="sap-t1">SAPAuditLog table enabled</label>
+              <label for="sap-tbl" class="tp-tbl-label"><input type="text" id="sap-tbl-name" data-tp-table class="tp-tbl-name" value="ABAPAuditLog" placeholder="Table name — e.g. ABAPAuditLog, ABAPAuditLog_CL" oninput="onThirdPartyTableNameChange(this)"></label>
+            </div>
+            <div class="tp-tbl-actions">
+              <button type="button" class="btn-link tp-tbl-add" onclick="addTpTableRow('sap')">+ Add another table</button>
             </div>
           </div>
           <div class="check-group">
@@ -5021,13 +5036,16 @@
               <label for="sql-c1">Diagnostic settings configured for SQL audit<div class="check-detail">Azure SQL or SQL MI diagnostic settings sending audit logs to Log Analytics</div></label>
             </div>
           </div>
-          <div class="check-group" data-tier-enabled>
-            <div class="check-group-title">Tables</div>
-            <div class="check-item">
-              <select class="status-select" id="sql-t1" data-tier="3" data-connector="SQL Database Audit" data-item="AzureDiagnostics (SQLSecurityAuditEvents) table enabled" onchange="onStatusChange(this)">
+          <div class="check-group" data-tier-enabled data-tp-tables data-prefix="sql" data-tp-connector="SQL Database Audit" data-tp-tier="3">
+            <div class="check-group-title">Tables<div class="check-detail">Resource-specific diagnostic mode writes to the dedicated <code>SQLSecurityAuditEvents</code> table (default below). Legacy Azure-diagnostics mode writes to <code>AzureDiagnostics</code> with category <code>SQLSecurityAuditEvents</code>; add a row if you're on that mode. Microsoft Support operations also write to <code>DevOpsOperationsAudit</code>.</div></div>
+            <div class="check-item" data-custom-label data-tp-row="1">
+              <select class="status-select" id="sql-tbl" data-tier="3" data-connector="SQL Database Audit" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="sql-t1">AzureDiagnostics (SQLSecurityAuditEvents) table enabled</label>
+              <label for="sql-tbl" class="tp-tbl-label"><input type="text" id="sql-tbl-name" data-tp-table class="tp-tbl-name" value="SQLSecurityAuditEvents" placeholder="Table name — e.g. SQLSecurityAuditEvents, AzureDiagnostics" oninput="onThirdPartyTableNameChange(this)"></label>
+            </div>
+            <div class="tp-tbl-actions">
+              <button type="button" class="btn-link tp-tbl-add" onclick="addTpTableRow('sql')">+ Add another table</button>
             </div>
           </div>
           <div class="check-group">
@@ -5208,13 +5226,16 @@
               <label for="github-c1">Connector enabled in Sentinel<div class="check-detail">GitHub audit log streaming or API-based ingestion configured</div></label>
             </div>
           </div>
-          <div class="check-group" data-tier-enabled>
-            <div class="check-group-title">Tables</div>
-            <div class="check-item">
-              <select class="status-select" id="github-t1" data-tier="3" data-connector="GitHub Enterprise" data-item="GitHubAuditData table enabled" onchange="onStatusChange(this)">
+          <div class="check-group" data-tier-enabled data-tp-tables data-prefix="github" data-tp-connector="GitHub Enterprise" data-tp-tier="3">
+            <div class="check-group-title">Tables<div class="check-detail">Active CCF connector (<code>GitHubAuditDefinitionV2</code>) ingests into <code>GitHubAuditLogsV2_CL</code>. Deprecated polling connector wrote to <code>GitHubAuditLogPolling_CL</code>. GitHub Webhooks connector ingests into <code>githubscanaudit_CL</code>. Edit the table name to match your deployment.</div></div>
+            <div class="check-item" data-custom-label data-tp-row="1">
+              <select class="status-select" id="github-tbl" data-tier="3" data-connector="GitHub Enterprise" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="github-t1">GitHubAuditData table enabled</label>
+              <label for="github-tbl" class="tp-tbl-label"><input type="text" id="github-tbl-name" data-tp-table class="tp-tbl-name" value="GitHubAuditLogsV2_CL" placeholder="Table name — e.g. GitHubAuditLogsV2_CL, GitHubAuditLogPolling_CL, githubscanaudit_CL" oninput="onThirdPartyTableNameChange(this)"></label>
+            </div>
+            <div class="tp-tbl-actions">
+              <button type="button" class="btn-link tp-tbl-add" onclick="addTpTableRow('github')">+ Add another table</button>
             </div>
           </div>
           <div class="check-group">
@@ -5289,13 +5310,16 @@
               <label for="aks-c1">Diagnostic settings configured for AKS<div class="check-detail">kube-apiserver audit logs, guard, and cluster autoscaler logs sent to Log Analytics</div></label>
             </div>
           </div>
-          <div class="check-group" data-tier-enabled>
-            <div class="check-group-title">Tables</div>
-            <div class="check-item">
-              <select class="status-select" id="aks-t1" data-tier="3" data-connector="Azure Kubernetes Service" data-item="AzureDiagnostics (AKS) table enabled" onchange="onStatusChange(this)">
+          <div class="check-group" data-tier-enabled data-tp-tables data-prefix="aks" data-tp-connector="Azure Kubernetes Service" data-tp-tier="3">
+            <div class="check-group-title">Tables<div class="check-detail">Sentinel AKS connector uses Azure-diagnostics mode and writes to <code>AzureDiagnostics</code> (categories: <code>kube-audit</code>, <code>kube-audit-admin</code>, <code>kube-apiserver</code>, <code>kube-controller-manager</code>, <code>kube-scheduler</code>, <code>cluster-autoscaler</code>, <code>guard</code>), plus <code>ContainerInventory</code> and <code>KubeEvents</code>. Resource-specific mode writes to per-category tables (e.g. <code>AKSAudit</code>, <code>AKSAuditAdmin</code>, <code>AKSControlPlane</code>). Edit the table name and add rows for additional tables.</div></div>
+            <div class="check-item" data-custom-label data-tp-row="1">
+              <select class="status-select" id="aks-tbl" data-tier="3" data-connector="Azure Kubernetes Service" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="aks-t1">AzureDiagnostics (AKS) or resource-specific tables enabled</label>
+              <label for="aks-tbl" class="tp-tbl-label"><input type="text" id="aks-tbl-name" data-tp-table class="tp-tbl-name" value="AzureDiagnostics" placeholder="Table name — e.g. AzureDiagnostics, ContainerInventory, KubeEvents, AKSAudit" oninput="onThirdPartyTableNameChange(this)"></label>
+            </div>
+            <div class="tp-tbl-actions">
+              <button type="button" class="btn-link tp-tbl-add" onclick="addTpTableRow('aks')">+ Add another table</button>
             </div>
           </div>
           <div class="check-group">
@@ -7652,25 +7676,27 @@ function updateCommentsSummary() {
 // third-party connector adder (TP, TI, Id, App, Collab, CustomApp, DevOps, OT).
 // Each adder embeds ${tpTableGroupHtml(prefix, safeName)} in its template so
 // the per-row markup and the "+ Add another table" button stay in sync.
-function tpTableGroupHtml(prefix, safeName) {
+function tpTableGroupHtml(prefix, safeName, tier) {
+  const t = tier || '2';
   return `
-      <div class="check-group" data-tier-enabled data-tp-tables data-prefix="${prefix}" data-tp-connector="${safeName}">
+      <div class="check-group" data-tier-enabled data-tp-tables data-prefix="${prefix}" data-tp-connector="${safeName}" data-tp-tier="${t}">
         <div class="check-group-title">Target Table</div>
-        ${tpTableRowHtml(prefix, safeName, 1)}
+        ${tpTableRowHtml(prefix, safeName, 1, t)}
         <div class="tp-tbl-actions">
           <button type="button" class="btn-link tp-tbl-add" onclick="addTpTableRow('${prefix}')">+ Add another table</button>
         </div>
       </div>`;
 }
 
-function tpTableRowHtml(prefix, safeName, rowIdx) {
+function tpTableRowHtml(prefix, safeName, rowIdx, tier) {
   const selId = rowIdx === 1 ? `${prefix}-tbl` : `${prefix}-tbl-${rowIdx}`;
   const inpId = rowIdx === 1 ? `${prefix}-tbl-name` : `${prefix}-tbl-name-${rowIdx}`;
+  const t = tier || '2';
   const removeBtn = rowIdx > 1
     ? `<button type="button" class="tp-tbl-remove-btn" onclick="removeTpTableRow('${selId}')" title="Remove this table">✕</button>`
     : '';
   return `<div class="check-item" data-custom-label data-tp-row="${rowIdx}">
-          <select class="status-select" id="${selId}" data-tier="2" data-connector="${safeName}" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
+          <select class="status-select" id="${selId}" data-tier="${t}" data-connector="${safeName}" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
             <option value="">— Not assessed —</option>
             <option value="Configured">Configured</option>
             <option value="Configured (Lake)">Configured (Lake)</option>
@@ -7688,6 +7714,7 @@ function addTpTableRow(prefix, explicitIdx) {
   const group = document.querySelector(`.check-group[data-tp-tables][data-prefix="${prefix}"]`);
   if (!group) return null;
   const safeName = group.dataset.tpConnector || '';
+  const tier = group.dataset.tpTier || '2';
   let newIdx;
   if (typeof explicitIdx === 'number' && explicitIdx > 1) {
     newIdx = explicitIdx;
@@ -7700,7 +7727,7 @@ function addTpTableRow(prefix, explicitIdx) {
     newIdx = maxIdx + 1;
   }
   const tmp = document.createElement('div');
-  tmp.innerHTML = tpTableRowHtml(prefix, safeName, newIdx).trim();
+  tmp.innerHTML = tpTableRowHtml(prefix, safeName, newIdx, tier).trim();
   const row = tmp.firstElementChild;
   const actions = group.querySelector('.tp-tbl-actions');
   if (actions) group.insertBefore(row, actions); else group.appendChild(row);
@@ -9171,6 +9198,27 @@ function applyState(state) {
       state.selects['storage-t-blob'] = state.selects['storage-t1'];
       delete state.selects['storage-t1'];
     }
+    // Migration: legacy 'sap-t1' / 'sql-t1' single-table selects were replaced
+    // by editable multi-row tp-table groups with first-row id '${prefix}-tbl'.
+    if (state.selects['sap-t1'] && !state.selects['sap-tbl']) {
+      state.selects['sap-tbl'] = state.selects['sap-t1'];
+      delete state.selects['sap-t1'];
+    }
+    if (state.selects['sql-t1'] && !state.selects['sql-tbl']) {
+      state.selects['sql-tbl'] = state.selects['sql-t1'];
+      delete state.selects['sql-t1'];
+    }
+    // Migration: legacy 'github-t1' / 'aks-t1' single-table selects were
+    // replaced by editable multi-row tp-table groups with first-row id
+    // '${prefix}-tbl'.
+    if (state.selects['github-t1'] && !state.selects['github-tbl']) {
+      state.selects['github-tbl'] = state.selects['github-t1'];
+      delete state.selects['github-t1'];
+    }
+    if (state.selects['aks-t1'] && !state.selects['aks-tbl']) {
+      state.selects['aks-tbl'] = state.selects['aks-t1'];
+      delete state.selects['aks-t1'];
+    }
     // Migration: legacy 'purview-*' selects (single combined Purview connector)
     // were split into 'purviewdm-*' (Data Map / Discovery) and 'purviewip-*'
     // (Information Protection, Preview). Map the legacy keys conservatively:
@@ -9265,6 +9313,23 @@ function applyState(state) {
   // populated values show up (order matters: the initial init already ran
   // before load, so cells exist).
   if (state.tableRetention && typeof tableRetentionState === 'object') {
+    // Migration: sap-t1 / sql-t1 -> sap-tbl / sql-tbl (see selects migration above).
+    if (state.tableRetention['sap-t1'] && !state.tableRetention['sap-tbl']) {
+      state.tableRetention['sap-tbl'] = state.tableRetention['sap-t1'];
+      delete state.tableRetention['sap-t1'];
+    }
+    if (state.tableRetention['sql-t1'] && !state.tableRetention['sql-tbl']) {
+      state.tableRetention['sql-tbl'] = state.tableRetention['sql-t1'];
+      delete state.tableRetention['sql-t1'];
+    }
+    if (state.tableRetention['github-t1'] && !state.tableRetention['github-tbl']) {
+      state.tableRetention['github-tbl'] = state.tableRetention['github-t1'];
+      delete state.tableRetention['github-t1'];
+    }
+    if (state.tableRetention['aks-t1'] && !state.tableRetention['aks-tbl']) {
+      state.tableRetention['aks-tbl'] = state.tableRetention['aks-t1'];
+      delete state.tableRetention['aks-t1'];
+    }
     for (const [id, entry] of Object.entries(state.tableRetention)) {
       tableRetentionState[id] = Object.assign({}, entry);
     }
