@@ -3568,7 +3568,7 @@
     <div class="tier-body">
       <div class="connector-section" id="lite-conn-retention" style="border-top:0;">
         <div class="connector-header" style="cursor:default;">
-          <h3>Workspace and table retention<div class="check-detail">Defaults inherited by every table unless overridden in the Full view. <a href="https://learn.microsoft.com/en-us/azure/azure-monitor/logs/data-retention-configure" target="_blank" rel="noopener" onclick="event.stopPropagation()">Learn ↗</a></div></h3>
+          <h3>Workspace and table retention<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/azure-monitor/logs/data-retention-configure" target="_blank" rel="noopener" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/procedures/retention-insights.md" target="_blank" rel="noopener" onclick="event.stopPropagation()">Workbook Guidance ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/ArchivingBasicLogsRetention.json" target="_blank" rel="noopener" onclick="event.stopPropagation()">Workbook ↗</a></div></h3>
           <span class="cost-badge free">Workspace</span>
         </div>
         <div class="connector-body" style="display:block;">
@@ -3609,6 +3609,7 @@
               </select>
               <label for="lite-workspace-default-total-retention">Default retention policy<div class="check-detail">Default retention policy that should be applied to all data in the workspace</div></label>
             </div>
+            <div class="check-detail" style="margin-top:8px; font-size:0.8rem; color:var(--text-light);">Defaults inherited by every table unless overridden in the Full view.</div>
           </div>
           <div class="section-comment">
             <label for="lite-ws-comment">Comments / Rationale — Platform and Workspace configuration</label>
@@ -3893,6 +3894,9 @@
           <span class="connector-chevron">▼</span>
         </div>
         <div class="connector-body">
+          <div class="connector-note">
+            <strong>Note:</strong> Sentinel Key Vault connector uses Azure-diagnostics mode and writes to <code>AzureDiagnostics</code> (filter <code>ResourceProvider == "MICROSOFT.KEYVAULT"</code>). Resource-specific mode writes to <code>AZKVAuditLogs</code> and <code>AZKVPolicyEvaluationDetailsLogs</code>. Edit the table name to match your deployment.
+          </div>
           <div class="check-group">
             <div class="check-group-title">Connector Setup</div>
             <div class="check-item">
@@ -3903,7 +3907,7 @@
             </div>
           </div>
           <div class="check-group" data-tier-enabled data-tp-tables data-prefix="akv" data-tp-connector="Azure Key Vault" data-tp-tier="2">
-            <div class="check-group-title">Target Table<div class="check-detail">Sentinel Key Vault connector uses Azure-diagnostics mode and writes to <code>AzureDiagnostics</code> (filter <code>ResourceProvider == "MICROSOFT.KEYVAULT"</code>). Resource-specific mode writes to <code>AZKVAuditLogs</code> and <code>AZKVPolicyEvaluationDetailsLogs</code>. Edit the table name to match your deployment.</div></div>
+            <div class="check-group-title">Target Table</div>
             <div class="check-item" data-custom-label data-tp-row="1">
               <select class="status-select" id="akv-tbl" data-tier="2" data-connector="Azure Key Vault" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
