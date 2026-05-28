@@ -4574,8 +4574,11 @@
               <label for="waf-c2">Diagnostic settings on Front Door<div class="check-detail">If using Azure Front Door with WAF policy</div></label>
             </div>
           </div>
+          <div class="connector-note">
+            <strong>Note:</strong> Sentinel WAF connector uses Azure-diagnostics mode and writes to <code>AzureDiagnostics</code> (<code>ResourceType in APPLICATIONGATEWAYS, CDNWEBAPPLICATIONFIREWALLPOLICIES, FRONTDOORS</code>). Resource-specific App Gateway tables: <code>AGWAccessLogs</code>, <code>AGWFirewallLogs</code>, <code>AGWPerformanceLogs</code>. Front Door / CDN: <code>AzureFrontDoorAccessLog</code>, <code>AzureFrontDoorWebApplicationFirewallLog</code>. Edit the table name to match your deployment.
+          </div>
           <div class="check-group" data-tier-enabled data-tp-tables data-prefix="waf" data-tp-connector="Azure WAF" data-tp-tier="2">
-            <div class="check-group-title">Target Table<div class="check-detail">Sentinel WAF connector uses Azure-diagnostics mode and writes to <code>AzureDiagnostics</code> (<code>ResourceType in APPLICATIONGATEWAYS, CDNWEBAPPLICATIONFIREWALLPOLICIES, FRONTDOORS</code>). Resource-specific App Gateway tables: <code>AGWAccessLogs</code>, <code>AGWFirewallLogs</code>, <code>AGWPerformanceLogs</code>. Front Door / CDN: <code>AzureFrontDoorAccessLog</code>, <code>AzureFrontDoorWebApplicationFirewallLog</code>. Edit the table name to match your deployment.</div></div>
+            <div class="check-group-title">Target Table</div>
             <div class="check-item" data-custom-label data-tp-row="1">
               <select class="status-select" id="waf-tbl" data-tier="2" data-connector="Azure WAF" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
@@ -4640,8 +4643,11 @@
               <label for="dns-c2">Azure DNS diagnostic settings<div class="check-detail">Private DNS zones / DNS Resolver</div></label>
             </div>
           </div>
+          <div class="connector-note">
+            <strong>Note:</strong> Windows DNS connector (AMA) writes to <code>DnsEvents</code> (queries / analytic events) and <code>DnsInventory</code> (resource records). Edit the table name to match your deployment and add a row for the second table.
+          </div>
           <div class="check-group" data-tier-enabled data-tp-tables data-prefix="dns" data-tp-connector="DNS Security Logs" data-tp-tier="2">
-            <div class="check-group-title">Target Table<div class="check-detail">Windows DNS connector (AMA) writes to <code>DnsEvents</code> (queries / analytic events) and <code>DnsInventory</code> (resource records). Edit the table name to match your deployment and add a row for the second table.</div></div>
+            <div class="check-group-title">Target Table</div>
             <div class="check-item" data-custom-label data-tp-row="1">
               <select class="status-select" id="dns-tbl" data-tier="2" data-connector="DNS Security Logs" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
@@ -4981,8 +4987,11 @@
               <label for="sap-c1">SAP data connector agent deployed<div class="check-detail">Container-based agent collecting SAP audit log, security log, and change documents</div></label>
             </div>
           </div>
+          <div class="connector-note">
+            <strong>Note:</strong> Agentless connector ingests workspace-native tables (e.g. <code>ABAPAuditLog</code>, <code>ABAPAuthorizationDetails</code>, <code>ABAPChangeDocsLog</code>, <code>ABAPUserDetails</code>). Agent-based connector ingests custom <code>*_CL</code> tables (e.g. <code>ABAPAuditLog_CL</code>) queried via SAP solution functions (<code>SAPAuditLog</code>, <code>SAPAppLog</code>, …). Edit the table name to match your deployment and add rows for additional tables.
+          </div>
           <div class="check-group" data-tier-enabled data-tp-tables data-prefix="sap" data-tp-connector="SAP" data-tp-tier="3">
-            <div class="check-group-title">Tables<div class="check-detail">Agentless connector ingests workspace-native tables (e.g. <code>ABAPAuditLog</code>, <code>ABAPAuthorizationDetails</code>, <code>ABAPChangeDocsLog</code>, <code>ABAPUserDetails</code>). Agent-based connector ingests custom <code>*_CL</code> tables (e.g. <code>ABAPAuditLog_CL</code>) queried via SAP solution functions (<code>SAPAuditLog</code>, <code>SAPAppLog</code>, …). Edit the table name to match your deployment and add rows for additional tables.</div></div>
+            <div class="check-group-title">Tables</div>
             <div class="check-item" data-custom-label data-tp-row="1">
               <select class="status-select" id="sap-tbl" data-tier="3" data-connector="SAP" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
@@ -5040,8 +5049,11 @@
               <label for="sql-c1">Diagnostic settings configured for SQL audit<div class="check-detail">Azure SQL or SQL MI diagnostic settings sending audit logs to Log Analytics</div></label>
             </div>
           </div>
+          <div class="connector-note">
+            <strong>Note:</strong> Resource-specific diagnostic mode writes to the dedicated <code>SQLSecurityAuditEvents</code> table (default below). Legacy Azure-diagnostics mode writes to <code>AzureDiagnostics</code> with category <code>SQLSecurityAuditEvents</code>; add a row if you're on that mode. Microsoft Support operations also write to <code>DevOpsOperationsAudit</code>.
+          </div>
           <div class="check-group" data-tier-enabled data-tp-tables data-prefix="sql" data-tp-connector="SQL Database Audit" data-tp-tier="3">
-            <div class="check-group-title">Tables<div class="check-detail">Resource-specific diagnostic mode writes to the dedicated <code>SQLSecurityAuditEvents</code> table (default below). Legacy Azure-diagnostics mode writes to <code>AzureDiagnostics</code> with category <code>SQLSecurityAuditEvents</code>; add a row if you're on that mode. Microsoft Support operations also write to <code>DevOpsOperationsAudit</code>.</div></div>
+            <div class="check-group-title">Tables</div>
             <div class="check-item" data-custom-label data-tp-row="1">
               <select class="status-select" id="sql-tbl" data-tier="3" data-connector="SQL Database Audit" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
@@ -5230,8 +5242,11 @@
               <label for="github-c1">Connector enabled in Sentinel<div class="check-detail">GitHub audit log streaming or API-based ingestion configured</div></label>
             </div>
           </div>
+          <div class="connector-note">
+            <strong>Note:</strong> Active CCF connector (<code>GitHubAuditDefinitionV2</code>) ingests into <code>GitHubAuditLogsV2_CL</code>. Deprecated polling connector wrote to <code>GitHubAuditLogPolling_CL</code>. GitHub Webhooks connector ingests into <code>githubscanaudit_CL</code>. Edit the table name to match your deployment.
+          </div>
           <div class="check-group" data-tier-enabled data-tp-tables data-prefix="github" data-tp-connector="GitHub Enterprise" data-tp-tier="3">
-            <div class="check-group-title">Tables<div class="check-detail">Active CCF connector (<code>GitHubAuditDefinitionV2</code>) ingests into <code>GitHubAuditLogsV2_CL</code>. Deprecated polling connector wrote to <code>GitHubAuditLogPolling_CL</code>. GitHub Webhooks connector ingests into <code>githubscanaudit_CL</code>. Edit the table name to match your deployment.</div></div>
+            <div class="check-group-title">Tables</div>
             <div class="check-item" data-custom-label data-tp-row="1">
               <select class="status-select" id="github-tbl" data-tier="3" data-connector="GitHub Enterprise" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
@@ -5314,8 +5329,11 @@
               <label for="aks-c1">Diagnostic settings configured for AKS<div class="check-detail">kube-apiserver audit logs, guard, and cluster autoscaler logs sent to Log Analytics</div></label>
             </div>
           </div>
+          <div class="connector-note">
+            <strong>Note:</strong> Sentinel AKS connector uses Azure-diagnostics mode and writes to <code>AzureDiagnostics</code> (categories: <code>kube-audit</code>, <code>kube-audit-admin</code>, <code>kube-apiserver</code>, <code>kube-controller-manager</code>, <code>kube-scheduler</code>, <code>cluster-autoscaler</code>, <code>guard</code>), plus <code>ContainerInventory</code> and <code>KubeEvents</code>. Resource-specific mode writes to per-category tables (e.g. <code>AKSAudit</code>, <code>AKSAuditAdmin</code>, <code>AKSControlPlane</code>). Edit the table name and add rows for additional tables.
+          </div>
           <div class="check-group" data-tier-enabled data-tp-tables data-prefix="aks" data-tp-connector="Azure Kubernetes Service" data-tp-tier="3">
-            <div class="check-group-title">Tables<div class="check-detail">Sentinel AKS connector uses Azure-diagnostics mode and writes to <code>AzureDiagnostics</code> (categories: <code>kube-audit</code>, <code>kube-audit-admin</code>, <code>kube-apiserver</code>, <code>kube-controller-manager</code>, <code>kube-scheduler</code>, <code>cluster-autoscaler</code>, <code>guard</code>), plus <code>ContainerInventory</code> and <code>KubeEvents</code>. Resource-specific mode writes to per-category tables (e.g. <code>AKSAudit</code>, <code>AKSAuditAdmin</code>, <code>AKSControlPlane</code>). Edit the table name and add rows for additional tables.</div></div>
+            <div class="check-group-title">Tables</div>
             <div class="check-item" data-custom-label data-tp-row="1">
               <select class="status-select" id="aks-tbl" data-tier="3" data-connector="Azure Kubernetes Service" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
