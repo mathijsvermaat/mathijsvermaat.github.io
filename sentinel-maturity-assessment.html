@@ -261,6 +261,111 @@
       box-shadow: 0 0 0 2px rgba(0,120,212,0.15);
     }
 
+    .notes-updates {
+      margin-top: 8px;
+      padding-left: 10px;
+      border-left: 2px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .notes-update {
+      font-size: 0.8rem;
+      color: var(--text);
+      white-space: pre-wrap;
+    }
+
+    .notes-update-time {
+      display: block;
+      font-size: 0.7rem;
+      color: var(--text-light);
+      letter-spacing: 0.2px;
+      margin-bottom: 1px;
+    }
+
+    .notes-update-actions-inline {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .btn-notes-update {
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--text);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .btn-notes-update:hover {
+      background: var(--secondary);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .notes-update-form {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .notes-update-form textarea {
+      min-height: 36px;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.82rem;
+      font-family: inherit;
+      resize: none;
+      overflow: hidden;
+      line-height: 1.45;
+    }
+
+    .notes-update-form .actions {
+      display: flex;
+      gap: 6px;
+      align-self: flex-end;
+    }
+
+    .notes-update-form button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--white);
+      color: var(--text);
+      font-size: 0.85rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .notes-update-form button.primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .notes-update-form button:hover:not(.primary) {
+      background: var(--secondary);
+    }
+
+    .notes-update-form button.primary:hover {
+      background: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+
     .btn-notes {
       padding: 6px 14px;
       font-size: 0.8rem;
@@ -2410,6 +2515,10 @@
     </h2>
     <div id="notes-display" class="notes-display"></div>
     <textarea id="notes-textarea" class="notes-textarea" style="display: none;" placeholder="Add general notes, observations, or context for this assessment…"></textarea>
+    <div id="notes-updates" class="notes-updates"></div>
+    <div class="notes-update-actions-inline">
+      <button type="button" class="btn-notes-update" id="notes-update-btn" onclick="openNotesUpdateForm()">💬 Add timestamped update</button>
+    </div>
   </div>
 
   <!-- Overall Progress -->
@@ -7018,6 +7127,105 @@ function toggleNotesEdit() {
   }
 }
 
+function setupGeneralNotesAuditTrail() {
+  const section = document.getElementById('notes-section');
+  const display = document.getElementById('notes-display');
+  if (!section || !display) return;
+  if (!section.dataset.notesUpdates) section.dataset.notesUpdates = '[]';
+  renderNotesUpdates();
+}
+
+function getNotesUpdates() {
+  const section = document.getElementById('notes-section');
+  if (!section) return [];
+  try {
+    const arr = JSON.parse(section.dataset.notesUpdates || '[]');
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function setNotesUpdates(updates) {
+  const section = document.getElementById('notes-section');
+  if (!section) return;
+  section.dataset.notesUpdates = JSON.stringify(updates || []);
+}
+
+function renderNotesUpdates() {
+  const list = document.getElementById('notes-updates');
+  if (!list) return;
+  const updates = getNotesUpdates();
+  list.innerHTML = '';
+  if (!updates.length) {
+    list.style.display = 'none';
+    return;
+  }
+  list.style.display = '';
+  updates.forEach(u => {
+    const row = document.createElement('div');
+    row.className = 'notes-update';
+    const ts = document.createElement('span');
+    ts.className = 'notes-update-time';
+    ts.textContent = formatTodoDate(u.at);
+    row.appendChild(ts);
+    row.appendChild(document.createTextNode(u.text || ''));
+    list.appendChild(row);
+  });
+}
+
+function openNotesUpdateForm() {
+  const section = document.getElementById('notes-section');
+  if (!section) return;
+  if (section.querySelector('.notes-update-form')) return;
+
+  const textarea = document.getElementById('notes-textarea');
+  const updatesList = document.getElementById('notes-updates');
+  const form = document.createElement('div');
+  form.className = 'notes-update-form';
+  const input = document.createElement('textarea');
+  input.rows = 1;
+  input.placeholder = 'Update note (Ctrl+Enter to save) — e.g. notes reviewed on 6 May';
+  input.addEventListener('input', function() { autoGrowTextarea(input); });
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); save(); }
+    else if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+  });
+  const actions = document.createElement('div');
+  actions.className = 'actions';
+  const cancelBtn = document.createElement('button');
+  cancelBtn.type = 'button';
+  cancelBtn.className = 'btn';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.onclick = cancel;
+  const saveBtn = document.createElement('button');
+  saveBtn.type = 'button';
+  saveBtn.className = 'btn primary';
+  saveBtn.textContent = 'Add update';
+  saveBtn.onclick = save;
+  actions.appendChild(cancelBtn);
+  actions.appendChild(saveBtn);
+  form.appendChild(input);
+  form.appendChild(actions);
+  if (textarea && textarea.parentNode) {
+    if (updatesList && updatesList.parentNode === textarea.parentNode) textarea.parentNode.insertBefore(form, updatesList);
+    else textarea.parentNode.insertBefore(form, textarea.nextSibling);
+  } else section.appendChild(form);
+  input.focus();
+  setTimeout(function() { autoGrowTextarea(input); }, 0);
+
+  function cancel() { form.remove(); }
+  function save() {
+    const text = input.value.trim();
+    if (!text) { cancel(); return; }
+    const updates = getNotesUpdates();
+    updates.push({ at: new Date().toISOString(), text: text });
+    setNotesUpdates(updates);
+    form.remove();
+    renderNotesUpdates();
+  }
+}
+
 // ===================== MANUAL TO DO ITEMS =====================
 function autoGrowTextarea(ta) {
   if (!ta) return;
@@ -8617,6 +8825,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Inject audit-trail UI under every comment textarea
   setupCommentAuditTrails();
+  setupGeneralNotesAuditTrail();
   // Wire rename-on-pencil for third-party connector sections (now & on add)
   setupThirdPartyNameEditors();
 });
@@ -8866,7 +9075,7 @@ function renameThirdPartyConnector(section, newName) {
 // ===================== SAVE / LOAD JSON =====================
 function gatherState() {
   const state = {
-    version: 5,
+    version: 6,
     exportedAt: new Date().toISOString(),
     meta: {
       customer: document.getElementById('customer-name').value,
@@ -8881,6 +9090,7 @@ function gatherState() {
       msspName: (document.getElementById('mssp-name') || {}).value || '',
       notes: document.getElementById('notes-display').textContent,
     },
+    notesUpdates: [],
     selects: {},
     comments: {},
     commentUpdates: {},
@@ -9060,6 +9270,14 @@ function gatherState() {
     });
   });
 
+  // Save General Information notes timestamped updates
+  try {
+    const updates = JSON.parse((document.getElementById('notes-section') || {}).dataset.notesUpdates || '[]');
+    if (Array.isArray(updates) && updates.length) state.notesUpdates = updates;
+  } catch (e) {
+    state.notesUpdates = [];
+  }
+
   // Save planned expansions
   state.expansions = {};
   document.querySelectorAll('[id$="-expansion-toggle"]').forEach(toggle => {
@@ -9119,6 +9337,11 @@ function applyState(state) {
     document.getElementById('notes-textarea').style.display = 'none';
     document.getElementById('notes-display').style.display = '';
     document.getElementById('notes-edit-btn').textContent = '✏️ Edit';
+    if (state.notesUpdates && Array.isArray(state.notesUpdates)) {
+      const notesSection = document.getElementById('notes-section');
+      if (notesSection) notesSection.dataset.notesUpdates = JSON.stringify(state.notesUpdates);
+    }
+    renderNotesUpdates();
     updateLicenseBenefit();
   }
 
