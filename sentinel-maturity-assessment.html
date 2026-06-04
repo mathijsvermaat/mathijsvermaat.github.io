@@ -545,6 +545,25 @@
       font-size: 0.8rem;
     }
 
+    .xdr-ueba-row-note {
+      display: inline-block;
+      margin-left: 8px;
+      font-size: 0.74rem;
+      color: #8a6d00;
+      background: #fff8e1;
+      border: 1px solid #ffe08a;
+      border-radius: 999px;
+      padding: 1px 7px;
+      vertical-align: middle;
+      line-height: 1.4;
+    }
+
+    .xdr-ueba-row-note.is-risk {
+      color: #b35a00;
+      border-color: #ffc28a;
+      background: #fff1e8;
+    }
+
     .connector-quick-actions {
       display: flex;
       justify-content: flex-end;
@@ -1922,16 +1941,15 @@
     body.lite-mode .lite-only { display: block; }
     body.lite-mode .full-only { display: none; }
 
-    /* In Lite mode, hide Tier 1, Tier 2, Tier 3, the General tier (Workspace/
-       dashboards/tooling), the manual-todo/risk/warnings summaries, and the
-       connector search. Workspace + table retention is surfaced through the
+     /* In Lite mode, hide Tier 1, Tier 2, Tier 3, the General tier (Workspace/
+       dashboards/tooling), and the connector search. Workspace + table
+       retention is surfaced through the
        dedicated Lite retention section below. Everything else in the Full
        layout is preserved untouched. */
     body.lite-mode #tier-general,
     body.lite-mode #tier-1,
     body.lite-mode #tier-2,
     body.lite-mode #tier-3,
-    body.lite-mode .warnings-summary,
     body.lite-mode .connector-search {
       display: none !important;
     }
@@ -2243,6 +2261,11 @@
     .tables-retention-note .ret-pill-an  { background: #e6f4ea; border-color: var(--success); color: var(--success); }
     .tables-retention-note .ret-pill-lk  { background: #f0e6fa; border-color: #8764b8;        color: #5c2d91; }
     .tables-retention-note .ret-pill-off { background: var(--secondary); color: var(--text-light); }
+
+    /* Match Lite Check 2 note gutter with the UEBA warning card. */
+    #lite-tier-xdr-body > .tables-retention-note {
+      margin: 0 24px 10px;
+    }
     /* Full-mode per-table change-tier inline row
        (visually matches the Lite switch toggle + details) */
     .xdr-tc-inline {
@@ -3135,6 +3158,10 @@
         </div>
         <div class="connector-body">
 
+          <div class="connector-note">
+            <strong>UEBA dependency warning:</strong> If <code>DeviceLogonEvents</code> is moved to <strong>Data Lake only</strong>, Sentinel UEBA may miss this source. Validate UEBA data source coverage before and after the change.
+          </div>
+
           <div class="check-group">
             <div class="check-group-title">Connector Setup</div>
             <div class="check-item">
@@ -3797,6 +3824,9 @@
           </select>
           <label for="lite-xdr-c1">Connector enabled in Sentinel<div class="check-detail">Data connectors → Microsoft Defender XDR → Connect</div></label>
         </div>
+      </div>
+      <div class="connector-note" style="margin: 0 24px 10px;">
+        <strong>UEBA dependency warning:</strong> Moving <code>DeviceLogonEvents</code> to <strong>Data Lake only</strong> can remove it as a UEBA source. Validate UEBA source status before finalizing this design.
       </div>
       <div id="lite-xdr-groups"></div>
       <div class="lite-ingest-totals" style="padding: 4px 24px 14px;">
@@ -5962,6 +5992,7 @@ function onStatusChange(sel) {
 
   updateProgress();
   updateTodoSummary();
+  updateXdrUebaWarnings();
   updateAcceptedRisks();
   updateConfigWarnings();
 }
@@ -7831,6 +7862,12 @@ function updateConfigWarnings() {
       }
     });
 
+    // UEBA caveat: DeviceLogonEvents at/planned for Lake should be visible in
+    // the top Configuration Warnings summary (instead of an inline dynamic banner).
+    if (connectorName === 'Microsoft Defender XDR' && isXdrUebaDeviceLogonAtLake()) {
+      unconfigured.push('UEBA dependency warning: DeviceLogonEvents is set or planned to Data Lake. Verify the UEBA "Device Logon Events" source remains connected, or keep this table in Analytics.');
+    }
+
     if (unconfigured.length > 0) {
       warningItems.push({ connector: connectorName, warnings: unconfigured });
     }
@@ -8790,6 +8827,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initVolumeInputs();
   updateProgress();
   updateTodoSummary();
+  updateXdrUebaWarnings();
   updateAcceptedRisks();
   updateConfigWarnings();
   updateCommentsSummary();
@@ -10076,6 +10114,24 @@ function isLakeCapable(id) {
 
 function isXdrId(id) { return typeof id === 'string' && /^xdr-t\d+$/.test(id); }
 
+const UEBA_DEVICE_LOGON_TABLE_ID = 'xdr-t7';
+
+function isXdrUebaDeviceLogonAtLake() {
+  const sel = document.getElementById(UEBA_DEVICE_LOGON_TABLE_ID);
+  const currentLake = !!(sel && sel.value === 'Configured (Lake)');
+  const planned = xdrTierChangeState[UEBA_DEVICE_LOGON_TABLE_ID];
+  const plannedLake = !!(planned && planned.tier === 'Lake');
+  return currentLake || plannedLake;
+}
+
+function updateXdrUebaWarnings() {
+  const atRisk = isXdrUebaDeviceLogonAtLake();
+
+  document.querySelectorAll('.xdr-ueba-row-note').forEach(el => {
+    el.classList.toggle('is-risk', atRisk);
+  });
+}
+
 function getXdrTierChange(id) { return xdrTierChangeState[id] || null; }
 
 function setXdrTierChangePlanned(id, planned) {
@@ -10090,6 +10146,7 @@ function setXdrTierChangePlanned(id, planned) {
   }
   syncXdrTierChangeRow(id);
   updateLiteXdrTotals();
+  updateXdrUebaWarnings();
   if (typeof updateTodoSummary === 'function') updateTodoSummary();
 }
 
@@ -10098,6 +10155,7 @@ function setXdrTierChangeTier(id, tier) {
   xdrTierChangeState[id].tier = (tier === 'Lake') ? 'Lake' : 'Analytics';
   syncXdrTierChangeRow(id);
   updateLiteXdrTotals();
+  updateXdrUebaWarnings();
   if (typeof updateTodoSummary === 'function') updateTodoSummary();
 }
 
@@ -10171,6 +10229,9 @@ function renderLiteXdr() {
       const planned = !!s;
       const tier = planned ? s.tier : 'Analytics';
       const gbday = planned ? (s.gbday || '') : '';
+      const tableLabel = t.id === UEBA_DEVICE_LOGON_TABLE_ID
+        ? `${t.label} <span class="xdr-ueba-row-note" title="UEBA source dependency: validate availability if this table is moved to Data Lake only.">UEBA source dependency</span>`
+        : t.label;
       const tcCells = lakeOk ? `
         <label class="lite-xdr-switch" title="Plan a tier change for this table">
           <input type="checkbox" ${planned ? 'checked' : ''} onchange="setXdrTierChangePlanned('${t.id}', this.checked)">
@@ -10193,7 +10254,7 @@ function renderLiteXdr() {
         <span></span>`;
       return `
       <div class="lite-xdr-row ${planned ? 'tc-on' : ''}" data-id="${t.id}">
-        <span class="tbl-name">${t.label}</span>
+        <span class="tbl-name">${tableLabel}</span>
         <div class="lite-seg" role="group" aria-label="${t.label} current tier">
           <button type="button" data-v="off"       onclick="setLiteXdr('${t.id}','off')">Not ingested</button>
           <button type="button" data-v="analytics" onclick="setLiteXdr('${t.id}','analytics')">Analytics</button>
@@ -10219,6 +10280,7 @@ function renderLiteXdr() {
   if (typeof syncLiteXdrSetup === 'function') syncLiteXdrSetup();
   updateLiteXdrTotals();
   updateLiteXdrProgress();
+  updateXdrUebaWarnings();
 }
 
 function applyLiteXdrSegState(id, v) {
@@ -10272,6 +10334,7 @@ function syncLiteXdrFromSelect(sel) {
   if (item && typeof renderTableRetentionCell === 'function') renderTableRetentionCell(item);
   const liteRow = document.querySelector(`.lite-xdr-row[data-id="${sel.id}"]`);
   if (liteRow && typeof renderTableRetentionCell === 'function') renderTableRetentionCell(liteRow);
+  updateXdrUebaWarnings();
 }
 
 function updateLiteXdrTotals() {
@@ -10452,6 +10515,14 @@ function initXdrTierChangeControls() {
           labelEl.textContent = labelText;
         }
         if (annotation) labelEl.title = annotation;
+
+        if (id === UEBA_DEVICE_LOGON_TABLE_ID && !item.hasAttribute('data-custom-label') && !labelEl.querySelector('.xdr-ueba-row-note')) {
+          const note = document.createElement('span');
+          note.className = 'xdr-ueba-row-note';
+          note.title = 'UEBA source dependency: validate availability if this table is moved to Data Lake only.';
+          note.textContent = 'UEBA source dependency';
+          labelEl.appendChild(note);
+        }
       }
       const lakeOk = isLakeCapable(id);
 
@@ -10536,6 +10607,7 @@ function initXdrTierChangeControls() {
   if (typeof injectTablesRetentionNote === 'function') {
     injectTablesRetentionNote();
   }
+  updateXdrUebaWarnings();
 }
 
 // Add a class to .retention-group inside any .connector-section that also
