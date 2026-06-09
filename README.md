@@ -1,8 +1,20 @@
 # mathijsvermaat.github.io
 
+## TL;DR — Quick links
+
+| Page | Live URL |
+| --- | --- |
+| App Blocked Page | https://mathijsvermaat.github.io/app-blocked.html |
+| Monitored App Page | https://mathijsvermaat.github.io/monitored.html |
+| Generic Blocked Page | https://mathijsvermaat.github.io/blocked.html |
+| Sentinel Maturity Assessment Checklist | https://mathijsvermaat.github.io/sentinel-maturity-assessment.html |
+| WisselApp | https://mathijsvermaat.github.io/WisselApp/ |
+
 ## Pages
 
 ### App Blocked Page (`app-blocked.html`)
+
+**Live page:** https://mathijsvermaat.github.io/app-blocked.html
 
 A professional user-facing page that displays when access to a restricted application is attempted.
 
@@ -26,6 +38,8 @@ Navigate to `app-blocked.html` in your browser to view the page, or integrate it
 
 ### Monitored App Page (`monitored.html`)
 
+**Live page:** https://mathijsvermaat.github.io/monitored.html
+
 A professional user-facing page that displays when access to a monitored application is attempted.
 
 **Purpose:** Inform users that a specific application (in this case, Gemini) is not allowed in the organization and provide them with approved alternatives.
@@ -48,6 +62,8 @@ Navigate to `monitored.html` in your browser to view the page, or integrate it i
 
 ### Generic Blocked Page (`blocked.html`)
 
+**Live page:** https://mathijsvermaat.github.io/blocked.html
+
 A generic blocking page for all restricted applications and services.
 
 **Purpose:** Display a universal access restriction message for any blocked application without mentioning a specific app.
@@ -63,6 +79,8 @@ A generic blocking page for all restricted applications and services.
 Configure your web filtering or proxy system to serve `blocked.html` as the default response when users attempt to access any restricted application. This is the recommended page to use as a general-purpose blocking page.
 
 ### Sentinel Maturity Assessment Checklist (`sentinel-maturity-assessment.html`)
+
+**Live page:** https://mathijsvermaat.github.io/sentinel-maturity-assessment.html
 
 An interactive assessment checklist for the [Sentinel Maturity Model](https://github.com/mathijsvermaat/Sentinel-Maturity). Used during customer engagements to document data connector onboarding, retention configuration, and detection readiness across all tiers.
 
@@ -84,6 +102,8 @@ An interactive assessment checklist for the [Sentinel Maturity Model](https://gi
 Navigate to `https://mathijsvermaat.github.io/sentinel-maturity-assessment.html` or open the file locally. Fill in the assessment metadata, work through each connector's checklist, add comments, and export the results.
 
 ### WisselApp (`WisselApp/`)
+
+**Live page:** https://mathijsvermaat.github.io/WisselApp/
 
 A substitution and playing-time planner for youth football (jeugdvoetbal), delivered as a fully offline Progressive Web App. See [WisselApp/README.md](WisselApp/README.md) for the full Dutch documentation.
 
