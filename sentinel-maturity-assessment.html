@@ -5521,46 +5521,52 @@
           <span class="connector-chevron">▼</span>
         </div>
         <div class="connector-body">
+          <div class="connector-note">
+            <strong>Note:</strong> Azure Storage Account ingestion is configured through <strong>Azure Monitor Diagnostic settings</strong> on each storage account service. In current Sentinel guidance, the recommended mode is <strong>resource-specific</strong>, which writes to <code>StorageBlobLogs</code>, <code>StorageQueueLogs</code>, <code>StorageTableLogs</code>, and <code>StorageFileLogs</code> (plus <code>AzureMetrics</code>). <code>AzureDiagnostics</code> is a legacy Azure-diagnostics mode option and should only be used if your deployment is explicitly configured that way.
+          </div>
           <div class="check-group">
             <div class="check-group-title">Connector Setup</div>
             <div class="check-item">
-              <select class="status-select" id="storage-c1" data-tier="3" data-connector="Azure Storage Account" data-item="Diagnostic settings configured for Storage" onchange="onStatusChange(this)">
+              <select class="status-select" id="storage-c1" data-tier="3" data-connector="Azure Storage Account" data-item="Diagnostic settings configured for Storage account services (resource-specific mode)" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="storage-c1">Diagnostic settings configured for Storage accounts<div class="check-detail">Blob, Table, Queue, and/or File storage diagnostics sent to Log Analytics</div></label>
+              <label for="storage-c1">Diagnostic settings configured for Storage account services (resource-specific mode)<div class="check-detail">Blob, Table, Queue, and/or File storage diagnostics sent to Log Analytics</div></label>
             </div>
           </div>
           <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
+            <div class="connector-note" style="margin: 0 0 12px 0; font-size: 0.9em;">
+              <strong>Note:</strong> Table routing is configured per table. <code>AzureMetrics</code> is Analytics-only; <code>Storage*</code> tables support Analytics or Lake.
+            </div>
             <div class="check-item">
-              <select class="status-select" id="storage-t-metrics" data-tier="3" data-connector="Azure Storage Account" data-item="AzureMetrics table enabled" onchange="onStatusChange(this)">
+              <select class="status-select" id="storage-t-metrics" data-tier="3" data-connector="Azure Storage Account" data-item="AzureMetrics table enabled (Storage account metrics)" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="storage-t-metrics">AzureMetrics table enabled<div class="check-detail">Storage account metrics (no DCR / Lake support)</div></label>
+              <label for="storage-t-metrics">AzureMetrics<div class="check-detail">Storage account metrics (no DCR / Lake support)</div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="storage-t-blob" data-tier="3" data-connector="Azure Storage Account" data-item="StorageBlobLogs table enabled" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="storage-t-blob">StorageBlobLogs table enabled</label>
+              <label for="storage-t-blob">StorageBlobLogs</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="storage-t-queue" data-tier="3" data-connector="Azure Storage Account" data-item="StorageQueueLogs table enabled" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="storage-t-queue">StorageQueueLogs table enabled</label>
+              <label for="storage-t-queue">StorageQueueLogs</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="storage-t-table" data-tier="3" data-connector="Azure Storage Account" data-item="StorageTableLogs table enabled" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="storage-t-table">StorageTableLogs table enabled</label>
+              <label for="storage-t-table">StorageTableLogs</label>
             </div>
             <div class="check-item">
               <select class="status-select" id="storage-t-file" data-tier="3" data-connector="Azure Storage Account" data-item="StorageFileLogs table enabled" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="storage-t-file">StorageFileLogs table enabled</label>
+              <label for="storage-t-file">StorageFileLogs</label>
             </div>
           </div>
           <div class="check-group">
