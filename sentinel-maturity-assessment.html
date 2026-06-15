@@ -284,6 +284,39 @@
       margin-bottom: 1px;
     }
 
+    .notes-update-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .notes-update-text {
+      flex: 1;
+    }
+
+    .notes-update-actions {
+      flex: 0 0 auto;
+    }
+
+    .btn-notes-update-mini {
+      padding: 2px 8px;
+      font-size: 0.72rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-light);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1.4;
+    }
+
+    .btn-notes-update-mini:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+      background: #e8f0fe;
+    }
+
     .notes-update-actions-inline {
       display: flex;
       gap: 6px;
@@ -1270,6 +1303,39 @@
       color: var(--text-light);
       letter-spacing: 0.2px;
       margin-bottom: 1px;
+    }
+
+    .todo-update-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .todo-update-text {
+      flex: 1;
+    }
+
+    .todo-update-actions-inline {
+      flex: 0 0 auto;
+    }
+
+    .btn-todo-update-mini {
+      padding: 2px 8px;
+      font-size: 0.72rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-light);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-family: inherit;
+      line-height: 1.4;
+    }
+
+    .btn-todo-update-mini:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+      background: #e8f0fe;
     }
 
     .todo-update-form {
@@ -5469,7 +5535,7 @@
             </div>
           </div>
           <div class="connector-note">
-            <strong>Note:</strong> Sentinel AKS connector uses Azure-diagnostics mode and writes to <code>AzureDiagnostics</code> (categories: <code>kube-audit</code>, <code>kube-audit-admin</code>, <code>kube-apiserver</code>, <code>kube-controller-manager</code>, <code>kube-scheduler</code>, <code>cluster-autoscaler</code>, <code>guard</code>), plus <code>ContainerInventory</code> and <code>KubeEvents</code>. Resource-specific mode writes to per-category tables (e.g. <code>AKSAudit</code>, <code>AKSAuditAdmin</code>, <code>AKSControlPlane</code>). Edit the table name and add rows for additional tables.
+            <strong>Note:</strong> AKS supports both legacy and resource-specific collection modes. Legacy mode writes categories (for example <code>kube-audit</code>, <code>kube-audit-admin</code>, <code>kube-apiserver</code>) to <code>AzureDiagnostics</code>. Resource-specific mode writes to dedicated tables such as <code>AKSAudit</code>, <code>AKSAuditAdmin</code>, and <code>AKSControlPlane</code> and is preferred for security operations. <code>ContainerInventory</code> and <code>KubeEvents</code> are supplemental Container Insights telemetry. Use table rows below to model your actual mix.
           </div>
           <div class="check-group" data-tier-enabled data-tp-tables data-prefix="aks" data-tp-connector="Azure Kubernetes Service" data-tp-tier="3">
             <div class="check-group-title">Tables</div>
@@ -5477,7 +5543,7 @@
               <select class="status-select" id="aks-tbl" data-tier="3" data-connector="Azure Kubernetes Service" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="aks-tbl" class="tp-tbl-label"><input type="text" id="aks-tbl-name" data-tp-table class="tp-tbl-name" value="AzureDiagnostics" placeholder="Table name — e.g. AzureDiagnostics, ContainerInventory, KubeEvents, AKSAudit" oninput="onThirdPartyTableNameChange(this)"></label>
+              <label for="aks-tbl" class="tp-tbl-label"><input type="text" id="aks-tbl-name" data-tp-table class="tp-tbl-name" value="AzureDiagnostics" placeholder="Table name — e.g. AzureDiagnostics (legacy), AKSAuditAdmin, AKSAudit, AKSControlPlane, ContainerInventory" oninput="onThirdPartyTableNameChange(this)"></label>
             </div>
             <div class="tp-tbl-actions">
               <button type="button" class="btn-link tp-tbl-add" onclick="addTpTableRow('aks')">+ Add another table</button>
@@ -7199,22 +7265,46 @@ function renderNotesUpdates() {
     return;
   }
   list.style.display = '';
-  updates.forEach(u => {
+  updates.forEach((u, idx) => {
     const row = document.createElement('div');
     row.className = 'notes-update';
+
+    const rowLine = document.createElement('div');
+    rowLine.className = 'notes-update-row';
+
+    const textWrap = document.createElement('div');
+    textWrap.className = 'notes-update-text';
     const ts = document.createElement('span');
     ts.className = 'notes-update-time';
     ts.textContent = formatTodoDate(u.at);
-    row.appendChild(ts);
-    row.appendChild(document.createTextNode(u.text || ''));
+    textWrap.appendChild(ts);
+    textWrap.appendChild(document.createTextNode(u.text || ''));
+
+    const actions = document.createElement('div');
+    actions.className = 'notes-update-actions';
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 'btn-notes-update-mini';
+    editBtn.textContent = 'Edit';
+    editBtn.title = 'Edit this update';
+    editBtn.onclick = function() { openNotesUpdateForm(idx); };
+    actions.appendChild(editBtn);
+
+    rowLine.appendChild(textWrap);
+    rowLine.appendChild(actions);
+    row.appendChild(rowLine);
     list.appendChild(row);
   });
 }
 
-function openNotesUpdateForm() {
+function openNotesUpdateForm(editIndex) {
   const section = document.getElementById('notes-section');
   if (!section) return;
   if (section.querySelector('.notes-update-form')) return;
+
+  const isEdit = Number.isInteger(editIndex) && editIndex >= 0;
+  const updates = getNotesUpdates();
+  const current = isEdit ? updates[editIndex] : null;
 
   const textarea = document.getElementById('notes-textarea');
   const updatesList = document.getElementById('notes-updates');
@@ -7223,6 +7313,7 @@ function openNotesUpdateForm() {
   const input = document.createElement('textarea');
   input.rows = 1;
   input.placeholder = 'Update note (Ctrl+Enter to save) — e.g. notes reviewed on 6 May';
+  if (current && current.text) input.value = current.text;
   input.addEventListener('input', function() { autoGrowTextarea(input); });
   input.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); save(); }
@@ -7238,7 +7329,7 @@ function openNotesUpdateForm() {
   const saveBtn = document.createElement('button');
   saveBtn.type = 'button';
   saveBtn.className = 'btn primary';
-  saveBtn.textContent = 'Add update';
+  saveBtn.textContent = isEdit ? 'Save update' : 'Add update';
   saveBtn.onclick = save;
   actions.appendChild(cancelBtn);
   actions.appendChild(saveBtn);
@@ -7249,15 +7340,22 @@ function openNotesUpdateForm() {
     else textarea.parentNode.insertBefore(form, textarea.nextSibling);
   } else section.appendChild(form);
   input.focus();
-  setTimeout(function() { autoGrowTextarea(input); }, 0);
+  setTimeout(function() {
+    autoGrowTextarea(input);
+    if (current && current.text) input.setSelectionRange(input.value.length, input.value.length);
+  }, 0);
 
   function cancel() { form.remove(); }
   function save() {
     const text = input.value.trim();
     if (!text) { cancel(); return; }
-    const updates = getNotesUpdates();
-    updates.push({ at: new Date().toISOString(), text: text });
-    setNotesUpdates(updates);
+    const next = getNotesUpdates();
+    if (isEdit && next[editIndex]) {
+      next[editIndex] = { at: next[editIndex].at || new Date().toISOString(), text: text };
+    } else {
+      next.push({ at: new Date().toISOString(), text: text });
+    }
+    setNotesUpdates(next);
     form.remove();
     renderNotesUpdates();
   }
@@ -7319,14 +7417,34 @@ function renderManualTodoText(item) {
   if (updates.length) {
     const list = document.createElement('div');
     list.className = 'todo-updates';
-    updates.forEach(u => {
+    updates.forEach((u, idx) => {
       const row = document.createElement('div');
       row.className = 'todo-update';
+
+      const rowLine = document.createElement('div');
+      rowLine.className = 'todo-update-row';
+
+      const textWrap = document.createElement('div');
+      textWrap.className = 'todo-update-text';
       const ts = document.createElement('span');
       ts.className = 'todo-update-time';
       ts.textContent = formatTodoDate(u.at);
-      row.appendChild(ts);
-      row.appendChild(document.createTextNode(u.text || ''));
+      textWrap.appendChild(ts);
+      textWrap.appendChild(document.createTextNode(u.text || ''));
+
+      const actions = document.createElement('div');
+      actions.className = 'todo-update-actions-inline';
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'btn-todo-update-mini';
+      editBtn.textContent = 'Edit';
+      editBtn.title = 'Edit this update';
+      editBtn.onclick = function() { openManualTodoUpdateForm(item, idx); };
+      actions.appendChild(editBtn);
+
+      rowLine.appendChild(textWrap);
+      rowLine.appendChild(actions);
+      row.appendChild(rowLine);
       list.appendChild(row);
     });
     textDiv.appendChild(list);
@@ -7360,16 +7478,21 @@ function setManualTodoUpdates(item, updates) {
   item.dataset.todoUpdates = JSON.stringify(updates || []);
 }
 
-function openManualTodoUpdateForm(item) {
+function openManualTodoUpdateForm(item, updateIndex) {
   const textDiv = item.querySelector('.todo-text');
   if (!textDiv) return;
   if (textDiv.querySelector('.todo-update-form')) return; // already open
+
+  const isEdit = Number.isInteger(updateIndex) && updateIndex >= 0;
+  const updates = getManualTodoUpdates(item);
+  const current = isEdit ? updates[updateIndex] : null;
 
   const form = document.createElement('div');
   form.className = 'todo-update-form';
   const ta = document.createElement('textarea');
   ta.rows = 1;
   ta.placeholder = 'Update note (Ctrl+Enter to save) — e.g. raised ticket INC1234';
+  if (current && current.text) ta.value = current.text;
   ta.addEventListener('input', function() { autoGrowTextarea(ta); });
   ta.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); save(); }
@@ -7384,7 +7507,7 @@ function openManualTodoUpdateForm(item) {
   const saveBtn = document.createElement('button');
   saveBtn.type = 'button';
   saveBtn.className = 'primary';
-  saveBtn.textContent = 'Add update';
+  saveBtn.textContent = isEdit ? 'Save update' : 'Add update';
   saveBtn.onclick = save;
   actions.appendChild(cancelBtn);
   actions.appendChild(saveBtn);
@@ -7392,15 +7515,22 @@ function openManualTodoUpdateForm(item) {
   form.appendChild(actions);
   textDiv.appendChild(form);
   ta.focus();
-  setTimeout(function() { autoGrowTextarea(ta); }, 0);
+  setTimeout(function() {
+    autoGrowTextarea(ta);
+    if (current && current.text) ta.setSelectionRange(ta.value.length, ta.value.length);
+  }, 0);
 
   function cancel() { form.remove(); }
   function save() {
     const text = ta.value.trim();
     if (!text) { cancel(); return; }
-    const updates = getManualTodoUpdates(item);
-    updates.push({ at: new Date().toISOString(), text: text });
-    setManualTodoUpdates(item, updates);
+    const next = getManualTodoUpdates(item);
+    if (isEdit && next[updateIndex]) {
+      next[updateIndex] = { at: next[updateIndex].at || new Date().toISOString(), text: text };
+    } else {
+      next.push({ at: new Date().toISOString(), text: text });
+    }
+    setManualTodoUpdates(item, next);
     form.remove();
     renderManualTodoText(item);
   }
@@ -8002,6 +8132,10 @@ function addTpTableRow(prefix, explicitIdx) {
   const tmp = document.createElement('div');
   tmp.innerHTML = tpTableRowHtml(prefix, safeName, newIdx, tier).trim();
   const row = tmp.firstElementChild;
+  const tableNameInput = row ? row.querySelector('input[data-tp-table]') : null;
+  if (prefix === 'aks' && tableNameInput) {
+    tableNameInput.placeholder = 'Table name — e.g. AKSAuditAdmin, AKSAudit, AKSControlPlane, AzureDiagnostics';
+  }
   const actions = group.querySelector('.tp-tbl-actions');
   if (actions) group.insertBefore(row, actions); else group.appendChild(row);
   if (typeof initXdrTierChangeControls === 'function') initXdrTierChangeControls();
@@ -8009,8 +8143,7 @@ function addTpTableRow(prefix, explicitIdx) {
   updateTodoSummary();
   updateAcceptedRisks();
   if (!explicitIdx) {
-    const inp = row.querySelector('input[data-tp-table]');
-    if (inp) inp.focus();
+    if (tableNameInput) tableNameInput.focus();
   }
   return row;
 }
@@ -8122,6 +8255,62 @@ function addThirdPartyConnector(name) {
 
 // Update the aria-label and tooltip on the Target Table segmented pill when
 // the user edits the table name in a third-party connector.
+function applyTableLakeCapability(sel, lakeCapable, reason) {
+  if (!sel) return;
+  sel.dataset.lakeCapable = lakeCapable ? 'true' : 'false';
+
+  const lakeVal = 'Configured (Lake)';
+  const hasLakeOption = !!Array.from(sel.options || []).find(o => o.value === lakeVal);
+  if (lakeCapable && !hasLakeOption) {
+    const opt = document.createElement('option');
+    opt.value = lakeVal;
+    opt.textContent = lakeVal;
+    const configuredIdx = Array.from(sel.options || []).findIndex(o => o.value === 'Configured');
+    if (configuredIdx >= 0 && sel.options[configuredIdx + 1]) {
+      sel.insertBefore(opt, sel.options[configuredIdx + 1]);
+    } else {
+      sel.appendChild(opt);
+    }
+  }
+  if (!lakeCapable && hasLakeOption) {
+    const lakeOpt = Array.from(sel.options || []).find(o => o.value === lakeVal);
+    if (lakeOpt) lakeOpt.remove();
+    if (sel.value === lakeVal) sel.value = 'Configured';
+  }
+
+  const item = sel.closest('.check-item');
+  const lakeBtn = item ? item.querySelector('.lite-seg button[data-v="lake"]') : null;
+  if (lakeBtn) {
+    lakeBtn.disabled = !lakeCapable;
+    lakeBtn.title = lakeCapable ? '' : (reason || 'Lake tier not available for this table');
+  }
+
+  const tcToggle = document.getElementById(sel.id + '-tc-toggle');
+  const tcTier = document.getElementById(sel.id + '-tc-tier');
+  const tcGb = document.getElementById(sel.id + '-tc-gbday');
+  if (!lakeCapable && typeof xdrTierChangeState === 'object' && xdrTierChangeState && xdrTierChangeState[sel.id]) {
+    delete xdrTierChangeState[sel.id];
+  }
+  if (tcToggle) {
+    tcToggle.disabled = !lakeCapable;
+    if (!lakeCapable) tcToggle.checked = false;
+  }
+  if (tcTier) tcTier.disabled = !lakeCapable;
+  if (tcGb) tcGb.disabled = !lakeCapable;
+
+  onStatusChange(sel);
+}
+
+function isAksAzureDiagnosticsTable(input) {
+  if (!input) return false;
+  const item = input.closest('.check-item');
+  if (!item) return false;
+  const sel = item.querySelector('select.status-select');
+  if (!sel || sel.dataset.connector !== 'Azure Kubernetes Service') return false;
+  const canonical = (input.value || '').toLowerCase().replace(/[_\s]/g, '');
+  return canonical === 'azurediagnostics';
+}
+
 function onThirdPartyTableNameChange(input) {
   const item = input.closest('.check-item');
   if (!item) return;
@@ -8132,6 +8321,11 @@ function onThirdPartyTableNameChange(input) {
   const label = name || 'Target table';
   if (seg) seg.setAttribute('aria-label', label + ' current tier');
   sel.setAttribute('data-item', name ? (name + ' tier') : 'Target table tier');
+  if (isAksAzureDiagnosticsTable(input)) {
+    applyTableLakeCapability(sel, false, 'AKS AzureDiagnostics is legacy mode; use Analytics tier');
+  } else {
+    applyTableLakeCapability(sel, true, '');
+  }
   updateTodoSummary();
 }
 
@@ -11195,6 +11389,7 @@ function setAssessmentMode(mode) {
 
 // ---------- Init & state hooks ----------
 document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('input[data-tp-table]').forEach(inp => onThirdPartyTableNameChange(inp));
   initXdrTierChangeControls();
   initLiteFullMode();
   renderLiteXdr();
