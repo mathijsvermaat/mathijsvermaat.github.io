@@ -9125,25 +9125,50 @@ function renderCommentUpdates(ta) {
   updates.forEach((u, idx) => {
     const row = document.createElement('div');
     row.className = 'comment-update';
+
+    const rowLine = document.createElement('div');
+    rowLine.className = 'notes-update-row';
+
+    const textWrap = document.createElement('div');
+    textWrap.className = 'notes-update-text';
     const ts = document.createElement('span');
     ts.className = 'comment-update-time';
     ts.textContent = formatTodoDate(u.at);
-    row.appendChild(ts);
-    row.appendChild(document.createTextNode(u.text || ''));
+    textWrap.appendChild(ts);
+    textWrap.appendChild(document.createTextNode(u.text || ''));
+
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'notes-update-actions';
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 'btn-notes-update-mini';
+    editBtn.textContent = 'Edit';
+    editBtn.title = 'Edit this update';
+    editBtn.onclick = function() { openCommentUpdateForm(ta, idx); };
+    actionsDiv.appendChild(editBtn);
+
+    rowLine.appendChild(textWrap);
+    rowLine.appendChild(actionsDiv);
+    row.appendChild(rowLine);
     list.appendChild(row);
   });
 }
 
-function openCommentUpdateForm(ta) {
+function openCommentUpdateForm(ta, editIndex) {
   const wrapper = ta.parentElement;
   if (!wrapper) return;
   if (wrapper.querySelector('.comment-update-form')) return; // already open
+
+  const isEdit = Number.isInteger(editIndex) && editIndex >= 0;
+  const updates = getCommentUpdates(ta);
+  const current = isEdit ? updates[editIndex] : null;
 
   const form = document.createElement('div');
   form.className = 'comment-update-form';
   const input = document.createElement('textarea');
   input.rows = 1;
   input.placeholder = 'Update note (Ctrl+Enter to save) — e.g. retention extended to 365 days on 6 May';
+  if (isEdit && current) input.value = current.text || '';
   input.addEventListener('input', function() { autoGrowTextarea(input); });
   input.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); save(); }
@@ -9158,7 +9183,7 @@ function openCommentUpdateForm(ta) {
   const saveBtn = document.createElement('button');
   saveBtn.type = 'button';
   saveBtn.className = 'primary';
-  saveBtn.textContent = 'Add update';
+  saveBtn.textContent = isEdit ? 'Save' : 'Add update';
   saveBtn.onclick = save;
   actions.appendChild(cancelBtn);
   actions.appendChild(saveBtn);
@@ -9172,9 +9197,13 @@ function openCommentUpdateForm(ta) {
   function save() {
     const text = input.value.trim();
     if (!text) { cancel(); return; }
-    const updates = getCommentUpdates(ta);
-    updates.push({ at: new Date().toISOString(), text: text });
-    setCommentUpdates(ta, updates);
+    const next = getCommentUpdates(ta);
+    if (isEdit) {
+      next[editIndex] = { at: next[editIndex].at || new Date().toISOString(), text: text };
+    } else {
+      next.push({ at: new Date().toISOString(), text: text });
+    }
+    setCommentUpdates(ta, next);
     form.remove();
     renderCommentUpdates(ta);
     if (typeof updateCommentsSummary === 'function') updateCommentsSummary();
