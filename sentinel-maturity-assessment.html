@@ -9959,6 +9959,23 @@ function applyState(state) {
     }
   }
 
+  // Final sync: ensure every inherited connector display reflects the current
+  // workspace default. Runs unconditionally so it also covers older JSON files
+  // that predate the workspace retention meta keys, and guarantees inherited
+  // displays match after all connectors and retention sections are restored.
+  // Both handlers only touch toggles set to 'inherit', so explicit overrides
+  // are left untouched.
+  onWorkspaceRetentionChange();
+  onWorkspaceTotalRetentionChange();
+  // Per-table retention cells (the "Inherited (…)" dropdowns) are rendered
+  // during the state.selects restore above, while the workspace selector still
+  // holds its page default (90/365). Refresh them unconditionally here so their
+  // "Inherited (…)" labels reflect the restored workspace defaults even when the
+  // loaded file has no per-table overrides (state.tableRetention absent).
+  if (typeof refreshAllTableRetentionCells === 'function') {
+    refreshAllTableRetentionCells();
+  }
+
   // Restore GB/day estimates (gbday inputs were created by onStatusChange above)
   if (state.gbdayValues) {
     for (const [id, value] of Object.entries(state.gbdayValues)) {
