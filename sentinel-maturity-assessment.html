@@ -6521,6 +6521,7 @@ function onWorkspaceRetentionChange() {
       if (analyticsSel) analyticsSel.value = newPeriod;
     }
   });
+  if (typeof syncLiteWsRetFromFull === 'function') syncLiteWsRetFromFull();
   updateTodoSummary();
 }
 
@@ -6538,6 +6539,7 @@ function onWorkspaceTotalRetentionChange() {
       if (totalSel) totalSel.value = newPeriod;
     }
   });
+  if (typeof syncLiteWsRetFromFull === 'function') syncLiteWsRetFromFull();
   updateTodoSummary();
 }
 
@@ -11450,6 +11452,7 @@ function setAssessmentMode(mode) {
     if (ret) ret.classList.remove('collapsed');
     if (xdr) xdr.classList.remove('collapsed');
     if (ama) ama.classList.remove('collapsed');
+    if (typeof syncLiteWsRetFromFull === 'function') syncLiteWsRetFromFull();
     refreshLiteAma();
     updateLiteXdrTotals();
     updateLiteXdrProgress();
