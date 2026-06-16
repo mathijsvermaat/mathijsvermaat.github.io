@@ -7290,6 +7290,19 @@ function renderNotesUpdates() {
     editBtn.onclick = function() { openNotesUpdateForm(idx); };
     actions.appendChild(editBtn);
 
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'btn-notes-update-mini';
+    removeBtn.textContent = 'Remove';
+    removeBtn.title = 'Remove this update';
+    removeBtn.onclick = function() {
+      const next = getNotesUpdates();
+      next.splice(idx, 1);
+      setNotesUpdates(next);
+      renderNotesUpdates();
+    };
+    actions.appendChild(removeBtn);
+
     rowLine.appendChild(textWrap);
     rowLine.appendChild(actions);
     row.appendChild(rowLine);
@@ -7440,6 +7453,19 @@ function renderManualTodoText(item) {
       editBtn.textContent = 'Edit';
       editBtn.title = 'Edit this update';
       editBtn.onclick = function() { openManualTodoUpdateForm(item, idx); };
+
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn-todo-update-mini';
+            removeBtn.textContent = 'Remove';
+            removeBtn.title = 'Remove this update';
+            removeBtn.onclick = function() {
+              const next = getManualTodoUpdates(item);
+              next.splice(idx, 1);
+              item.dataset.todoUpdates = JSON.stringify(next);
+              renderManualTodoText(item);
+            };
+            actions.appendChild(removeBtn);
       actions.appendChild(editBtn);
 
       rowLine.appendChild(textWrap);
@@ -9146,6 +9172,20 @@ function renderCommentUpdates(ta) {
     editBtn.title = 'Edit this update';
     editBtn.onclick = function() { openCommentUpdateForm(ta, idx); };
     actionsDiv.appendChild(editBtn);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'btn-notes-update-mini';
+    removeBtn.textContent = 'Remove';
+    removeBtn.title = 'Remove this update';
+    removeBtn.onclick = function() {
+      const next = getCommentUpdates(ta);
+      next.splice(idx, 1);
+      setCommentUpdates(ta, next);
+      renderCommentUpdates(ta);
+      if (typeof updateCommentsSummary === 'function') updateCommentsSummary();
+    };
+    actionsDiv.appendChild(removeBtn);
 
     rowLine.appendChild(textWrap);
     rowLine.appendChild(actionsDiv);
