@@ -4365,12 +4365,6 @@
               </select>
               <label for="ti-t2">ThreatIntelObjects<div class="check-detail">New STIX-based objects table (identity, malware, attack pattern, etc.)</div></label>
             </div>
-            <div class="check-item">
-              <select class="status-select" id="ti-t3" data-tier="2" data-connector="Microsoft Defender TI" data-item="ThreatIntelligenceIndicator table tier" onchange="onStatusChange(this)">
-                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
-              </select>
-              <label for="ti-t3">ThreatIntelligenceIndicator<div class="check-detail">Legacy TI table (being deprecated in favour of ThreatIntelIndicators)</div></label>
-            </div>
           </div>
           <div class="check-group">
             <div class="check-group-title">Content Hub</div>
@@ -4433,7 +4427,7 @@
       <!-- ===== Microsoft Intune ===== -->
       <div class="connector-section collapsed" id="conn-intune">
         <div class="connector-header" onclick="toggleConnector('conn-intune')">
-          <h3>Microsoft Intune (Endpoint Management)<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/microsoft-intune.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a></div></h3>
+          <h3>Microsoft Intune (Endpoint Management)<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/microsoft-intune.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a>&emsp;<a href="https://techcommunity.microsoft.com/blog/microsoftsentinelblog/how-to-ingest-microsoft-intune-logs-into-microsoft-sentinel/" target="_blank" onclick="event.stopPropagation()">Blog ↗</a></div></h3>
           <span class="cost-badge paid">Paid</span>
           <span class="connector-progress" id="conn-intune-progress">0/0</span>
           <span class="connector-chevron">▼</span>
