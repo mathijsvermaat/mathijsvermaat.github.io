@@ -5143,10 +5143,10 @@
           <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Tables</div>
             <div class="check-item">
-              <select class="status-select" id="mdca-t1" data-tier="3" data-connector="Microsoft Defender for Cloud Apps" data-item="McasShadowItReporting table enabled" onchange="onStatusChange(this)">
+              <select class="status-select" id="mdca-t1" data-tier="3" data-connector="Microsoft Defender for Cloud Apps" data-item="McasShadowItReporting" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="mdca-t1">McasShadowItReporting table enabled</label>
+              <label for="mdca-t1">McasShadowItReporting</label>
             </div>
           </div>
           <div class="check-group">
@@ -5259,7 +5259,9 @@
             </div>
           </div>
           <div class="connector-note">
-            <strong>Note:</strong> Resource-specific diagnostic mode writes to the dedicated <code>SQLSecurityAuditEvents</code> table (default below). Legacy Azure-diagnostics mode writes to <code>AzureDiagnostics</code> with category <code>SQLSecurityAuditEvents</code>; add a row if you're on that mode. Microsoft Support operations also write to <code>DevOpsOperationsAudit</code>.
+            <strong>Note:</strong> Resource-specific diagnostic mode writes to dedicated tables. The two security-relevant defaults are pre-filled below: <code>SQLSecurityAuditEvents</code> (audit) and <code>DevOpsOperationsAudit</code> (Microsoft support operations). Legacy Azure-diagnostics mode instead writes everything to <code>AzureDiagnostics</code> — add a row for it if you're on that mode.<br>
+            Other Azure SQL diagnostic log tables you can add via <em>+ Add another table</em> if in scope (mostly performance/operational rather than security): <code>SQLInsights</code>, <code>AutomaticTuning</code>, <code>QueryStoreWaitStatistics</code>, <code>Errors</code>, <code>DatabaseWaitStatistics</code>, <code>Timeouts</code>, <code>Blocks</code>, <code>Deadlocks</code>. The <code>Basic</code>, <code>InstanceAndAppAdvanced</code> and <code>WorkloadManagement</code> categories are <em>metrics</em> — they land in <code>AzureMetrics</code>, not their own tables.<br>
+            Other database engines (PostgreSQL, MySQL, on-prem SQL Server): rename the rows below to your platform's tables — e.g. <code>AzureDiagnostics</code> for Azure Database for PostgreSQL/MySQL, or your Arc/agent-collected table for on-prem — and set anything not applicable to <strong>N/A</strong>.
           </div>
           <div class="check-group" data-tier-enabled data-tp-tables data-prefix="sql" data-tp-connector="SQL Database Audit" data-tp-tier="3">
             <div class="check-group-title">Tables</div>
@@ -5268,6 +5270,12 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="sql-tbl" class="tp-tbl-label"><input type="text" id="sql-tbl-name" data-tp-table class="tp-tbl-name" value="SQLSecurityAuditEvents" placeholder="Table name — e.g. SQLSecurityAuditEvents, AzureDiagnostics" oninput="onThirdPartyTableNameChange(this)"></label>
+            </div>
+            <div class="check-item" data-custom-label data-tp-row="2">
+              <select class="status-select" id="sql-tbl-2" data-tier="3" data-connector="SQL Database Audit" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="sql-tbl-2" class="tp-tbl-label"><input type="text" id="sql-tbl-name-2" data-tp-table class="tp-tbl-name" value="DevOpsOperationsAudit" placeholder="Table name — e.g. DevOpsOperationsAudit, AzureDiagnostics" oninput="onThirdPartyTableNameChange(this)"></label>
             </div>
             <div class="tp-tbl-actions">
               <button type="button" class="btn-link tp-tbl-add" onclick="addTpTableRow('sql')">+ Add another table</button>
@@ -8195,6 +8203,11 @@ function addTpTableRow(prefix, explicitIdx) {
     });
     newIdx = maxIdx + 1;
   }
+  // Idempotency guard: if a row with this index already exists (a static default
+  // row authored in the HTML, or a double state restore), reuse it rather than
+  // creating a duplicate with clashing element ids.
+  const existingRow = group.querySelector(`.check-item[data-tp-row="${newIdx}"]`);
+  if (existingRow) return existingRow;
   const tmp = document.createElement('div');
   tmp.innerHTML = tpTableRowHtml(prefix, safeName, newIdx, tier).trim();
   const row = tmp.firstElementChild;
