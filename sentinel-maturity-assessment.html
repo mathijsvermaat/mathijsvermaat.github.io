@@ -747,6 +747,7 @@
     .status-select.status-not-configured { background: #fce4ec; border-color: var(--danger); color: var(--danger); }
     .status-select.status-to-be-added { background: #fff8e1; border-color: var(--warning); color: #8a6d00; }
     .status-select.status-na { background: var(--secondary); border-color: var(--border); color: var(--text-light); }
+    .status-select.status-unknown { background: #ede9fb; border-color: #7c6df2; color: #4a3caa; }
     .status-select.status-healthy { background: #e6f4ea; border-color: var(--success); color: var(--success); }
     .status-select.status-unhealthy { background: #fff3e0; border-color: #e65100; color: #e65100; }
 
@@ -1091,6 +1092,12 @@
       color: var(--text);
       padding: 2px 0;
     }
+
+    .todo-verify-group {
+      border-left: 3px solid #7c6df2;
+      padding-left: 10px;
+    }
+    .todo-verify-group h3 { color: #4a3caa; }
 
     .manual-todo-input {
       display: flex;
@@ -5074,13 +5081,16 @@
               <label for="iis-c1">AMA DCR configured for IIS log collection<div class="check-detail">Data Collection Rule collecting W3CIISLog via Azure Monitor Agent</div></label>
             </div>
           </div>
-          <div class="check-group" data-tier-enabled>
-            <div class="check-group-title">Tables</div>
-            <div class="check-item">
-              <select class="status-select" id="iis-t1" data-tier="3" data-connector="IIS Web Server Logs" data-item="W3CIISLog table enabled" onchange="onStatusChange(this)">
+          <div class="check-group" data-tier-enabled data-tp-tables data-prefix="iis" data-tp-connector="IIS Web Server Logs" data-tp-tier="3">
+            <div class="check-group-title">Target Table</div>
+            <div class="check-item" data-custom-label data-tp-row="1">
+              <select class="status-select" id="iis-tbl" data-tier="3" data-connector="IIS Web Server Logs" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="iis-t1">W3CIISLog table enabled</label>
+              <label for="iis-tbl" class="tp-tbl-label"><input type="text" id="iis-tbl-name" data-tp-table class="tp-tbl-name" value="W3CIISLog" placeholder="Table name — e.g. W3CIISLog, W3CIISLog_CL" oninput="onThirdPartyTableNameChange(this)"></label>
+            </div>
+            <div class="tp-tbl-actions">
+              <button type="button" class="btn-link tp-tbl-add" onclick="addTpTableRow('iis')">+ Add another table</button>
             </div>
           </div>
           <div class="check-group">
@@ -6031,11 +6041,12 @@ function clearConnectorSearch() {
 
 // ===================== STATUS SELECT STYLING =====================
 function onStatusChange(sel) {
-  sel.classList.remove('status-configured', 'status-configured-lake', 'status-not-configured', 'status-na', 'status-to-be-added', 'status-healthy', 'status-unhealthy');
+  sel.classList.remove('status-configured', 'status-configured-lake', 'status-not-configured', 'status-na', 'status-to-be-added', 'status-unknown', 'status-healthy', 'status-unhealthy');
   if (sel.value === 'Configured') sel.classList.add('status-configured');
   else if (sel.value === 'Configured (Lake)') sel.classList.add('status-configured-lake');
   else if (sel.value === 'Not configured') sel.classList.add('status-not-configured');
   else if (sel.value === 'To be added') sel.classList.add('status-to-be-added');
+  else if (sel.value === 'To verify') sel.classList.add('status-unknown');
   else if (sel.value === 'N/A') sel.classList.add('status-na');
   else if (sel.value === 'Healthy') sel.classList.add('status-healthy');
   else if (sel.value === 'Unhealthy') sel.classList.add('status-unhealthy');
@@ -6126,7 +6137,7 @@ function handleConnectorCollapse(sel) {
   const firstSetupSelect = setupGroup.querySelector('select.status-select');
   if (sel !== firstSetupSelect) return;
 
-  const collapseValues = ['N/A', 'Not configured', 'To be added'];
+  const collapseValues = ['N/A', 'Not configured', 'To be added', 'To verify'];
   const shouldCollapse = collapseValues.includes(sel.value);
 
   // Find all check-groups after the first one (Tables, Content Hub, Retention, Validation)
@@ -6137,7 +6148,7 @@ function handleConnectorCollapse(sel) {
       // Reset all selects in this group to "Not assessed" and clear styling
       group.querySelectorAll('select.status-select').forEach(s => {
         s.value = '';
-        s.classList.remove('status-configured', 'status-not-configured', 'status-na', 'status-to-be-added');
+        s.classList.remove('status-configured', 'status-not-configured', 'status-na', 'status-to-be-added', 'status-unknown');
         // Remove any retention dropdowns or GB/day inputs
         const checkItem = s.closest('.check-item');
         if (checkItem) {
@@ -6160,7 +6171,7 @@ function handleConnectorCollapse(sel) {
       const s = setupItems[i].querySelector('select.status-select');
       if (s) {
         s.value = '';
-        s.classList.remove('status-configured', 'status-not-configured', 'status-na', 'status-to-be-added');
+        s.classList.remove('status-configured', 'status-not-configured', 'status-na', 'status-to-be-added', 'status-unknown');
       }
       setupItems[i].style.display = 'none';
     }
@@ -6270,7 +6281,7 @@ function updateLicenseBenefit() {
 // When the primary "Connector enabled in Sentinel" select is in one of these states,
 // the dependent selects below it are hidden and cleared, so they must also be
 // excluded from the progress numerator AND denominator. The gate itself still counts.
-const GATE_COLLAPSE_VALUES = ['N/A', 'Not configured', 'To be added'];
+const GATE_COLLAPSE_VALUES = ['N/A', 'Not configured', 'To be added', 'To verify'];
 
 function computeGateExcludedSelects() {
   const excluded = new Set();
@@ -6773,6 +6784,7 @@ function updateTodoSummary() {
 
   const allSelects = document.querySelectorAll('select.status-select[data-tier]');
   const todoItems = [];
+  const toVerifyItems = [];
   allSelects.forEach(sel => {
     if (sel.value === 'To be added') {
       todoItems.push({
@@ -6785,6 +6797,13 @@ function updateTodoSummary() {
       todoItems.push({
         connector: sel.dataset.connector,
         item: 'Investigate unhealthy connector — ' + sel.dataset.item,
+        tier: sel.dataset.tier,
+        selectId: sel.id
+      });
+    } else if (sel.value === 'To verify') {
+      toVerifyItems.push({
+        connector: sel.dataset.connector,
+        item: sel.dataset.item,
         tier: sel.dataset.tier,
         selectId: sel.id
       });
@@ -7198,6 +7217,31 @@ function updateTodoSummary() {
     retDiv.appendChild(secondary);
 
     container.appendChild(retDiv);
+  }
+
+  // "To verify" open questions — Connector Setup items whose current state is
+  // unknown. Selecting "To verify" collapses the connector in the UI, so surface
+  // the connectors here to keep the open questions visible.
+  if (toVerifyItems.length > 0) {
+    const seen = new Set();
+    const names = [];
+    toVerifyItems.forEach(i => {
+      if (i.connector && !seen.has(i.connector)) { seen.add(i.connector); names.push(i.connector); }
+    });
+    const verifyGroup = document.createElement('div');
+    verifyGroup.className = 'todo-connector-group todo-verify-group';
+    const vh = document.createElement('h3');
+    vh.textContent = '❓ To verify — confirm current state';
+    verifyGroup.appendChild(vh);
+    const vul = document.createElement('ul');
+    names.forEach(name => {
+      const li = document.createElement('li');
+      li.textContent = name;
+      vul.appendChild(li);
+    });
+    verifyGroup.appendChild(vul);
+    container.appendChild(verifyGroup);
+    totalCount += names.length;
   }
 
   countBadge.textContent = totalCount;
@@ -9041,6 +9085,26 @@ document.addEventListener('DOMContentLoaded', () => {
     tbdOption.value = 'To be added';
     tbdOption.textContent = 'To be added';
     sel.insertBefore(tbdOption, naOption);
+  });
+
+  // Inject "To verify" option into Connector Setup selects only. Used when the
+  // customer doesn't yet know the current state and needs to verify. It behaves
+  // like a gate value: selecting it on the primary setup item collapses the rest
+  // of the connector (see GATE_COLLAPSE_VALUES / handleConnectorCollapse).
+  document.querySelectorAll('.connector-section[id^="conn-"]').forEach(section => {
+    if (NON_GATED_SECTION_IDS.includes(section.id)) return;
+    const setupGroup = section.querySelector('.connector-body .check-group')
+      || section.querySelector('.check-group');
+    if (!setupGroup) return;
+    setupGroup.querySelectorAll('select.status-select').forEach(sel => {
+      const naOption = sel.querySelector('option[value="N/A"]');
+      if (!naOption) return; // Skip non-standard selects
+      if (sel.querySelector('option[value="To verify"]')) return;
+      const unkOption = document.createElement('option');
+      unkOption.value = 'To verify';
+      unkOption.textContent = 'To verify';
+      sel.insertBefore(unkOption, naOption);
+    });
   });
 
   document.getElementById('assessment-date').valueAsDate = new Date();
