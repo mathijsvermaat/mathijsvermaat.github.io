@@ -9100,23 +9100,42 @@ document.addEventListener('DOMContentLoaded', () => {
     sel.insertBefore(tbdOption, naOption);
   });
 
-  // Inject "To verify" option into Connector Setup selects only. Used when the
-  // customer doesn't yet know the current state and needs to verify. It behaves
-  // like a gate value: selecting it on the primary setup item collapses the rest
-  // of the connector (see GATE_COLLAPSE_VALUES / handleConnectorCollapse).
+  // Inject "To verify" option — used when the customer doesn't yet know the
+  // current state and needs to check. On the primary Connector Setup item it acts
+  // like a gate value (collapses the rest of the connector, see
+  // GATE_COLLAPSE_VALUES / handleConnectorCollapse); elsewhere it simply flags the
+  // item and surfaces it in the To Do summary's "To verify" list.
+  //
+  // Scope:
+  //  - Gated connectors: Connector Setup, Content Hub and Validation groups.
+  //  - General (non-gated) sections: every standard status dropdown.
+  const addToVerifyOption = (sel) => {
+    if (!sel || sel.querySelector('option[value="To verify"]')) return;
+    const naOption = sel.querySelector('option[value="N/A"]');
+    const isHealthSel = !!sel.querySelector('option[value="Healthy"]');
+    if (!naOption && !isHealthSel) return; // skip presets / Yes-No / non-standard selects
+    const opt = document.createElement('option');
+    opt.value = 'To verify';
+    opt.textContent = 'To verify';
+    if (naOption) sel.insertBefore(opt, naOption);   // before N/A
+    else sel.appendChild(opt);                        // Validation (Healthy/Unhealthy) — append at end
+  };
   document.querySelectorAll('.connector-section[id^="conn-"]').forEach(section => {
-    if (NON_GATED_SECTION_IDS.includes(section.id)) return;
-    const setupGroup = section.querySelector('.connector-body .check-group')
-      || section.querySelector('.check-group');
-    if (!setupGroup) return;
-    setupGroup.querySelectorAll('select.status-select').forEach(sel => {
-      const naOption = sel.querySelector('option[value="N/A"]');
-      if (!naOption) return; // Skip non-standard selects
-      if (sel.querySelector('option[value="To verify"]')) return;
-      const unkOption = document.createElement('option');
-      unkOption.value = 'To verify';
-      unkOption.textContent = 'To verify';
-      sel.insertBefore(unkOption, naOption);
+    if (NON_GATED_SECTION_IDS.includes(section.id)) {
+      // General (non-gated) sections: every standard status dropdown.
+      section.querySelectorAll('.connector-body select.status-select').forEach(addToVerifyOption);
+      return;
+    }
+    // Gated connectors: the first check-group is the setup/gate group; plus the
+    // Content Hub (labelled "Detections" on a few connectors) and Validation groups.
+    section.querySelectorAll('.connector-body .check-group').forEach((group, idx) => {
+      const titleEl = group.querySelector('.check-group-title');
+      const title = titleEl ? (titleEl.textContent || '').trim() : '';
+      const isSetup = idx === 0;
+      const isContentHub = title.startsWith('Content Hub') || title === 'Detections';
+      const isValidation = title.startsWith('Validation');
+      if (!(isSetup || isContentHub || isValidation)) return;
+      group.querySelectorAll('select.status-select').forEach(addToVerifyOption);
     });
   });
 
