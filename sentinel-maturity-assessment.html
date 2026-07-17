@@ -6299,6 +6299,12 @@ function computeGateExcludedSelects() {
     const setupGroup = section.querySelector('.connector-body .check-group')
       || section.querySelector('.check-group');
     if (!setupGroup) return;
+    // Container sections (e.g. conn-customapp / conn-thirdparty*) host nested child
+    // connector-sections but have no gate of their own. The descendant query above can
+    // reach into the FIRST nested child and treat ITS gate as this section's gate,
+    // wrongly excluding every other child's selects (e.g. a 2nd custom app showing 0/0).
+    // Only act when the setup group belongs directly to THIS section.
+    if (setupGroup.closest('.connector-section') !== section) return;
     const gate = setupGroup.querySelector('select.status-select[data-tier]');
     if (!gate || !GATE_COLLAPSE_VALUES.includes(gate.value)) return;
     section.querySelectorAll('select.status-select[data-tier]').forEach(sel => {
