@@ -5547,7 +5547,7 @@
             </div>
           </div>
           <div class="connector-note">
-            <strong>Note:</strong> AKS supports both legacy and resource-specific collection modes. Legacy mode writes categories (for example <code>kube-audit</code>, <code>kube-audit-admin</code>, <code>kube-apiserver</code>) to <code>AzureDiagnostics</code>. Resource-specific mode writes to dedicated tables such as <code>AKSAudit</code>, <code>AKSAuditAdmin</code>, and <code>AKSControlPlane</code> and is preferred for security operations. <code>ContainerInventory</code> and <code>KubeEvents</code> are supplemental Container Insights telemetry. Use table rows below to model your actual mix.
+            <strong>Note:</strong> AKS supports two collection modes. <strong>Resource-specific</strong> mode (recommended for security operations) writes to dedicated tables — the pre-filled defaults below: <code>AKSAudit</code> (<code>kube-audit</code> — all API audit events, incl. get/list), <code>AKSAuditAdmin</code> (<code>kube-audit-admin</code> — modifying operations only), and <code>AKSControlPlane</code> (<code>kube-apiserver</code>, <code>kube-controller-manager</code>, <code>kube-scheduler</code>, <code>cluster-autoscaler</code>, <code>cloud-controller-manager</code>, <code>guard</code>, CSI drivers). <strong>Legacy</strong> mode writes all of those categories to <code>AzureDiagnostics</code> instead — if you're on legacy mode, rename a row to <code>AzureDiagnostics</code> and set the resource-specific rows to <strong>N/A</strong>. <code>kube-audit</code> and <code>kube-audit-admin</code> are usually mutually exclusive (enable one to control cost/noise) — set the unused one to N/A. <code>ContainerInventory</code> and <code>KubeEvents</code> are supplemental Container Insights telemetry (agent-based, not diagnostic settings).
           </div>
           <div class="check-group" data-tier-enabled data-tp-tables data-prefix="aks" data-tp-connector="Azure Kubernetes Service" data-tp-tier="3">
             <div class="check-group-title">Tables</div>
@@ -5555,7 +5555,19 @@
               <select class="status-select" id="aks-tbl" data-tier="3" data-connector="Azure Kubernetes Service" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="aks-tbl" class="tp-tbl-label"><input type="text" id="aks-tbl-name" data-tp-table class="tp-tbl-name" value="AzureDiagnostics" placeholder="Table name — e.g. AzureDiagnostics (legacy), AKSAuditAdmin, AKSAudit, AKSControlPlane, ContainerInventory" oninput="onThirdPartyTableNameChange(this)"></label>
+              <label for="aks-tbl" class="tp-tbl-label"><input type="text" id="aks-tbl-name" data-tp-table class="tp-tbl-name" value="AKSAudit" placeholder="Table name — e.g. AKSAudit, AzureDiagnostics (legacy)" oninput="onThirdPartyTableNameChange(this)"></label>
+            </div>
+            <div class="check-item" data-custom-label data-tp-row="2">
+              <select class="status-select" id="aks-tbl-2" data-tier="3" data-connector="Azure Kubernetes Service" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="aks-tbl-2" class="tp-tbl-label"><input type="text" id="aks-tbl-name-2" data-tp-table class="tp-tbl-name" value="AKSAuditAdmin" placeholder="Table name — e.g. AKSAuditAdmin" oninput="onThirdPartyTableNameChange(this)"></label>
+            </div>
+            <div class="check-item" data-custom-label data-tp-row="3">
+              <select class="status-select" id="aks-tbl-3" data-tier="3" data-connector="Azure Kubernetes Service" data-item="Target table tier" data-lake-capable="true" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="aks-tbl-3" class="tp-tbl-label"><input type="text" id="aks-tbl-name-3" data-tp-table class="tp-tbl-name" value="AKSControlPlane" placeholder="Table name — e.g. AKSControlPlane" oninput="onThirdPartyTableNameChange(this)"></label>
             </div>
             <div class="tp-tbl-actions">
               <button type="button" class="btn-link tp-tbl-add" onclick="addTpTableRow('aks')">+ Add another table</button>
