@@ -125,3 +125,7 @@ All data (players, matches, playing time) is stored locally in IndexedDB on the 
 
 **Usage:**
 Navigate to `https://mathijsvermaat.github.io/WisselApp/` and add it to your home screen (iOS Safari: Share → *Add to Home Screen*; Android Chrome: menu → *Install app*).
+
+## License
+
+Licensed under the [MIT License](LICENSE).
