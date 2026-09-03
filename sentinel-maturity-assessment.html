@@ -988,6 +988,46 @@
       color: #8a6d00;
     }
 
+    .gbday-free-hint {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--success);
+      background: #e6f4ea;
+      border: 1px solid var(--success);
+      border-radius: 999px;
+      padding: 1px 8px;
+      white-space: nowrap;
+      cursor: help;
+    }
+
+    .todo-free-total {
+      margin-top: -12px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--success);
+    }
+
+    .todo-newret-total {
+      margin-top: -8px;
+      margin-bottom: 20px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--warning);
+      color: #8a6d00;
+    }
+
+    .todo-newret-total .todo-retention-primary {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .todo-newret-total .todo-retention-secondary {
+      margin-top: 4px;
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: var(--text-light);
+    }
+
     .todo-retention-total {
       margin-top: 20px;
       padding-top: 12px;
@@ -2958,7 +2998,7 @@
     <div class="tier-body" id="tier-1-body">
 
       <!-- ===== FREE: Office 365 ===== -->
-      <div class="connector-section collapsed" id="conn-o365">
+      <div class="connector-section collapsed" id="conn-o365" data-free-ingest="true">
         <div class="connector-header" onclick="toggleConnector('conn-o365')">
           <h3>Office 365<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/office-365.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a>&emsp;<a href="https://learn.microsoft.com/en-us/azure/sentinel/data-connectors-reference#microsoft-office-365" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/Microsoft%20365" target="_blank" onclick="event.stopPropagation()">Solution ↗</a>&emsp;<a href="https://github.com/oshezaf/sentinelninja/blob/main/Solutions%20Docs/connectors/office365.md" target="_blank" onclick="event.stopPropagation()">Ninja ↗</a></div></h3>
           <span class="cost-badge free">Free Data Source</span>
@@ -3042,7 +3082,7 @@
       </div>
 
       <!-- ===== FREE: Azure Activity Logs ===== -->
-      <div class="connector-section collapsed" id="conn-azactivity">
+      <div class="connector-section collapsed" id="conn-azactivity" data-free-ingest="true">
         <div class="connector-header" onclick="toggleConnector('conn-azactivity')">
           <h3>Azure Activity Logs<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/azure-activity-logs.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a>&emsp;<a href="https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/activity-log" target="_blank" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/Azure%20Activity" target="_blank" onclick="event.stopPropagation()">Solution ↗</a>&emsp;<a href="https://github.com/oshezaf/sentinelninja/blob/main/Solutions%20Docs/connectors/azureactivity.md" target="_blank" onclick="event.stopPropagation()">Ninja ↗</a>&emsp;<a href="https://github.com/mathijsvermaat/azure-activity-log-sentinel-audit" target="_blank" onclick="event.stopPropagation()">Subscription audit ↗</a></div></h3>
           <span class="cost-badge free">Free Data Source</span>
@@ -3154,7 +3194,7 @@
       </div>
 
       <!-- ===== FREE: Sentinel Health & Audit Diagnostics ===== -->
-      <div class="connector-section collapsed" id="conn-health">
+      <div class="connector-section collapsed" id="conn-health" data-free-ingest="true">
         <div class="connector-header" onclick="toggleConnector('conn-health')">
           <h3>Sentinel Health &amp; Audit Diagnostics<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/sentinel-health.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a>&emsp;<a href="https://learn.microsoft.com/en-us/azure/sentinel/health-audit" target="_blank" onclick="event.stopPropagation()">Learn ↗</a></div></h3>
           <span class="cost-badge free">Free Data Source</span>
@@ -6203,6 +6243,75 @@ function handleConnectorCollapse(sel) {
   }
 }
 
+// ===================== FREE DATA SOURCES & RETENTION EXPOSURE =====================
+// Ingestion is free for a handful of connectors, but retention is only included
+// for the first 90 days — anything retained beyond that is billed, whether the
+// source was free to ingest or not.
+const FREE_RETENTION_INCLUDED_DAYS = 90;
+
+// Marked per connector via data-free-ingest in the markup rather than inferred
+// from the cost badge: Defender for Cloud is badged free but only SecurityAlert is.
+function isFreeDataSource(section) {
+  return !!(section && section.dataset && section.dataset.freeIngest === 'true');
+}
+
+// Retention days for a single table, as { analytics, total }. `tierOverride`
+// evaluates a planned tier change before the select has been switched over.
+function resolveTableRetentionDays(tableId, tierOverride) {
+  const sel = document.getElementById(tableId);
+  const v = tierOverride || (sel ? sel.value : '');
+  const st = (typeof tableRetentionState === 'object' && tableRetentionState[tableId]) || {};
+  let analytics, total;
+  if (v === 'Configured (Lake)') {
+    analytics = 0;
+    total = st.lake === 'None' ? 0 : parsePeriodToDays(st.lake || getWsTotalRetention());
+  } else {
+    analytics = parsePeriodToDays(st.analytics || getWsAnalyticsRetention());
+    total = st.longTerm === 'None' ? analytics : parsePeriodToDays(st.longTerm || getWsTotalRetention());
+  }
+  if (total < analytics) total = analytics;
+  return { analytics: analytics, total: total };
+}
+
+// Retention that newly ingested data will land on, as { analytics, total } in days.
+// A connector gated to "To be added" has its Tables/Retention groups collapsed and
+// cleared, so it correctly falls through to the workspace defaults.
+function resolveConnectorRetentionDays(section) {
+  const wsDays = {
+    analytics: parsePeriodToDays(getWsAnalyticsRetention()),
+    total: parsePeriodToDays(getWsTotalRetention()),
+  };
+  if (!section) return wsDays;
+
+  // Per-table retention (connectors with a tier-enabled Tables grid).
+  // Use the longest-retained configured table as the representative worst case.
+  let best = null;
+  section.querySelectorAll('.check-item.xdr-tbl-item[data-id]').forEach(row => {
+    const id = row.dataset.id;
+    const tblSel = document.getElementById(id);
+    const v = tblSel ? tblSel.value : '';
+    if (!v || v === 'Not configured' || v === 'N/A') return;
+    const days = resolveTableRetentionDays(id);
+    if (!best || days.total > best.total) best = days;
+  });
+  if (best) return best;
+
+  const grp = section.querySelector('.retention-group[data-prefix]');
+  if (grp && !grp.classList.contains('legacy-retention-suppressed')) {
+    const prefix = grp.dataset.prefix;
+    const analytics = parsePeriodToDays(getEffectiveAnalyticsPeriod(prefix));
+    let total = parsePeriodToDays(getEffectiveTotalPeriod(prefix));
+    if (total < analytics) total = analytics;
+    return { analytics: analytics, total: total };
+  }
+  return wsDays;
+}
+
+function chargeableRetention(gbday, totalDays) {
+  const billableDays = Math.max(0, (totalDays || 0) - FREE_RETENTION_INCLUDED_DAYS);
+  return { billableDays: billableDays, gb: gbday * billableDays };
+}
+
 // ===================== GB/DAY INPUT FOR "TO BE ADDED" =====================
 function handleGbdayInput(sel) {
   const checkItem = sel.closest('.check-item');
@@ -6211,15 +6320,16 @@ function handleGbdayInput(sel) {
   // Only show GB/day input for the first setup item in each connector (the primary enable/configure step)
   const connectorBody = sel.closest('.connector-body');
   if (!connectorBody) return;
-  // Skip free data source connectors where GB/day is not relevant
+  // General sections are process checks, not data sources — no volume to estimate
   const connSection = connectorBody.closest('.connector-section');
-  if (connSection && ['conn-gen-workspace', 'conn-gen-solutions', 'conn-gen-workbooks', 'conn-health', 'conn-o365', 'conn-azactivity'].includes(connSection.id)) return;
+  if (connSection && NON_GATED_SECTION_IDS.includes(connSection.id)) return;
   const firstGroup = connectorBody.querySelector('.check-group');
   if (!firstGroup) return;
   const firstSelect = firstGroup.querySelector('select.status-select');
   if (sel !== firstSelect) return;
 
   let container = checkItem.querySelector('.gbday-inline');
+  const free = isFreeDataSource(connSection);
 
   if (sel.value === 'To be added') {
     if (!container) {
@@ -6233,22 +6343,34 @@ function handleGbdayInput(sel) {
       input.placeholder = '0';
       input.min = '0';
       input.step = '0.1';
+      if (free) input.dataset.freeSource = '1';
       input.addEventListener('input', () => updateTodoSummary());
 
       const label = document.createElement('span');
       label.className = 'gbday-label';
       label.textContent = 'GB/day';
 
-      const plan = document.createElement('select');
-      plan.className = 'gbday-plan';
-      plan.id = sel.id + '-plan';
-      plan.title = 'Table plan';
-      plan.innerHTML = '<option value="Analytics">Analytics</option><option value="Data Lake">Data Lake</option>';
-      plan.addEventListener('change', () => updateTodoSummary());
-
       container.appendChild(input);
       container.appendChild(label);
-      container.appendChild(plan);
+
+      if (free) {
+        // Ingestion tier isn't a cost decision here, but retention past 90 days still is.
+        const hint = document.createElement('span');
+        hint.className = 'gbday-free-hint';
+        hint.textContent = 'Free ingest';
+        hint.title = 'Ingestion is not charged for this connector. Retention beyond '
+          + FREE_RETENTION_INCLUDED_DAYS + ' days is still billable — captured in the retention estimate below.';
+        container.appendChild(hint);
+      } else {
+        const plan = document.createElement('select');
+        plan.className = 'gbday-plan';
+        plan.id = sel.id + '-plan';
+        plan.title = 'Table plan';
+        plan.innerHTML = '<option value="Analytics">Analytics</option><option value="Data Lake">Data Lake</option>';
+        plan.addEventListener('change', () => updateTodoSummary());
+        container.appendChild(plan);
+      }
+
       checkItem.appendChild(container);
     }
   } else {
@@ -6847,6 +6969,38 @@ function updateTodoSummary() {
   let totalGbday = 0;
   let totalAnalytics = 0;
   let totalDataLake = 0;
+  // Free-ingest sources are tracked separately so they never inflate the cost total.
+  let freeGbday = 0;
+
+  // Retention footprint of newly ingested data. Retention is included for the
+  // first FREE_RETENTION_INCLUDED_DAYS days regardless of whether ingest was
+  // free, so anything retained beyond that is billable storage.
+  let newRetGB = 0;
+  let newRetGbday = 0;
+  let newRetFreeGB = 0;
+  let newRetMaxDays = 0;
+  const accrueNewRetention = (gbday, section, retOverride) => {
+    if (!(gbday > 0)) return { billableDays: 0, gb: 0 };
+    const ret = retOverride || resolveConnectorRetentionDays(section);
+    const calc = chargeableRetention(gbday, ret.total);
+    if (calc.gb > 0) {
+      newRetGB += calc.gb;
+      newRetGbday += gbday;
+      if (isFreeDataSource(section)) newRetFreeGB += calc.gb;
+      if (ret.total > newRetMaxDays) newRetMaxDays = ret.total;
+    }
+    return calc;
+  };
+
+  // Volumes and GB deltas render as a muted badge so every To Do row looks the
+  // same regardless of which block generated it.
+  const appendTodoDetail = (li, detail) => {
+    if (!detail) return;
+    const badge = document.createElement('span');
+    badge.className = 'todo-gbday';
+    badge.textContent = `(${detail})`;
+    li.appendChild(badge);
+  };
 
   // Aggregate one-off long-term storage deltas from retention extensions/reductions
   // (separate from the GB/day daily-ingest total computed below).
@@ -6896,17 +7050,32 @@ function updateTodoSummary() {
         const gbInput = document.getElementById(item.selectId + '-gbday');
         if (gbInput && gbInput.value) {
           const val = parseFloat(gbInput.value) || 0;
+          const isFree = gbInput.dataset.freeSource === '1';
+          const selEl = document.getElementById(item.selectId);
+          const section = selEl ? selEl.closest('.connector-section') : null;
           const planSel = document.getElementById(item.selectId + '-plan');
           const plan = planSel ? planSel.value : 'Analytics';
-          if (plan === 'Data Lake') { totalDataLake += val; } else { totalAnalytics += val; }
-          totalGbday += val;
+          if (isFree) {
+            freeGbday += val;
+          } else {
+            if (plan === 'Data Lake') { totalDataLake += val; } else { totalAnalytics += val; }
+            totalGbday += val;
+          }
+          const ret = accrueNewRetention(val, section);
           const badge = document.createElement('span');
           badge.className = 'todo-gbday';
           badge.textContent = `(${val} GB/day`;
           const planBadge = document.createElement('span');
           planBadge.className = 'todo-plan';
-          planBadge.textContent = plan === 'Data Lake' ? ' · Data Lake' : ' · Analytics';
+          if (isFree) planBadge.textContent = ' · Free ingest';
+          else planBadge.textContent = plan === 'Data Lake' ? ' · Data Lake' : ' · Analytics';
           badge.appendChild(planBadge);
+          if (ret.gb > 0) {
+            const retBadge = document.createElement('span');
+            retBadge.className = 'todo-plan';
+            retBadge.textContent = ` · +${Math.round(ret.gb).toLocaleString()} GB retention`;
+            badge.appendChild(retBadge);
+          }
           badge.appendChild(document.createTextNode(')'));
           li.appendChild(badge);
         }
@@ -6955,12 +7124,14 @@ function updateTodoSummary() {
       const targetDays = parsePeriodToDays(aTarget.value);
       const delta = gbday ? Math.round((targetDays - currentDays) * gbday) : 0;
       let text = `Change analytics retention from ${currentPeriod} to ${aTarget.value}`;
-      if (delta > 0) { text += ` (+${gbday} GB/day · +${delta.toLocaleString()} GB total)`; }
-      else if (delta < 0) { text += ` (−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total)`; }
+      let detail = '';
+      if (delta > 0) { detail = `+${gbday} GB/day · +${delta.toLocaleString()} GB total`; }
+      else if (delta < 0) { detail = `−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total`; }
       accrueRetention('analytics', delta, gbday);
       const group = getOrCreateGroup();
       const li = document.createElement('li');
       li.textContent = text;
+      appendTodoDetail(li, detail);
       group.querySelector('ul').appendChild(li);
       totalCount++;
     }
@@ -6976,12 +7147,14 @@ function updateTodoSummary() {
       const targetDays = parsePeriodToDays(tTarget.value);
       const delta = gbday ? Math.round((targetDays - currentDays) * gbday) : 0;
       let text = `Change total retention from ${currentTotal} to ${tTarget.value}`;
-      if (delta > 0) { text += ` (+${gbday} GB/day · +${delta.toLocaleString()} GB total)`; }
-      else if (delta < 0) { text += ` (−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total)`; }
+      let detail = '';
+      if (delta > 0) { detail = `+${gbday} GB/day · +${delta.toLocaleString()} GB total`; }
+      else if (delta < 0) { detail = `−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total`; }
       accrueRetention('longTerm', delta, gbday);
       const group = getOrCreateGroup();
       const li = document.createElement('li');
       li.textContent = text;
+      appendTodoDetail(li, detail);
       group.querySelector('ul').appendChild(li);
       totalCount++;
     }
@@ -7026,12 +7199,19 @@ function updateTodoSummary() {
       const tableLabel = getTableLabel(id);
       const gbday = parseFloat(ch.gbday) || 0;
 
-      const emit = (text) => {
+      const emit = (text, detail) => {
         const group = getOrCreateConnectorGroup(connectorName);
         const li = document.createElement('li');
         li.textContent = text;
+        appendTodoDetail(li, detail);
         group.querySelector('ul').appendChild(li);
         totalCount++;
+      };
+
+      const deltaDetail = (delta) => {
+        if (delta > 0) return `+${gbday} GB/day · +${delta.toLocaleString()} GB total`;
+        if (delta < 0) return `−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total`;
+        return '';
       };
 
       if (tier === 'Configured (Lake)') {
@@ -7039,32 +7219,26 @@ function updateTodoSummary() {
           const cur = entry.lake || getWsTotalRetention();
           const cd = parsePeriodToDays(cur), td = parsePeriodToDays(ch.lakeTarget);
           const delta = gbday ? Math.round((td - cd) * gbday) : 0;
-          let text = `${tableLabel}: change Lake retention from ${cur} to ${ch.lakeTarget}`;
-          if (delta > 0) { text += ` (+${gbday} GB/day · +${delta.toLocaleString()} GB total)`; }
-          else if (delta < 0) { text += ` (−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total)`; }
+          const text = `${tableLabel}: change Lake retention from ${cur} to ${ch.lakeTarget}`;
           accrueRetention('lake', delta, gbday);
-          emit(text);
+          emit(text, deltaDetail(delta));
         }
       } else {
         if (ch.analyticsTarget) {
           const cur = entry.analytics || getWsAnalyticsRetention();
           const cd = parsePeriodToDays(cur), td = parsePeriodToDays(ch.analyticsTarget);
           const delta = gbday ? Math.round((td - cd) * gbday) : 0;
-          let text = `${tableLabel}: change Analytics retention from ${cur} to ${ch.analyticsTarget}`;
-          if (delta > 0) { text += ` (+${gbday} GB/day · +${delta.toLocaleString()} GB total)`; }
-          else if (delta < 0) { text += ` (−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total)`; }
+          const text = `${tableLabel}: change Analytics retention from ${cur} to ${ch.analyticsTarget}`;
           accrueRetention('analytics', delta, gbday);
-          emit(text);
+          emit(text, deltaDetail(delta));
         }
         if (ch.longTermTarget) {
           const cur = entry.longTerm || getWsTotalRetention();
           const cd = parsePeriodToDays(cur), td = parsePeriodToDays(ch.longTermTarget);
           const delta = gbday ? Math.round((td - cd) * gbday) : 0;
-          let text = `${tableLabel}: change Long-term retention from ${cur} to ${ch.longTermTarget}`;
-          if (delta > 0) { text += ` (+${gbday} GB/day · +${delta.toLocaleString()} GB total)`; }
-          else if (delta < 0) { text += ` (−${gbday} GB/day saved · −${(-delta).toLocaleString()} GB total)`; }
+          const text = `${tableLabel}: change Long-term retention from ${cur} to ${ch.longTermTarget}`;
           accrueRetention('longTerm', delta, gbday);
-          emit(text);
+          emit(text, deltaDetail(delta));
         }
       }
     });
@@ -7092,14 +7266,15 @@ function updateTodoSummary() {
 
     let text = '📈 Expansion planned';
     if (desc) text += ' — ' + desc;
-    if (gbday > 0) text += ` (${gbday} GB/day · ${plan})`;
+    let detail = gbday > 0 ? `${gbday} GB/day · ${plan}` : '';
 
     // Accrue into the new-ingest total. Expansion = adding GB/day to the
     // chosen plan, regardless of current connector status.
     if (gbday > 0) {
+      if (plan === 'Data Lake') { totalDataLake += gbday; } else { totalAnalytics += gbday; }
       totalGbday += gbday;
-      if (plan === 'Data Lake') totalDataLake += gbday;
-      else totalAnalytics += gbday;
+      const ret = accrueNewRetention(gbday, section);
+      if (ret.gb > 0) detail += ` · +${Math.round(ret.gb).toLocaleString()} GB retention`;
     }
 
     // Find or create a group for this connector
@@ -7117,6 +7292,7 @@ function updateTodoSummary() {
     }
     const li = document.createElement('li');
     li.textContent = text;
+    appendTodoDetail(li, detail);
     group.querySelector('ul').appendChild(li);
     totalCount++;
   });
@@ -7143,8 +7319,8 @@ function updateTodoSummary() {
                        : 'Not ingested';
       const targetStr = s.tier === 'Lake' ? 'Lake' : 'Analytics';
       const gb = parseFloat(s.gbday) || 0;
-      let text = `📊 Change tier for ${label} — ${currentStr} → ${targetStr}`;
-      if (gb > 0) text += ` (${gb} GB/day)`;
+      const text = `📊 Change tier for ${label} — ${currentStr} → ${targetStr}`;
+      let detail = gb > 0 ? `${gb} GB/day` : '';
 
       // Accrue into the new-ingest total only when the table is currently
       // 'Not ingested' (Off) and is being switched on — that is the only
@@ -7154,6 +7330,10 @@ function updateTodoSummary() {
         totalGbday += gb;
         if (s.tier === 'Lake') totalDataLake += gb;
         else totalAnalytics += gb;
+        const tierVal = s.tier === 'Lake' ? 'Configured (Lake)' : 'Configured';
+        const ret = accrueNewRetention(gb, sel.closest('.connector-section'),
+          resolveTableRetentionDays(id, tierVal));
+        if (ret.gb > 0) detail += ` · +${Math.round(ret.gb).toLocaleString()} GB retention`;
       }
 
       let group = container.querySelector(`[data-tierchange-connector="${connectorName}"]`);
@@ -7170,6 +7350,7 @@ function updateTodoSummary() {
       }
       const li = document.createElement('li');
       li.textContent = text;
+      appendTodoDetail(li, detail);
       group.querySelector('ul').appendChild(li);
       totalCount++;
     }
@@ -7188,6 +7369,39 @@ function updateTodoSummary() {
     }
     totalDiv.textContent = totalText;
     container.appendChild(totalDiv);
+  }
+
+  // Free-ingest sources — volume matters for sizing but carries no ingest charge.
+  if (freeGbday > 0) {
+    const freeDiv = document.createElement('div');
+    freeDiv.className = 'todo-free-total';
+    freeDiv.textContent = `Free data sources: ${freeGbday.toFixed(1)} GB/day — no ingestion charge`;
+    container.appendChild(freeDiv);
+  }
+
+  // Retention footprint of the new data above (free and paid alike): storage is
+  // included for the first 90 days, everything beyond that is billable.
+  if (newRetGB > 0) {
+    const nrDiv = document.createElement('div');
+    nrDiv.className = 'todo-newret-total';
+
+    const primary = document.createElement('div');
+    primary.className = 'todo-retention-primary';
+    primary.textContent = `Retention for new data beyond ${FREE_RETENTION_INCLUDED_DAYS} days: `
+      + `${newRetGbday.toFixed(1)} GB/day → ${Math.round(newRetGB).toLocaleString()} GB billable storage`;
+    nrDiv.appendChild(primary);
+
+    const secondary = document.createElement('div');
+    secondary.className = 'todo-retention-secondary';
+    let secondaryText = `Longest total retention applied: ${newRetMaxDays} days`;
+    if (newRetFreeGB > 0) {
+      secondaryText += ` — includes ${Math.round(newRetFreeGB).toLocaleString()} GB from free data sources`
+        + ' (free to ingest, billable to retain)';
+    }
+    secondary.textContent = secondaryText;
+    nrDiv.appendChild(secondary);
+
+    container.appendChild(nrDiv);
   }
 
   // Long-term storage delta totals from retention extensions/reductions
