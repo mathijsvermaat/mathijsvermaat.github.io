@@ -8165,6 +8165,54 @@ function updateCommentsSummary() {
   });
 }
 
+// ===================== "TO VERIFY" OPTION =====================
+// "To verify" is used when the customer doesn't yet know the current state and
+// needs to check. On the primary Connector Setup item it acts as a gate value
+// (collapses the rest of the connector, see GATE_COLLAPSE_VALUES /
+// handleConnectorCollapse); elsewhere it simply flags the item and surfaces it
+// in the To Do summary's "To verify" list.
+//
+// Scope:
+//  - Gated connectors: Connector Setup, Content Hub and Validation groups.
+//  - General (non-gated) sections: every standard status dropdown.
+function addToVerifyOption(sel) {
+  if (!sel || sel.querySelector('option[value="To verify"]')) return;
+  const naOption = sel.querySelector('option[value="N/A"]');
+  const isHealthSel = !!sel.querySelector('option[value="Healthy"]');
+  if (!naOption && !isHealthSel) return; // skip presets / Yes-No / non-standard selects
+  const opt = document.createElement('option');
+  opt.value = 'To verify';
+  opt.textContent = 'To verify';
+  if (naOption) sel.insertBefore(opt, naOption);   // before N/A
+  else sel.appendChild(opt);                        // Validation (Healthy/Unhealthy) — append at end
+}
+
+// Pass a single .connector-section to cover a newly added dynamic connector,
+// or omit `root` to sweep every connector currently in the document.
+function applyToVerifyOptions(root) {
+  const sections = (root && root.classList && root.classList.contains('connector-section'))
+    ? [root]
+    : Array.from((root || document).querySelectorAll('.connector-section[id^="conn-"]'));
+
+  sections.forEach(section => {
+    if (NON_GATED_SECTION_IDS.includes(section.id)) {
+      section.querySelectorAll('.connector-body select.status-select').forEach(addToVerifyOption);
+      return;
+    }
+    // The first check-group is the setup/gate group; plus Content Hub
+    // (labelled "Detections" on a few connectors) and Validation.
+    section.querySelectorAll('.connector-body .check-group').forEach((group, idx) => {
+      const titleEl = group.querySelector('.check-group-title');
+      const title = titleEl ? (titleEl.textContent || '').trim() : '';
+      const isSetup = idx === 0;
+      const isContentHub = title.startsWith('Content Hub') || title === 'Detections';
+      const isValidation = title.startsWith('Validation');
+      if (!(isSetup || isContentHub || isValidation)) return;
+      group.querySelectorAll('select.status-select').forEach(addToVerifyOption);
+    });
+  });
+}
+
 // ===================== THIRD-PARTY DYNAMIC CONNECTORS =====================
 
 // Shared helpers for the multi-row "Target Table" group used by every dynamic
@@ -8343,6 +8391,7 @@ function addThirdPartyConnector(name) {
   `;
 
   document.getElementById('thirdparty-connectors').appendChild(section);
+  applyToVerifyOptions(section);
   initRetentionSection(prefix);
   if (typeof initXdrTierChangeControls === 'function') initXdrTierChangeControls();
   updateProgress();
@@ -8515,6 +8564,7 @@ function addThirdPartyTIConnector(name) {
   `;
 
   document.getElementById('thirdpartyti-connectors').appendChild(section);
+  applyToVerifyOptions(section);
   initRetentionSection(prefix);
   if (typeof initXdrTierChangeControls === 'function') initXdrTierChangeControls();
   updateProgress();
@@ -8611,6 +8661,7 @@ function addThirdPartyIdConnector(name) {
   `;
 
   document.getElementById('thirdpartyid-connectors').appendChild(section);
+  applyToVerifyOptions(section);
   initRetentionSection(prefix);
   if (typeof initXdrTierChangeControls === 'function') initXdrTierChangeControls();
   updateProgress();
@@ -8707,6 +8758,7 @@ function addThirdPartyAppConnector(name) {
   `;
 
   document.getElementById('thirdpartyapp-connectors').appendChild(section);
+  applyToVerifyOptions(section);
   initRetentionSection(prefix);
   if (typeof initXdrTierChangeControls === 'function') initXdrTierChangeControls();
   updateProgress();
@@ -8803,6 +8855,7 @@ function addThirdPartyCollabConnector(name) {
   `;
 
   document.getElementById('thirdpartycollab-connectors').appendChild(section);
+  applyToVerifyOptions(section);
   initRetentionSection(prefix);
   if (typeof initXdrTierChangeControls === 'function') initXdrTierChangeControls();
   updateProgress();
@@ -8899,6 +8952,7 @@ function addCustomAppConnector(name) {
   `;
 
   document.getElementById('customapp-connectors').appendChild(section);
+  applyToVerifyOptions(section);
   initRetentionSection(prefix);
   if (typeof initXdrTierChangeControls === 'function') initXdrTierChangeControls();
   updateProgress();
@@ -8995,6 +9049,7 @@ function addThirdPartyDevOpsConnector(name) {
   `;
 
   document.getElementById('thirdpartydevops-connectors').appendChild(section);
+  applyToVerifyOptions(section);
   initRetentionSection(prefix);
   if (typeof initXdrTierChangeControls === 'function') initXdrTierChangeControls();
   updateProgress();
@@ -9091,6 +9146,7 @@ function addThirdPartyOTConnector(name) {
   `;
 
   document.getElementById('thirdpartyot-connectors').appendChild(section);
+  applyToVerifyOptions(section);
   initRetentionSection(prefix);
   if (typeof initXdrTierChangeControls === 'function') initXdrTierChangeControls();
   updateProgress();
@@ -9118,44 +9174,9 @@ document.addEventListener('DOMContentLoaded', () => {
     sel.insertBefore(tbdOption, naOption);
   });
 
-  // Inject "To verify" option — used when the customer doesn't yet know the
-  // current state and needs to check. On the primary Connector Setup item it acts
-  // like a gate value (collapses the rest of the connector, see
-  // GATE_COLLAPSE_VALUES / handleConnectorCollapse); elsewhere it simply flags the
-  // item and surfaces it in the To Do summary's "To verify" list.
-  //
-  // Scope:
-  //  - Gated connectors: Connector Setup, Content Hub and Validation groups.
-  //  - General (non-gated) sections: every standard status dropdown.
-  const addToVerifyOption = (sel) => {
-    if (!sel || sel.querySelector('option[value="To verify"]')) return;
-    const naOption = sel.querySelector('option[value="N/A"]');
-    const isHealthSel = !!sel.querySelector('option[value="Healthy"]');
-    if (!naOption && !isHealthSel) return; // skip presets / Yes-No / non-standard selects
-    const opt = document.createElement('option');
-    opt.value = 'To verify';
-    opt.textContent = 'To verify';
-    if (naOption) sel.insertBefore(opt, naOption);   // before N/A
-    else sel.appendChild(opt);                        // Validation (Healthy/Unhealthy) — append at end
-  };
-  document.querySelectorAll('.connector-section[id^="conn-"]').forEach(section => {
-    if (NON_GATED_SECTION_IDS.includes(section.id)) {
-      // General (non-gated) sections: every standard status dropdown.
-      section.querySelectorAll('.connector-body select.status-select').forEach(addToVerifyOption);
-      return;
-    }
-    // Gated connectors: the first check-group is the setup/gate group; plus the
-    // Content Hub (labelled "Detections" on a few connectors) and Validation groups.
-    section.querySelectorAll('.connector-body .check-group').forEach((group, idx) => {
-      const titleEl = group.querySelector('.check-group-title');
-      const title = titleEl ? (titleEl.textContent || '').trim() : '';
-      const isSetup = idx === 0;
-      const isContentHub = title.startsWith('Content Hub') || title === 'Detections';
-      const isValidation = title.startsWith('Validation');
-      if (!(isSetup || isContentHub || isValidation)) return;
-      group.querySelectorAll('select.status-select').forEach(addToVerifyOption);
-    });
-  });
+  // Inject "To verify" option into every statically authored connector.
+  // Dynamic connectors get it from their own adder (see applyToVerifyOptions).
+  applyToVerifyOptions();
 
   document.getElementById('assessment-date').valueAsDate = new Date();
   initRetentionSections();
