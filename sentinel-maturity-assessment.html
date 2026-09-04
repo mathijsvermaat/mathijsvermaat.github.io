@@ -932,6 +932,186 @@
       color: var(--text);
     }
 
+    /* ---------- Connector filter bar ---------- */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .filter-chip {
+      position: relative;
+      display: inline-flex;
+      align-items: stretch;
+    }
+
+    .filter-chip-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius) 0 0 var(--radius);
+      background: var(--secondary);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.8rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .filter-chip-btn:hover { background: var(--border); }
+    .filter-chip-btn .chip-value { font-weight: 600; }
+    .filter-chip-btn .chip-chev { font-size: 0.6rem; color: var(--text-light); }
+
+    .filter-chip-clear {
+      display: inline-flex;
+      align-items: center;
+      padding: 0 9px;
+      border: 1px solid var(--border);
+      border-left: 0;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      background: var(--secondary);
+      color: var(--text-light);
+      font-family: inherit;
+      font-size: 0.85rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .filter-chip-clear:hover { background: var(--border); color: var(--text); }
+
+    .filter-chip.is-active .filter-chip-btn,
+    .filter-chip.is-active .filter-chip-clear {
+      background: #e8f0fe;
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .filter-chip.is-active .filter-chip-btn .chip-chev { color: var(--primary); }
+
+    .filter-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      z-index: 200;
+      min-width: 230px;
+      padding: 12px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 16px rgba(0,0,0,.14);
+    }
+
+    .filter-chip.is-open .filter-menu { display: block; }
+
+    .filter-menu-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .filter-menu-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .filter-menu-option input { cursor: pointer; }
+    .filter-menu-option .opt-count { margin-left: auto; font-size: 0.75rem; color: var(--text-light); }
+
+    .filter-menu-sep {
+      margin: 8px 0;
+      border: 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .filter-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-left: auto;
+    }
+
+    .filter-results {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      white-space: nowrap;
+    }
+    .filter-results strong { color: var(--text); }
+
+    .filter-expand-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: var(--text-light);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-clear-filters {
+      padding: 5px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--white);
+      color: var(--text-light);
+      font-family: inherit;
+      font-size: 0.78rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-clear-filters:hover { color: var(--danger); border-color: var(--danger); }
+    .btn-clear-filters[disabled] { opacity: 0.45; cursor: default; }
+    .btn-clear-filters[disabled]:hover { color: var(--text-light); border-color: var(--border); }
+
+    /* Swatches mirroring the status-select colour language */
+    .filter-swatch {
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+      flex-shrink: 0;
+      border: 1px solid rgba(0,0,0,.12);
+    }
+    .filter-swatch.sw-configured    { background: var(--success); }
+    .filter-swatch.sw-notconfigured { background: var(--danger); }
+    .filter-swatch.sw-tobeadded     { background: var(--warning); }
+    .filter-swatch.sw-toverify      { background: #7c6df2; }
+    .filter-swatch.sw-na            { background: var(--border); }
+    .filter-swatch.sw-unassessed    { background: transparent; border-style: dashed; }
+    .filter-swatch.sw-free          { background: var(--success); }
+    .filter-swatch.sw-benefit       { background: var(--warning); }
+    .filter-swatch.sw-paid          { background: var(--danger); }
+
+    .filter-empty {
+      display: none;
+      padding: 24px;
+      margin-bottom: 24px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text-light);
+      background: var(--white);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+    }
+    .filter-empty.visible { display: block; }
+
+    @media (max-width: 720px) {
+      .filter-bar-right { margin-left: 0; width: 100%; }
+    }
+
     .connector-section.search-hidden,
     .tier-section.search-hidden {
       display: none;
@@ -2759,6 +2939,40 @@
       <input type="text" class="connector-search-input" id="connector-search-input" placeholder="Search connectors — e.g. Office 365, Firewall, Syslog…" oninput="filterConnectors(this.value)">
       <button class="connector-search-clear" id="connector-search-clear" onclick="clearConnectorSearch()" title="Clear search">&times;</button>
     </div>
+    <div class="filter-bar" id="filter-bar">
+      <div class="filter-chip" id="filter-chip-tier">
+        <button type="button" class="filter-chip-btn" onclick="toggleFilterMenu('tier', event)">Tier: <span class="chip-value" id="filter-label-tier">Any</span><span class="chip-chev">▼</span></button>
+        <button type="button" class="filter-chip-clear" onclick="clearFilter('tier')" title="Clear tier filter">&times;</button>
+        <div class="filter-menu" id="filter-menu-tier"></div>
+      </div>
+      <div class="filter-chip" id="filter-chip-status">
+        <button type="button" class="filter-chip-btn" onclick="toggleFilterMenu('status', event)">Status: <span class="chip-value" id="filter-label-status">Any</span><span class="chip-chev">▼</span></button>
+        <button type="button" class="filter-chip-clear" onclick="clearFilter('status')" title="Clear status filter">&times;</button>
+        <div class="filter-menu" id="filter-menu-status"></div>
+      </div>
+      <div class="filter-chip" id="filter-chip-type">
+        <button type="button" class="filter-chip-btn" onclick="toggleFilterMenu('type', event)">Type: <span class="chip-value" id="filter-label-type">Any</span><span class="chip-chev">▼</span></button>
+        <button type="button" class="filter-chip-clear" onclick="clearFilter('type')" title="Clear type filter">&times;</button>
+        <div class="filter-menu" id="filter-menu-type"></div>
+      </div>
+      <div class="filter-chip" id="filter-chip-cost">
+        <button type="button" class="filter-chip-btn" onclick="toggleFilterMenu('cost', event)">Cost: <span class="chip-value" id="filter-label-cost">Any</span><span class="chip-chev">▼</span></button>
+        <button type="button" class="filter-chip-clear" onclick="clearFilter('cost')" title="Clear cost filter">&times;</button>
+        <div class="filter-menu" id="filter-menu-cost"></div>
+      </div>
+      <button type="button" class="btn-clear-filters" id="btn-clear-filters" onclick="clearAllConnectorFilters()" disabled>Clear all</button>
+      <div class="filter-bar-right">
+        <label class="filter-expand-toggle" title="Expand matching connectors so their checks are visible straight away">
+          <input type="checkbox" id="filter-expand-matches" checked onchange="applyConnectorFilters()">
+          Expand matches
+        </label>
+        <span class="filter-results" id="filter-results"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="filter-empty" id="filter-empty">
+    No connectors match the current filters. <a href="#" onclick="clearAllConnectorFilters(); return false;">Clear all filters</a>
   </div>
 
   <!-- ==================== GENERAL ==================== -->
@@ -6026,70 +6240,284 @@ function initVolumeInputs() {
   });
 }
 
-// ===================== CONNECTOR SEARCH =====================
-function filterConnectors(query) {
-  const clearBtn = document.getElementById('connector-search-clear');
-  clearBtn.style.display = query ? 'block' : 'none';
+// ===================== CONNECTOR SEARCH & FILTERS =====================
+// Search text and the four filter chips share one state object and one apply
+// pass, so they compose instead of overwriting each other's visibility.
+const connectorFilterState = {
+  search: '',
+  tier: new Set(),
+  status: new Set(),
+  type: new Set(),
+  cost: new Set(),
+};
 
-  const q = query.toLowerCase().trim();
+const CONNECTOR_FILTER_DEFS = {
+  tier: {
+    label: 'Tier',
+    options: [
+      { v: 'general', label: 'General' },
+      { v: '1', label: 'Tier 1 — Foundational' },
+      { v: '2', label: 'Tier 2 — Extended' },
+      { v: '3', label: 'Tier 3 — Advanced' },
+    ],
+  },
+  status: {
+    label: 'Status',
+    options: [
+      { v: 'configured',    label: 'Configured',     sw: 'sw-configured' },
+      { v: 'notconfigured', label: 'Not configured', sw: 'sw-notconfigured' },
+      { v: 'tobeadded',     label: 'To be added',    sw: 'sw-tobeadded' },
+      { v: 'toverify',      label: 'To verify',      sw: 'sw-toverify' },
+      { v: 'na',            label: 'N/A',            sw: 'sw-na' },
+      { v: 'unassessed',    label: 'Not assessed',   sw: 'sw-unassessed' },
+    ],
+  },
+  type: {
+    label: 'Type',
+    options: [
+      { v: 'builtin', label: 'Built-in connector' },
+      { v: 'custom',  label: 'Custom / third-party' },
+    ],
+  },
+  cost: {
+    label: 'Cost',
+    options: [
+      { v: 'free',    label: 'Free data source',  sw: 'sw-free' },
+      { v: 'benefit', label: 'Ingestion benefit', sw: 'sw-benefit' },
+      { v: 'paid',    label: 'Paid ingestion',    sw: 'sw-paid' },
+    ],
+  },
+};
 
-  // Get all connector sections (static + dynamic)
+const STATUS_FILTER_VALUES = {
+  '': 'unassessed',
+  'Configured': 'configured',
+  'Not configured': 'notconfigured',
+  'To be added': 'tobeadded',
+  'To verify': 'toverify',
+  'N/A': 'na',
+};
+
+// The connector's own gate select — `:scope >` keeps nested child connectors
+// (dynamic third-party sections) from being mistaken for this section's gate.
+function getConnectorGateSelect(section) {
+  const body = section.querySelector(':scope > .connector-body');
+  if (!body) return null;
+  const group = body.querySelector(':scope > .check-group');
+  if (!group) return null;
+  return group.querySelector('select.status-select');
+}
+
+function classifyConnector(section) {
+  const header = section.querySelector(':scope > .connector-header h3');
+  const tierSection = section.closest('.tier-section');
+  const tierId = tierSection ? tierSection.id : '';
+  const gate = getConnectorGateSelect(section);
+  const badge = section.querySelector(':scope > .connector-header .cost-badge');
+
+  let cost = 'none';
+  if (badge) {
+    if (badge.classList.contains('free')) cost = 'free';
+    else if (badge.classList.contains('benefit')) cost = 'benefit';
+    else if (badge.classList.contains('paid')) cost = 'paid';
+  }
+
+  const parentId = section.parentElement ? section.parentElement.id : '';
+
+  return {
+    name: header ? header.textContent.toLowerCase() : '',
+    tier: tierId === 'tier-general' ? 'general' : tierId.replace('tier-', ''),
+    status: gate ? (STATUS_FILTER_VALUES[gate.value] || 'unassessed') : 'none',
+    type: THIRD_PARTY_CONTAINER_IDS.includes(parentId) ? 'custom' : 'builtin',
+    cost: cost,
+    assessable: !!gate,
+  };
+}
+
+function hasActiveConnectorFilters() {
+  const s = connectorFilterState;
+  return !!s.search || s.tier.size > 0 || s.status.size > 0 || s.type.size > 0 || s.cost.size > 0;
+}
+
+function connectorMatchesFilters(meta) {
+  const s = connectorFilterState;
+  if (s.search && !meta.name.includes(s.search)) return false;
+  if (s.tier.size && !s.tier.has(meta.tier)) return false;
+  if (s.status.size && !s.status.has(meta.status)) return false;
+  if (s.type.size && !s.type.has(meta.type)) return false;
+  if (s.cost.size && !s.cost.has(meta.cost)) return false;
+  return true;
+}
+
+// Collapsed state is restored verbatim once filters clear, so filtering never
+// permanently rearranges the user's expanded/collapsed layout.
+let preFilterCollapseState = null;
+
+function snapshotCollapseState() {
+  if (preFilterCollapseState) return;
+  preFilterCollapseState = [];
+  document.querySelectorAll('.tier-section, .connector-section').forEach(el => {
+    preFilterCollapseState.push([el, el.classList.contains('collapsed')]);
+  });
+}
+
+function restoreCollapseState() {
+  if (!preFilterCollapseState) return;
+  preFilterCollapseState.forEach(([el, wasCollapsed]) => {
+    if (el.isConnected) el.classList.toggle('collapsed', wasCollapsed);
+  });
+  preFilterCollapseState = null;
+}
+
+function applyConnectorFilters() {
   const allConnectors = document.querySelectorAll('.connector-section');
   const allTiers = document.querySelectorAll('.tier-section');
+  const active = hasActiveConnectorFilters();
 
-  if (!q) {
-    // Clear: show everything, restore collapsed state
+  if (!active) {
     allConnectors.forEach(s => s.classList.remove('search-hidden'));
     allTiers.forEach(t => t.classList.remove('search-hidden'));
+    restoreCollapseState();
+    refreshFilterChrome(0, 0, false);
     return;
   }
 
-  // First pass: hide every connector. We'll selectively un-hide matches and
-  // their ancestor containers below. Dynamic third-party connectors (Palo
-  // Alto, Okta, ServiceNow, ...) are rendered as nested .connector-section
-  // elements inside parent containers like #conn-thirdparty, so a simple
-  // direct-text match on the parent's h3 isn't enough — we need to propagate
-  // matches upward to keep the parent (and its body) visible and expanded.
-  allConnectors.forEach(section => {
-    section.classList.add('search-hidden');
-  });
+  snapshotCollapseState();
+  allConnectors.forEach(s => s.classList.add('search-hidden'));
 
-  // Second pass: identify matches and propagate visibility to ancestors.
-  allConnectors.forEach(section => {
-    const header = section.querySelector(':scope > .connector-header h3');
-    const name = header ? header.textContent.toLowerCase() : '';
-    if (!name.includes(q)) return;
+  const expandEl = document.getElementById('filter-expand-matches');
+  const expand = expandEl ? expandEl.checked : false;
+  let matched = 0;
+  let total = 0;
 
-    // Reveal the matching section but keep its own collapsed state intact —
-    // we don't auto-expand matches so the user can still scan a short list
-    // of header-only matches without having to scroll past expanded bodies.
+  allConnectors.forEach(section => {
+    if (section.closest('.lite-only')) return;
+    const meta = classifyConnector(section);
+    if (meta.assessable) total++;
+    if (!connectorMatchesFilters(meta)) return;
+    if (meta.assessable) matched++;
+
     section.classList.remove('search-hidden');
+    if (expand) section.classList.remove('collapsed');
 
-    // Walk up: reveal and expand every ancestor connector-section so the
-    // match is actually rendered (parent .connector-body must not be
-    // collapsed and parent must not be display:none).
+    // Reveal (and open) every ancestor so a nested match is actually rendered.
     let parent = section.parentElement;
     while (parent) {
-      if (parent.classList && parent.classList.contains('connector-section')) {
-        parent.classList.remove('search-hidden', 'collapsed');
-      }
-      if (parent.classList && parent.classList.contains('tier-section')) {
-        parent.classList.remove('collapsed');
-        break; // tier-section is the outermost relevant container
+      if (parent.classList) {
+        if (parent.classList.contains('connector-section')) parent.classList.remove('search-hidden', 'collapsed');
+        if (parent.classList.contains('tier-section')) { parent.classList.remove('collapsed'); break; }
       }
       parent = parent.parentElement;
     }
   });
 
-  // Hide tiers where no connectors are visible.
   allTiers.forEach(tier => {
     const visible = tier.querySelectorAll('.connector-section:not(.search-hidden)');
-    if (visible.length === 0) {
-      tier.classList.add('search-hidden');
-    } else {
-      tier.classList.remove('search-hidden');
-    }
+    tier.classList.toggle('search-hidden', visible.length === 0);
   });
+
+  refreshFilterChrome(matched, total, true);
+}
+
+function refreshFilterChrome(matched, total, active) {
+  for (const key in CONNECTOR_FILTER_DEFS) {
+    const set = connectorFilterState[key];
+    const chip = document.getElementById('filter-chip-' + key);
+    const label = document.getElementById('filter-label-' + key);
+    if (!chip || !label) continue;
+    if (set.size === 0) label.textContent = 'Any';
+    else if (set.size === 1) {
+      const opt = CONNECTOR_FILTER_DEFS[key].options.find(o => set.has(o.v));
+      label.textContent = opt ? opt.label.split(' — ')[0] : '1 selected';
+    } else {
+      label.textContent = set.size + ' selected';
+    }
+    chip.classList.toggle('is-active', set.size > 0);
+  }
+
+  const clearBtn = document.getElementById('btn-clear-filters');
+  if (clearBtn) clearBtn.disabled = !active;
+
+  const results = document.getElementById('filter-results');
+  if (results) results.innerHTML = active ? `Showing <strong>${matched}</strong> of ${total} connectors` : '';
+
+  const empty = document.getElementById('filter-empty');
+  if (empty) empty.classList.toggle('visible', active && matched === 0);
+}
+
+function buildFilterMenu(key) {
+  const menu = document.getElementById('filter-menu-' + key);
+  if (!menu) return;
+  const def = CONNECTOR_FILTER_DEFS[key];
+
+  // Recount on every open so the numbers track the current assessment state.
+  const counts = {};
+  document.querySelectorAll('.connector-section').forEach(section => {
+    if (section.closest('.lite-only')) return;
+    const meta = classifyConnector(section);
+    if (!meta.assessable) return;
+    counts[meta[key]] = (counts[meta[key]] || 0) + 1;
+  });
+
+  menu.innerHTML = `<div class="filter-menu-title">${def.label}</div>` +
+    def.options.map(o => {
+      const checked = connectorFilterState[key].has(o.v) ? ' checked' : '';
+      const sw = o.sw ? `<span class="filter-swatch ${o.sw}"></span>` : '';
+      return `<label class="filter-menu-option">
+          <input type="checkbox" value="${o.v}"${checked} onchange="onFilterOptionChange('${key}', this)">
+          ${sw}<span>${o.label}</span><span class="opt-count">${counts[o.v] || 0}</span>
+        </label>`;
+    }).join('') +
+    `<hr class="filter-menu-sep"><div class="filter-menu-option" style="justify-content:flex-end">
+       <button type="button" class="btn-clear-filters" onclick="clearFilter('${key}')">Clear ${def.label.toLowerCase()}</button>
+     </div>`;
+}
+
+function toggleFilterMenu(key, event) {
+  if (event) event.stopPropagation();
+  const chip = document.getElementById('filter-chip-' + key);
+  if (!chip) return;
+  const wasOpen = chip.classList.contains('is-open');
+  closeAllFilterMenus();
+  if (!wasOpen) {
+    buildFilterMenu(key);
+    chip.classList.add('is-open');
+  }
+}
+
+function closeAllFilterMenus() {
+  document.querySelectorAll('.filter-chip.is-open').forEach(c => c.classList.remove('is-open'));
+}
+
+function onFilterOptionChange(key, input) {
+  if (input.checked) connectorFilterState[key].add(input.value);
+  else connectorFilterState[key].delete(input.value);
+  applyConnectorFilters();
+}
+
+function clearFilter(key) {
+  connectorFilterState[key].clear();
+  const menu = document.getElementById('filter-menu-' + key);
+  if (menu) menu.querySelectorAll('input[type=checkbox]').forEach(cb => { cb.checked = false; });
+  applyConnectorFilters();
+}
+
+function clearAllConnectorFilters() {
+  Object.keys(CONNECTOR_FILTER_DEFS).forEach(k => connectorFilterState[k].clear());
+  connectorFilterState.search = '';
+  const input = document.getElementById('connector-search-input');
+  if (input) input.value = '';
+  const clearBtn = document.getElementById('connector-search-clear');
+  if (clearBtn) clearBtn.style.display = 'none';
+  closeAllFilterMenus();
+  applyConnectorFilters();
+}
+
+function filterConnectors(query) {
+  const clearBtn = document.getElementById('connector-search-clear');
+  if (clearBtn) clearBtn.style.display = query ? 'block' : 'none';
+  connectorFilterState.search = (query || '').toLowerCase().trim();
+  applyConnectorFilters();
 }
 
 function clearConnectorSearch() {
@@ -6098,6 +6526,10 @@ function clearConnectorSearch() {
   filterConnectors('');
   input.focus();
 }
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.filter-chip')) closeAllFilterMenus();
+});
 
 // ===================== STATUS SELECT STYLING =====================
 function onStatusChange(sel) {
@@ -6132,6 +6564,9 @@ function onStatusChange(sel) {
   updateXdrUebaWarnings();
   updateAcceptedRisks();
   updateConfigWarnings();
+  // A status-filtered view behaves as a worklist: re-running the filter drops
+  // connectors that no longer match the status the user is working through.
+  if (connectorFilterState.status.size) applyConnectorFilters();
 }
 
 // ===================== SET ALL CONFIGURED =====================
@@ -10478,8 +10913,11 @@ function exportToPDF() {
   clone.querySelectorAll('.tier-section.collapsed').forEach(s => s.classList.remove('collapsed'));
   clone.querySelectorAll('.connector-section.collapsed').forEach(s => s.classList.remove('collapsed'));
 
+  // An active filter must never silently produce a partial report.
+  clone.querySelectorAll('.search-hidden').forEach(s => s.classList.remove('search-hidden'));
+
   // Remove interactive elements from the clone (toolbar, search, buttons)
-  clone.querySelectorAll('.toolbar, .connector-search, .connector-quick-actions, .btn, .btn-icon, .manual-todo-input').forEach(el => el.remove());
+  clone.querySelectorAll('.toolbar, .connector-search, .filter-empty, .connector-quick-actions, .btn, .btn-icon, .manual-todo-input').forEach(el => el.remove());
 
   // Copy textarea/input values into the clone (cloneNode doesn't copy .value)
   const origTextareas = container.querySelectorAll('textarea');
@@ -11798,6 +12236,8 @@ function setAssessmentMode(mode) {
   try { localStorage.setItem(LITE_MODE_STORAGE_KEY, mode); } catch (_) { /* storage unavailable */ }
 
   if (lite) {
+    // Lite hides the filter bar, so drop any active filter before the DOM moves.
+    if (typeof clearAllConnectorFilters === 'function') clearAllConnectorFilters();
     moveTier1ToLite();
   } else {
     restoreTier1ToFull();
