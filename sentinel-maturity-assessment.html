@@ -10909,17 +10909,10 @@ function exportToPDF() {
   const container = document.querySelector('.container');
   const clone = container.cloneNode(true);
 
-  // Expand all collapsed sections in the clone
-  clone.querySelectorAll('.tier-section.collapsed').forEach(s => s.classList.remove('collapsed'));
-  clone.querySelectorAll('.connector-section.collapsed').forEach(s => s.classList.remove('collapsed'));
-
-  // An active filter must never silently produce a partial report.
-  clone.querySelectorAll('.search-hidden').forEach(s => s.classList.remove('search-hidden'));
-
-  // Remove interactive elements from the clone (toolbar, search, buttons)
-  clone.querySelectorAll('.toolbar, .connector-search, .filter-empty, .connector-quick-actions, .btn, .btn-icon, .manual-todo-input').forEach(el => el.remove());
-
-  // Copy textarea/input values into the clone (cloneNode doesn't copy .value)
+  // Copy field values into the clone. This MUST run before any element is
+  // removed below: the copy is index-based, so removing a node first (the
+  // Load Progress file input, the search box, the manual to-do fields) shifts
+  // every subsequent value into the wrong field.
   const origTextareas = container.querySelectorAll('textarea');
   const cloneTextareas = clone.querySelectorAll('textarea');
   origTextareas.forEach((orig, i) => { if (cloneTextareas[i]) cloneTextareas[i].value = orig.value; });
@@ -10929,6 +10922,16 @@ function exportToPDF() {
   const origSelects = container.querySelectorAll('select');
   const cloneSelects = clone.querySelectorAll('select');
   origSelects.forEach((orig, i) => { if (cloneSelects[i]) cloneSelects[i].value = orig.value; });
+
+  // Expand all collapsed sections in the clone
+  clone.querySelectorAll('.tier-section.collapsed').forEach(s => s.classList.remove('collapsed'));
+  clone.querySelectorAll('.connector-section.collapsed').forEach(s => s.classList.remove('collapsed'));
+
+  // An active filter must never silently produce a partial report.
+  clone.querySelectorAll('.search-hidden').forEach(s => s.classList.remove('search-hidden'));
+
+  // Remove interactive elements from the clone (toolbar, search, buttons)
+  clone.querySelectorAll('.toolbar, .connector-search, .filter-empty, .connector-quick-actions, .btn, .btn-icon, .manual-todo-input').forEach(el => el.remove());
 
   document.getElementById('report-content').innerHTML = '';
   document.getElementById('report-content').appendChild(clone);
