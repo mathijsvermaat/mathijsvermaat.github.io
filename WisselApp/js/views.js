@@ -369,6 +369,7 @@ export function viewLive(match, players, plan, elapsedSec) {
     <div class="card">
       <h3>🧤 Keeper</h3>
       <div class="bigname pname tappable" data-pid="${keeperId}" data-role="keeper">${escapeHtml(nameOf(players, keeperId))}</div>
+      ${isFinished ? '' : `<button id="edit-keepers" class="card-action">🧤 Keepers aanpassen</button>`}
     </div>
     <div class="row two">
       <div class="card">
@@ -380,6 +381,7 @@ export function viewLive(match, players, plan, elapsedSec) {
         ${benchIds.length ? benchIds.map((id) => `<div class="pname tappable" data-pid="${id}" data-role="bench">${escapeHtml(nameOf(players, id))}</div>`).join('') : '<i class="sub">leeg</i>'}
       </div>
     </div>
+    ${isFinished ? '' : `<button id="manual-swap" class="card-action">🔄 Handmatig wisselen</button>`}
 
     ${(match.injuredIds && match.injuredIds.length) ? `
     <div class="card injured-card">

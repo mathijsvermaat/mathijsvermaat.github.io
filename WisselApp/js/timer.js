@@ -29,6 +29,9 @@ export class MatchClock {
 
   setAlarms(secs) {
     this.alarmsAtSec = [...secs].sort((a, b) => a - b);
+    // Alarms added for a moment that already passed must not fire retroactively.
+    const e = this.elapsedSec();
+    this.alarmsAtSec.forEach((a) => { if (a <= e) this.firedAlarms.add(a); });
     this._persist();
   }
 

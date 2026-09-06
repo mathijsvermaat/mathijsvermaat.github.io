@@ -2,7 +2,7 @@
 
 import * as db from './db.js';
 import * as V from './views.js';
-import { buildPlan, suggestKeepers, buildHistory, totalQuarters, recommendSubInterval, applyInjury } from './scheduler.js';
+import { buildPlan, suggestKeepers, buildHistory, totalQuarters, recommendSubInterval, applyInjury, setKeeperForQuarter, applyManualSwap } from './scheduler.js';
 import { MatchClock } from './timer.js';
 import { unlockAudio, showAlert, showActionSheet, beep, vibrate, TONE_PRESETS, DEFAULT_TONES } from './notify.js';
 
@@ -521,9 +521,10 @@ async function renderLive(players, id) {
   if (!liveCtx || liveCtx.match.id !== id) {
     if (liveCtx) liveCtx.clock.pause();
     const prefs = await getPrefs();
+    const history = buildHistory((await db.listMatches()).filter((m) => m.id !== id));
     const clock = new MatchClock(id, totalSec, () => paint(), (atSec) => onAlarm(atSec));
     if (match.status === 'finished') clock.pause();
-    liveCtx = { match, plan, players, clock, prefs, quarterBreaks: new Set(), lastPersistMs: 0 };
+    liveCtx = { match, plan, players, clock, prefs, history, quarterBreaks: new Set(), lastPersistMs: 0 };
     if (match.status !== 'finished') rearmAlarms();
     if (match.status === 'live' && !clock.isRunning() && clock.elapsedSec() === 0) clock.start();
   }
@@ -584,6 +585,8 @@ async function renderLive(players, id) {
       b.addEventListener('click', (ev) => { ev.stopPropagation(); onDeleteGoal(b.dataset.gid); });
     });
     if (!isFinished) {
+      document.getElementById('edit-keepers')?.addEventListener('click', () => openKeeperEditor());
+      document.getElementById('manual-swap')?.addEventListener('click', () => openManualSwap());
       view.querySelectorAll('.tappable[data-pid]').forEach((el) => {
         el.addEventListener('click', () => onPlayerTap(el.dataset.pid, el.dataset.role));
       });
@@ -594,15 +597,20 @@ async function renderLive(players, id) {
   async function onPlayerTap(pid, role) {
     const name = V.nameOf(players, pid);
     const at = liveCtx.clock.elapsedSec();
-    const choice = await showActionSheet(`${name}`, [
-      { id: 'goal', label: '⚽ Doelpunt' },
-      { id: 'injury', label: '🩹 Markeer als geblesseerd', danger: true },
-      { id: 'cancel', label: 'Annuleren' },
-    ]);
+    const actions = [{ id: 'goal', label: '⚽ Doelpunt' }];
+    if (role === 'keeper') actions.push({ id: 'keepers', label: '🧤 Keepers aanpassen' });
+    if (role === 'field') actions.push({ id: 'swap-out', label: '🔄 Wissel eruit' });
+    if (role === 'bench') actions.push({ id: 'swap-in', label: '🔄 Breng in het veld' });
+    actions.push({ id: 'injury', label: '🩹 Markeer als geblesseerd', danger: true });
+    actions.push({ id: 'cancel', label: 'Annuleren' });
+    const choice = await showActionSheet(`${name}`, actions);
     if (choice === 'goal') {
       await addGoal({ scorerId: pid, team: 'us', atSec: at });
       return;
     }
+    if (choice === 'keepers') { await openKeeperEditor(); return; }
+    if (choice === 'swap-out') { await openManualSwap(pid, null); return; }
+    if (choice === 'swap-in') { await openManualSwap(null, pid); return; }
     if (choice !== 'injury') return;
     if (!confirm(`${name} markeren als geblesseerd? Deze speler wordt uit de rest van de wedstrijd gehaald en het wisselschema wordt bijgewerkt.`)) return;
     match.injuredIds = match.injuredIds || [];
@@ -612,6 +620,94 @@ async function renderLive(players, id) {
     await db.saveMatch(match);
     rearmAlarms();
     paint();
+  }
+
+  function currentLineup(atSec) {
+    let qi = plan.quarters.findIndex((q) => atSec < q.endSec);
+    if (qi === -1) qi = plan.quarters.length - 1;
+    const q = plan.quarters[qi];
+    let si = q.slots.findIndex((s) => atSec < s.endSec);
+    if (si === -1) si = q.slots.length - 1;
+    const fieldIds = q.slots[si].fieldIds;
+    const injured = match.injuredIds || [];
+    const benchIds = match.attendingPlayerIds.filter((id) => id !== q.keeperId && !fieldIds.includes(id) && !injured.includes(id));
+    return { q, qi, fieldIds, benchIds };
+  }
+
+  async function persistPlanChange() {
+    const elapsed = liveCtx.clock.elapsedSec();
+    match.plan = plan;
+    match.actualPlaytime = computeActualPlaytime(plan, match, elapsed);
+    match.elapsedSec = elapsed;
+    await db.saveMatch(match);
+    rearmAlarms();
+    paint();
+  }
+
+  async function openKeeperEditor() {
+    const at = liveCtx.clock.elapsedSec();
+    // A keeper plays a full quarter, so only quarters that have not kicked off yet can change.
+    const editable = plan.quarters.filter((q) => q.startSec >= at - 1);
+    if (!editable.length) {
+      showAlert('Kwart al bezig', 'Een keeper wissel je bij een kwartwissel. Er zijn geen kwarten meer die nog moeten beginnen.', { sound: false, vib: false });
+      return;
+    }
+    const qActions = editable.map((q) => ({
+      id: `q:${q.index}`,
+      label: `Kwart ${q.index + 1} <span class="sub">· nu: ${V.escapeHtml(V.nameOf(players, q.keeperId))}</span>`,
+    }));
+    qActions.push({ id: 'cancel', label: 'Annuleren' });
+    const qc = await showActionSheet('Welk kwart aanpassen?', qActions);
+    if (!qc || !qc.startsWith('q:')) return;
+    const qi = Number(qc.slice(2));
+    const quarter = plan.quarters[qi];
+    if (!quarter) return;
+    const injured = match.injuredIds || [];
+    const keeperCount = (pid) => plan.quarters.filter((q) => q.keeperId === pid).length;
+    const histMin = (pid) => Math.round((liveCtx.history[pid]?.keeperSeconds || 0) / 60);
+    const pActions = match.attendingPlayerIds
+      .filter((id) => !injured.includes(id))
+      .map((id) => ({
+        id: `p:${id}`,
+        label: `${id === quarter.keeperId ? '✓ ' : ''}${V.escapeHtml(V.nameOf(players, id))} <span class="sub">· ${keeperCount(id)}× dit duel · ${histMin(id)} min historie</span>`,
+      }));
+    pActions.push({ id: 'cancel', label: 'Annuleren' });
+    const pc = await showActionSheet(`Keeper kwart ${qi + 1}`, pActions);
+    if (!pc || !pc.startsWith('p:')) return;
+    if (!setKeeperForQuarter(plan, match, qi, pc.slice(2), at, liveCtx.history)) return;
+    await persistPlanChange();
+    const summary = plan.quarters
+      .map((q) => `Kwart ${q.index + 1}: <b>${V.escapeHtml(V.nameOf(players, q.keeperId))}</b>`)
+      .join('<br/>');
+    showAlert('Keepers bijgewerkt', `${summary}<div class="sub">Het wisselschema van de resterende speeltijd is opnieuw verdeeld zodat iedereen ongeveer evenveel speelt.</div>`, { sound: false, vib: false });
+  }
+
+  async function openManualSwap(outId = null, inId = null) {
+    const at = liveCtx.clock.elapsedSec();
+    const { fieldIds, benchIds } = currentLineup(at);
+    if (!benchIds.length) {
+      showAlert('Geen wissel mogelijk', 'Er staat niemand op de bank.', { sound: false, vib: false });
+      return;
+    }
+    if (!outId) {
+      const acts = fieldIds.map((id) => ({ id: `p:${id}`, label: `⬇ ${V.escapeHtml(V.nameOf(players, id))}` }));
+      acts.push({ id: 'cancel', label: 'Annuleren' });
+      const c = await showActionSheet('Wie gaat eruit?', acts);
+      if (!c || !c.startsWith('p:')) return;
+      outId = c.slice(2);
+    }
+    if (!inId) {
+      const acts = benchIds.map((id) => ({ id: `p:${id}`, label: `⬆ ${V.escapeHtml(V.nameOf(players, id))}` }));
+      acts.push({ id: 'cancel', label: 'Annuleren' });
+      const c = await showActionSheet('Wie komt erin?', acts);
+      if (!c || !c.startsWith('p:')) return;
+      inId = c.slice(2);
+    }
+    if (!applyManualSwap(plan, match, at, outId, inId, liveCtx.history)) {
+      showAlert('Wissel niet mogelijk', 'Deze wissel kan nu niet worden toegepast.', { sound: false, vib: false });
+      return;
+    }
+    await persistPlanChange();
   }
 
   function genGoalId() {
