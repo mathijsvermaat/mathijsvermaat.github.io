@@ -133,6 +133,63 @@
       vertical-align: middle;
     }
 
+    /* ---------- Collector import ---------- */
+    .collector-panel {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .collector-panel h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0;
+      padding: 18px 24px;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .collector-panel h2:hover { background: var(--secondary); }
+    .collector-chevron { font-size: 0.7rem; color: var(--text-light); transition: transform 0.15s; }
+    .collector-panel.collapsed .collector-chevron { transform: rotate(-90deg); }
+    .collector-panel.collapsed .collector-body { display: none; }
+    .collector-hint { margin-left: auto; font-size: 0.78rem; font-weight: 400; color: var(--text-light); }
+    .collector-body { padding: 0 24px 22px; }
+    .collector-intro { font-size: 0.85rem; color: var(--text-light); line-height: 1.55; margin-bottom: 14px; }
+    .collector-intro code { background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 3px; font-size: 0.8rem; }
+    .collector-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .collector-opt { font-size: 0.82rem; color: var(--text); display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+    .collector-file { font-size: 0.8rem; color: var(--text-light); }
+    .collector-preview { margin-top: 18px; border-top: 1px solid var(--border); padding-top: 16px; }
+    .collector-summary { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 14px; }
+    .collector-stat { font-size: 0.78rem; color: var(--text-light); }
+    .collector-stat b { display: block; color: var(--text); font-size: 1.05rem; font-weight: 600; }
+    .collector-group { margin-bottom: 14px; }
+    .collector-group h4 { font-size: 0.82rem; font-weight: 600; margin: 0 0 6px; color: var(--text); }
+    .collector-list { list-style: none; margin: 0; padding: 0; }
+    .collector-list li { font-size: 0.8rem; color: var(--text); padding: 3px 0; display: flex; gap: 10px; align-items: baseline; }
+    .collector-list .cl-target { color: var(--text-light); flex: 0 0 230px; }
+    .collector-list .cl-value { font-weight: 600; }
+    .collector-list .cl-note { color: var(--text-light); font-size: 0.76rem; }
+    .collector-list li.is-conflict .cl-value { color: #8a6d00; }
+    .collector-warn {
+      margin: 12px 0;
+      padding: 10px 14px;
+      background: #fff8e1;
+      border-left: 4px solid var(--warning);
+      border-radius: 4px;
+      font-size: 0.82rem;
+      color: #5c4a00;
+      line-height: 1.5;
+    }
+    .collector-warn ul { margin: 6px 0 0 18px; }
+    .collector-apply { display: flex; gap: 10px; margin-top: 16px; align-items: center; }
+    .collector-done { font-size: 0.82rem; color: var(--success); font-weight: 600; }
+
     .meta-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -2755,6 +2812,34 @@
     <div class="toolbar-group">
       <button class="btn btn-primary" onclick="exportToPDF()" title="Print / Save as PDF">📄 Export PDF</button>
       <button class="btn btn-success" onclick="exportToExcel()" title="Export to Excel spreadsheet">📊 Export Excel</button>
+    </div>
+  </div>
+
+  <!-- Collector import -->
+  <div class="collector-panel collapsed" id="collector-panel">
+    <h2 onclick="toggleCollectorPanel()">
+      <span class="collector-chevron">▼</span>Import collector output
+      <span class="collector-hint">Optional — pre-fill answers from a workspace scan</span>
+    </h2>
+    <div class="collector-body">
+      <p class="collector-intro">
+        Run <a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/tools/sentinel-collector.sh" target="_blank">sentinel-collector.sh</a>
+        against the customer workspace and load the JSON it produces. The collector is read-only; it reports workspace and table retention,
+        data connectors, installed solutions, deployed workbooks and which tables have recently received data.
+        <br>Anything the collector could not determine is left for you to assess — it never marks a check as <em>Not configured</em>.
+      </p>
+      <div class="collector-actions">
+        <label class="btn" title="Load a collector JSON file">
+          📥 Choose collector JSON
+          <input type="file" accept=".json" style="display:none" onchange="onCollectorFileChosen(event)">
+        </label>
+        <label class="collector-opt" title="By default only unanswered checks are filled in">
+          <input type="checkbox" id="collector-overwrite" onchange="renderCollectorPreview()">
+          Overwrite answers that are already set
+        </label>
+        <span class="collector-file" id="collector-file"></span>
+      </div>
+      <div class="collector-preview" id="collector-preview" style="display:none;"></div>
     </div>
   </div>
 
@@ -10903,6 +10988,483 @@ function loadFromJSON(event) {
   event.target.value = '';
 }
 
+// ===================== COLLECTOR IMPORT =====================
+// Consumes the neutral JSON contract emitted by tools/sentinel-collector.sh in
+// the Sentinel-Maturity repo. The collector may only ever upgrade "unknown" to
+// "known": a check is left untouched unless there is positive evidence for it.
+// Missing data never becomes "Not configured".
+
+const COLLECTOR_SCHEMAS = ['1.0'];
+// A table seen this recently is treated as proof the connector is flowing.
+const COLLECTOR_FRESH_DAYS = 7;
+
+// Days → the retention option strings used by the workspace and per-table selects.
+const COLLECTOR_RETENTION_LABELS = {
+  30: '30 days', 60: '60 days', 90: '90 days', 120: '120 days',
+  180: '180 days', 270: '270 days', 365: '365 days',
+  730: '2 years', 1095: '3 years', 1460: '4 years', 1825: '5 years',
+  2190: '6 years', 2555: '7 years', 2920: '8 years', 3285: '9 years',
+  3650: '10 years', 4015: '11 years', 4380: '12 years'
+};
+
+// Content Hub package display names → the Solutions checks.
+const COLLECTOR_SOLUTION_MATCH = {
+  'gen-sol-nse': ['network session essentials'],
+  'gen-sol-soar': ['soar essentials'],
+  'gen-sol-soc': ['soc handbook'],
+  'gen-sol-ueba': ['ueba essentials']
+};
+
+// Deployed workbook display names → the Workbooks checks.
+const COLLECTOR_WORKBOOK_MATCH = {
+  'gen-wb-aha': ['analytics health'],
+  'gen-wb-ablr': ['archiving', 'retention insights', 'log retention'],
+  'gen-wb-ama': ['defender vs ama', 'ama coverage'],
+  'gen-wb-gdpr': ['gdpr'],
+  'gen-wb-cost': ['sentinel cost'],
+  'gen-wb-opt': ['optimization workbook', 'optimisation workbook'],
+  'gen-wb-gsa': ['network traffic insights'],
+  'gen-wb-health': ['sentinel health'],
+  'gen-wb-sox': ['sox'],
+  'gen-wb-usage': ['workspace usage']
+};
+
+// ARM dataConnectors "kind" → connector section. Deliberately short: the ARM
+// connector list under-reports badly, so table activity is the primary signal
+// and this map only adds connectors that have no per-table group to key off.
+const COLLECTOR_CONNECTOR_KINDS = {
+  office365: 'conn-o365',
+  azureactivity: 'conn-azactivity',
+  azureactivitylog: 'conn-azactivity',
+  azureactivedirectory: 'conn-entra',
+  microsoftthreatprotection: 'conn-xdr',
+  microsoftdefenderadvancedthreatprotection: 'conn-xdr',
+  azureadvancedthreatprotection: 'conn-xdr',
+  officeatp: 'conn-xdr',
+  azuresecuritycenter: 'conn-dfc',
+  microsoftcloudappsecurity: 'conn-mdca',
+  microsoftdefenderthreatintelligence: 'conn-ti',
+  threatintelligence: 'conn-ti',
+  threatintelligencetaxii: 'conn-ti',
+  amazonwebservicescloudtrail: 'conn-aws',
+  amazonwebservicess3: 'conn-aws',
+  googlecloudplatform: 'conn-gcp',
+  gcp: 'conn-gcp',
+  iot: 'conn-mdiot',
+  windowsforwardedevents: 'conn-wfe'
+};
+
+let collectorData = null;
+let collectorPlan = null;
+
+function collectorEscape(value) {
+  const div = document.createElement('div');
+  div.textContent = value == null ? '' : String(value);
+  return div.innerHTML;
+}
+
+function toggleCollectorPanel() {
+  const panel = document.getElementById('collector-panel');
+  if (panel) panel.classList.toggle('collapsed');
+}
+
+function collectorRetentionLabel(days) {
+  const n = Number(days);
+  return Number.isFinite(n) ? (COLLECTOR_RETENTION_LABELS[n] || null) : null;
+}
+
+function collectorDaysSince(iso) {
+  const t = Date.parse(iso || '');
+  if (!Number.isFinite(t)) return null;
+  return (Date.now() - t) / 86400000;
+}
+
+// Maps table name → per-table tier select id, derived from the live DOM so it
+// stays correct as connectors are added. Third-party groups are skipped (their
+// table names are typed by the assessor), and any name that resolves to more
+// than one select is dropped as ambiguous.
+function buildCollectorTableIndex() {
+  const seen = new Map();
+  document.querySelectorAll('.check-group[data-tier-enabled]').forEach(group => {
+    if (group.hasAttribute('data-tp-tables')) return;
+    group.querySelectorAll('select.status-select[id]').forEach(sel => {
+      const match = (sel.dataset.item || '').match(/^([A-Za-z][A-Za-z0-9_]*)\b/);
+      if (!match) return;
+      const name = match[1];
+      if (seen.has(name)) seen.set(name, null); // ambiguous
+      else seen.set(name, sel.id);
+    });
+  });
+  const index = new Map();
+  seen.forEach((id, name) => { if (id) index.set(name, id); });
+  return index;
+}
+
+// The gate select of a connector — the first status select in its first group.
+function collectorSetupSelect(section) {
+  const group = section && section.querySelector('.connector-body .check-group');
+  return group ? group.querySelector('select.status-select[id]') : null;
+}
+
+function collectorSelectSupports(sel, value) {
+  return !!(sel && sel.querySelector(`option[value="${CSS.escape(value)}"]`));
+}
+
+function onCollectorFileChosen(event) {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    let parsed;
+    try {
+      parsed = JSON.parse(e.target.result);
+    } catch (err) {
+      alert('That file is not valid JSON: ' + err.message);
+      return;
+    }
+    if (!parsed || typeof parsed !== 'object' || !parsed.schemaVersion) {
+      alert('That does not look like collector output. Expected a file produced by sentinel-collector.sh.');
+      return;
+    }
+    if (!COLLECTOR_SCHEMAS.includes(String(parsed.schemaVersion))) {
+      alert(`Unsupported collector schema "${parsed.schemaVersion}". This checklist understands: ${COLLECTOR_SCHEMAS.join(', ')}.`);
+      return;
+    }
+    collectorData = parsed;
+    const label = document.getElementById('collector-file');
+    if (label) {
+      const when = parsed.collectedAt ? new Date(parsed.collectedAt).toLocaleString() : 'unknown date';
+      label.textContent = `${file.name} — collected ${when}`;
+    }
+    renderCollectorPreview();
+  };
+  reader.readAsText(file);
+}
+
+// Builds the list of proposed changes without touching the page.
+function buildCollectorPlan(data) {
+  const actions = [];
+  const skipped = [];
+  const notes = [];
+  const tableIndex = buildCollectorTableIndex();
+  const activity = new Map();
+  (data.tableActivity || []).forEach(t => {
+    const age = collectorDaysSince(t.lastSeen);
+    if (age !== null) activity.set(t.name, age);
+  });
+
+  const add = (group, target, targetLabel, value, note) => {
+    actions.push({ group, target, targetLabel, value, note: note || '' });
+  };
+
+  // --- Workspace ---
+  const ws = data.workspace;
+  if (ws) {
+    if (ws.name) {
+      add('meta', 'sentinel-workspace', 'Workspace name', ws.name, '');
+    }
+    const wsRet = collectorRetentionLabel(ws.retentionInDays);
+    if (wsRet) {
+      add('meta', 'workspace-default-retention', 'Workspace default analytics retention', wsRet, '');
+    } else if (ws.retentionInDays != null) {
+      skipped.push(`Workspace retention is ${ws.retentionInDays} days, which is not one of the selectable periods.`);
+    }
+  }
+
+  // --- Solutions and workbooks ---
+  const packageNames = (data.contentPackages || []).map(p => (p.displayName || '').toLowerCase());
+  const workbookNames = (data.workbooks || []).map(w => (w.displayName || '').toLowerCase());
+  const matchAny = (haystack, needles) => needles.some(n => haystack.some(h => h.includes(n)));
+
+  if (data.contentPackages) {
+    Object.entries(COLLECTOR_SOLUTION_MATCH).forEach(([id, needles]) => {
+      if (matchAny(packageNames, needles)) add('solutions', id, null, 'Configured', 'solution installed');
+    });
+  } else {
+    notes.push('Content packages were not collected, so no solution checks were filled in.');
+  }
+
+  if (data.workbooks) {
+    Object.entries(COLLECTOR_WORKBOOK_MATCH).forEach(([id, needles]) => {
+      if (matchAny(workbookNames, needles)) add('workbooks', id, null, 'Configured', 'workbook deployed');
+    });
+  } else {
+    notes.push('Workbooks were not collected, so no workbook checks were filled in.');
+  }
+
+  // --- Per-table tier, from plan plus observed activity ---
+  const planByTable = new Map();
+  ((data.tables && data.tables.nonDefault) || []).forEach(t => planByTable.set(t.name, t));
+
+  const connectorHasFreshTable = new Set();
+  const tierSetByPlan = new Set();
+
+  tableIndex.forEach((selectId, tableName) => {
+    const age = activity.get(tableName);
+    if (age === undefined) return; // no evidence of data — leave for the assessor
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    const days = Math.floor(age);
+
+    // Per-table rows offer no "To verify" option, so a stale table becomes a
+    // prompt for the assessor rather than an answer.
+    if (age > COLLECTOR_FRESH_DAYS) {
+      notes.push(`${tableName} last received data ${days} days ago — confirm whether it is still flowing.`);
+      return;
+    }
+
+    const section = sel.closest('.connector-section[id^="conn-"]');
+    const row = planByTable.get(tableName);
+    const isLake = !!(row && row.plan && row.plan !== 'Analytics');
+    const value = isLake ? 'Configured (Lake)' : 'Configured';
+
+    if (!collectorSelectSupports(sel, value)) {
+      skipped.push(`${tableName}: this checklist row does not offer "${value}".`);
+      return;
+    }
+    if (section) connectorHasFreshTable.add(section.id);
+    tierSetByPlan.add(selectId);
+    add('tables', selectId, tableName, value,
+      days <= 0 ? 'data seen today' : `data last seen ${days} day${days === 1 ? '' : 's'} ago`);
+  });
+
+  // --- Connector setup gates ---
+  const gateReason = new Map();
+  connectorHasFreshTable.forEach(id => gateReason.set(id, 'tables are receiving data'));
+  if (data.dataConnectors) {
+    data.dataConnectors.forEach(c => {
+      const connId = COLLECTOR_CONNECTOR_KINDS[String(c.kind || '').toLowerCase()];
+      if (!connId) return;
+      if (!(c.enabledStreams && c.enabledStreams.length)) return;
+      if (!gateReason.has(connId)) gateReason.set(connId, `connector "${c.kind}" is enabled in Sentinel`);
+    });
+  } else {
+    notes.push('Data connectors were not collected; connector status was inferred from table activity only.');
+  }
+
+  gateReason.forEach((reason, connId) => {
+    const section = document.getElementById(connId);
+    const sel = collectorSetupSelect(section);
+    if (!sel || !collectorSelectSupports(sel, 'Configured')) return;
+    const heading = section.querySelector('.connector-header h3');
+    const name = heading ? (heading.childNodes[0].textContent || connId).trim() : connId;
+    add('connectors', sel.id, name, 'Configured', reason);
+  });
+
+  // --- Per-table retention overrides ---
+  // Retention state is only meaningful once the table's tier is known: the
+  // controls stay hidden otherwise, so writing it would be invisible state.
+  const wsAnalytics = ws ? collectorRetentionLabel(ws.retentionInDays) : null;
+  ((data.tables && data.tables.nonDefault) || []).forEach(row => {
+    const selectId = tableIndex.get(row.name);
+    if (!selectId) return;
+    const tierSel = document.getElementById(selectId);
+    const tierKnown = tierSetByPlan.has(selectId) ||
+      (tierSel && (tierSel.value === 'Configured' || tierSel.value === 'Configured (Lake)'));
+    if (!tierKnown) {
+      skipped.push(`${row.name}: retention override recorded in Azure, but the table tier is not set here yet.`);
+      return;
+    }
+    const isLake = !!(row.plan && row.plan !== 'Analytics');
+    if (row.retentionIsDefault === false && !isLake) {
+      const label = collectorRetentionLabel(row.retentionInDays);
+      if (label) {
+        add('retention', selectId, row.name, label,
+          label === wsAnalytics ? 'pinned explicitly (same as workspace default)' : 'interactive retention override');
+      } else {
+        skipped.push(`${row.name}: interactive retention of ${row.retentionInDays} days has no matching period.`);
+      }
+    }
+    if (row.totalRetentionIsDefault === false) {
+      const label = collectorRetentionLabel(row.totalRetentionInDays);
+      if (label) {
+        add(isLake ? 'retention-lake' : 'retention-total', selectId, row.name, label,
+          isLake ? 'lake retention override' : 'total retention override');
+      } else {
+        skipped.push(`${row.name}: total retention of ${row.totalRetentionInDays} days has no matching period.`);
+      }
+    }
+  });
+
+  if (data.tables && typeof data.tables.totalCount === 'number') {
+    const deviations = ((data.tables.nonDefault) || []).length;
+    notes.push(`${data.tables.totalCount} tables scanned, ${deviations} with retention or tier deviations.`);
+  }
+  if (!data.tableActivity) {
+    notes.push('Table activity was not collected, so no connector or table status could be confirmed.');
+  }
+
+  return { actions, skipped, notes };
+}
+
+// Splits the plan into what would actually change, honouring the overwrite option.
+function collectorClassify(plan) {
+  const overwrite = !!(document.getElementById('collector-overwrite') || {}).checked;
+  const apply = [];
+  const conflicts = [];
+  const unchanged = [];
+
+  plan.actions.forEach(a => {
+    let current = '';
+    if (a.group === 'retention') current = (tableRetentionState[a.target] || {}).analytics || '';
+    else if (a.group === 'retention-total') current = (tableRetentionState[a.target] || {}).longTerm || '';
+    else if (a.group === 'retention-lake') current = (tableRetentionState[a.target] || {}).lake || '';
+    else {
+      const el = document.getElementById(a.target);
+      current = el ? el.value : '';
+    }
+
+    const entry = Object.assign({}, a, { current });
+    if (current === a.value) unchanged.push(entry);
+    else if (!current) apply.push(entry);
+    else if (overwrite) { entry.conflict = true; apply.push(entry); }
+    else conflicts.push(entry);
+  });
+
+  return { apply, conflicts, unchanged };
+}
+
+const COLLECTOR_GROUP_TITLES = {
+  meta: 'Workspace details',
+  connectors: 'Connector status',
+  tables: 'Table tiers',
+  solutions: 'Solutions',
+  workbooks: 'Workbooks',
+  retention: 'Table retention — interactive',
+  'retention-total': 'Table retention — total',
+  'retention-lake': 'Table retention — lake'
+};
+
+function collectorRowLabel(a) {
+  if (a.targetLabel) return a.targetLabel;
+  const lbl = document.querySelector(`label[for="${CSS.escape(a.target)}"]`);
+  if (!lbl) return a.target;
+  const clone = lbl.cloneNode(true);
+  const detail = clone.querySelector('.check-detail');
+  if (detail) detail.remove();
+  return (clone.textContent || a.target).trim();
+}
+
+function renderCollectorPreview() {
+  const box = document.getElementById('collector-preview');
+  if (!box) return;
+  if (!collectorData) { box.style.display = 'none'; box.innerHTML = ''; return; }
+
+  collectorPlan = buildCollectorPlan(collectorData);
+  const { apply, conflicts, unchanged } = collectorClassify(collectorPlan);
+
+  const grouped = {};
+  apply.forEach(a => { (grouped[a.group] = grouped[a.group] || []).push(a); });
+
+  let html = '';
+  html += '<div class="collector-summary">' +
+    `<div class="collector-stat"><b>${apply.length}</b>to apply</div>` +
+    `<div class="collector-stat"><b>${conflicts.length}</b>already answered differently</div>` +
+    `<div class="collector-stat"><b>${unchanged.length}</b>already match</div>` +
+    '</div>';
+
+  const collectorWarnings = collectorData.warnings || [];
+  if (collectorWarnings.length) {
+    html += '<div class="collector-warn"><strong>The collector could not read everything.</strong> ' +
+      'Those areas are left untouched.<ul>' +
+      collectorWarnings.map(w => `<li>${collectorEscape(w.message || w.code || '')}</li>`).join('') +
+      '</ul></div>';
+  }
+
+  Object.keys(COLLECTOR_GROUP_TITLES).forEach(key => {
+    const rows = grouped[key];
+    if (!rows || !rows.length) return;
+    html += `<div class="collector-group"><h4>${COLLECTOR_GROUP_TITLES[key]} (${rows.length})</h4><ul class="collector-list">`;
+    rows.forEach(a => {
+      html += `<li${a.conflict ? ' class="is-conflict"' : ''}>` +
+        `<span class="cl-target">${collectorEscape(collectorRowLabel(a))}</span>` +
+        `<span class="cl-value">${collectorEscape(a.value)}</span>` +
+        (a.conflict ? `<span class="cl-note">replaces “${collectorEscape(a.current)}”</span>`
+                    : (a.note ? `<span class="cl-note">${collectorEscape(a.note)}</span>` : '')) +
+        '</li>';
+    });
+    html += '</ul></div>';
+  });
+
+  if (conflicts.length) {
+    html += `<div class="collector-group"><h4>Left alone — you have already answered these (${conflicts.length})</h4><ul class="collector-list">`;
+    conflicts.forEach(a => {
+      html += '<li>' +
+        `<span class="cl-target">${collectorEscape(collectorRowLabel(a))}</span>` +
+        `<span class="cl-value">${collectorEscape(a.current)}</span>` +
+        `<span class="cl-note">collector suggests “${collectorEscape(a.value)}”</span>` +
+        '</li>';
+    });
+    html += '</ul></div>';
+  }
+
+  const info = collectorPlan.notes.concat(collectorPlan.skipped);
+  if (info.length) {
+    html += '<div class="collector-warn"><strong>For your information.</strong><ul>' +
+      info.map(n => `<li>${collectorEscape(n)}</li>`).join('') + '</ul></div>';
+  }
+
+  html += '<div class="collector-apply">' +
+    `<button class="btn btn-primary" onclick="applyCollectorPlan()"${apply.length ? '' : ' disabled'}>Apply ${apply.length} change${apply.length === 1 ? '' : 's'}</button>` +
+    '<button class="btn" onclick="cancelCollectorImport()">Cancel</button>' +
+    '<span class="collector-done" id="collector-done"></span>' +
+    '</div>';
+
+  box.innerHTML = html;
+  box.style.display = '';
+}
+
+function applyCollectorPlan() {
+  if (!collectorPlan) return;
+  const { apply } = collectorClassify(collectorPlan);
+  if (!apply.length) return;
+
+  // Tier selects must be set before retention, because a table's retention
+  // controls are only rendered once its tier is known.
+  const order = { meta: 0, connectors: 1, solutions: 1, workbooks: 1, tables: 2, retention: 3, 'retention-total': 3, 'retention-lake': 3 };
+  const ordered = apply.slice().sort((a, b) => (order[a.group] || 9) - (order[b.group] || 9));
+
+  let touchedRetention = false;
+
+  ordered.forEach(a => {
+    if (a.group === 'retention' || a.group === 'retention-total' || a.group === 'retention-lake') {
+      const field = a.group === 'retention' ? 'analytics' : (a.group === 'retention-total' ? 'longTerm' : 'lake');
+      if (!tableRetentionState[a.target]) tableRetentionState[a.target] = {};
+      tableRetentionState[a.target][field] = a.value;
+      touchedRetention = true;
+      return;
+    }
+    const el = document.getElementById(a.target);
+    if (!el) return;
+    el.value = a.value;
+    if (a.target === 'workspace-default-retention') onWorkspaceRetentionChange();
+    else if (el.classList.contains('status-select')) onStatusChange(el);
+  });
+
+  if (touchedRetention && typeof refreshAllTableRetentionCells === 'function') refreshAllTableRetentionCells();
+
+  updateProgress();
+  updateTodoSummary();
+  if (typeof updateAcceptedRisks === 'function') updateAcceptedRisks();
+  if (typeof updateConfigWarnings === 'function') updateConfigWarnings();
+  if (typeof updateXdrUebaWarnings === 'function') updateXdrUebaWarnings();
+  if (typeof saveState === 'function') { try { saveState(); } catch (e) {} }
+  if (connectorFilterState.status.size) applyConnectorFilters();
+
+  renderCollectorPreview();
+  const done = document.getElementById('collector-done');
+  if (done) done.textContent = `Applied ${apply.length} change${apply.length === 1 ? '' : 's'}.`;
+}
+
+function cancelCollectorImport() {
+  collectorData = null;
+  collectorPlan = null;
+  const label = document.getElementById('collector-file');
+  if (label) label.textContent = '';
+  renderCollectorPreview();
+}
+
 // ===================== EXPORT PDF =====================
 function exportToPDF() {
   // Clone the assessment content into the preview overlay
@@ -10931,7 +11493,7 @@ function exportToPDF() {
   clone.querySelectorAll('.search-hidden').forEach(s => s.classList.remove('search-hidden'));
 
   // Remove interactive elements from the clone (toolbar, search, buttons)
-  clone.querySelectorAll('.toolbar, .connector-search, .filter-empty, .connector-quick-actions, .btn, .btn-icon, .manual-todo-input').forEach(el => el.remove());
+  clone.querySelectorAll('.toolbar, .collector-panel, .connector-search, .filter-empty, .connector-quick-actions, .btn, .btn-icon, .manual-todo-input').forEach(el => el.remove());
 
   document.getElementById('report-content').innerHTML = '';
   document.getElementById('report-content').appendChild(clone);
