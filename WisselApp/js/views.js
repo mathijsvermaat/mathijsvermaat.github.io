@@ -1,5 +1,7 @@
 // HTML templates and small render helpers. Vanilla strings — no framework.
 
+import { getAvailablePlayerIds } from './scheduler.js';
+
 export const FORMAT_PRESETS = [
   { id: 'jo8',  label: 'JO8/JO9 (6v6 met keeper)',   onField: 6,  totalMinutes: 40, halves: 2, quartersPerHalf: 2 },
   { id: 'jo10', label: 'JO10/JO11 (8v8)',            onField: 8,  totalMinutes: 50, halves: 2, quartersPerHalf: 2 },
@@ -161,6 +163,7 @@ export function viewStats(players, history) {
       <td>${escapeHtml(p.firstName)}</td>
       <td>${h.games}</td>
       <td>${fmtMin(h.totalSeconds)}</td>
+      <td>${h.games ? fmtTime(h.totalSeconds / h.games) : '-'}</td>
       <td>${fmtMin(h.keeperSeconds)}</td>
       <td>${h.keeperGames}</td>
       <td>${h.goals || 0}</td>
@@ -169,12 +172,22 @@ export function viewStats(players, history) {
   return `
     <div class="card">
       <h3>Speeltijd over alle wedstrijden</h3>
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Speeltijd per speler">
       <table class="stats">
-        <thead><tr><th>Speler</th><th>Wedstr.</th><th>Totaal</th><th>Keeper</th><th>Keeper×</th><th>⚽</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="6" class="empty-cell">Geen data</td></tr>'}</tbody>
+        <thead><tr><th>Speler</th><th>Wedstr.</th><th>Totaal</th><th title="Gemiddelde minuten:seconden per gespeelde wedstrijd">Gem./wedstrijd</th><th>Keeper</th><th>Keeper×</th><th>⚽</th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="7" class="empty-cell">Geen data</td></tr>'}</tbody>
       </table>
+      </div>
     </div>
   `;
+}
+
+export function renderFairness(plan) {
+  if (!plan.fairness) return '';
+  const { spreadSec, limitSec, withinLimit } = plan.fairness;
+  const label = plan.fairness.basis === 'availability' ? 'Verschil verdeling naar aanwezigheid' : 'Verschil speeltijd';
+  return `<p class="sub" role="status">${label}: ${fmtTime(spreadSec)}.
+    ${withinLimit ? '' : `Doel maximaal ${fmtTime(limitSec)} niet bereikt met deze keepers, wisselintervallen en vastgelegde speeltijd.`}</p>`;
 }
 
 // ---------- Match setup wizard ----------
@@ -226,20 +239,20 @@ export function viewMatchSetup(match, players, history, plan) {
           </div>
         `).join('')}
         <h4>Geplande speeltijd</h4>
-        <p class="sub">${match.ignoreHistory
-          ? 'Geschiedenis wordt <b>genegeerd</b>: minuten worden alleen binnen deze wedstrijd zo eerlijk mogelijk verdeeld.'
-          : 'De planning verdeelt minuten zo eerlijk mogelijk binnen deze wedstrijd én verrekent de totalen uit eerdere wedstrijden: spelers met minder historische speeltijd krijgen voorrang.'}</p>
+        ${renderFairness(plan)}
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Geplande speeltijd per speler">
         <table class="stats">
-          <thead><tr><th>Speler</th><th>Historie</th><th>Veld</th><th>Keeper</th><th>Deze wedstr.</th><th>Totaal na</th></tr></thead>
+          <thead><tr><th>Speler</th><th>Historie</th><th>Veld</th><th>Keeper</th><th>Deze wedstr.</th><th>Gem. na</th></tr></thead>
           <tbody>
             ${match.attendingPlayerIds.map((id) => {
               const v = plan.plannedSecondsPerPlayer[id];
               const hist = history[id]?.totalSeconds || 0;
               const after = hist + (v.totalSec || 0);
-              return `<tr><td>${escapeHtml(nameOf(players, id))}</td><td>${fmtMin(hist)}</td><td>${fmtMin(v.fieldSec)}</td><td>${fmtMin(v.keeperSec)}</td><td>${fmtMin(v.totalSec)}</td><td>${fmtMin(after)}</td></tr>`;
+              return `<tr><td>${escapeHtml(nameOf(players, id))}</td><td>${fmtMin(hist)}</td><td>${fmtMin(v.fieldSec)}</td><td>${fmtMin(v.keeperSec)}</td><td>${fmtMin(v.totalSec)}</td><td>${fmtTime(after / ((history[id]?.games || 0) + 1))}</td></tr>`;
             }).join('')}
           </tbody>
         </table>
+        </div>
       </div>
     `;
   }
@@ -311,7 +324,9 @@ export function viewLive(match, players, plan, elapsedSec) {
   const slot = q.slots[curSlot === -1 ? q.slots.length - 1 : curSlot];
   const keeperId = q.keeperId;
   const fieldIds = slot.fieldIds;
-  const benchIds = match.attendingPlayerIds.filter((id) => id !== keeperId && !fieldIds.includes(id) && !(match.injuredIds || []).includes(id));
+  const availableIds = getAvailablePlayerIds(match, elapsedSec);
+  const benchIds = availableIds.filter((id) => id !== keeperId && !fieldIds.includes(id));
+  const departedIds = match.attendingPlayerIds.filter((id) => !availableIds.includes(id) && !(match.injuredIds || []).includes(id));
 
   // All sub events in chronological order
   const allEvents = plan.quarters.flatMap((qq) => qq.subEvents).sort((a, b) => a.atSec - b.atSec);
@@ -382,6 +397,9 @@ export function viewLive(match, players, plan, elapsedSec) {
       </div>
     </div>
     ${isFinished ? '' : `<button id="manual-swap" class="card-action">🔄 Handmatig wisselen</button>`}
+    ${match.status === 'live' && elapsedSec < totalSec ? `<button id="edit-attendance" class="card-action">Aanwezigheid aanpassen</button>` : ''}
+    ${!isFinished && fieldIds.length < fmt.onField - 1 ? `<p class="sub" role="status">Onderbezet: ${fieldIds.length + 1} van ${fmt.onField} spelers.</p>` : ''}
+    ${departedIds.length ? `<div class="sub">Niet meer aanwezig: ${departedIds.map((id) => escapeHtml(nameOf(players, id))).join(', ')}</div>` : ''}
 
     ${(match.injuredIds && match.injuredIds.length) ? `
     <div class="card injured-card">
@@ -391,6 +409,7 @@ export function viewLive(match, players, plan, elapsedSec) {
 
     <div class="card">
       <h3>Tijdlijn wissels</h3>
+      ${isFinished ? '' : renderFairness(plan)}
       <div class="tl-head"><div>Eraf</div><div>Resterend</div><div>Erin</div></div>
       <div class="timeline">${timelineHtml || '<div class="sub">Geen wissels.</div>'}</div>
     </div>

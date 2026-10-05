@@ -111,7 +111,7 @@ export function suggestKeepers(attendingIds, history, format) {
  *     plannedSecondsPerPlayer: { pid: { fieldSec, keeperSec, totalSec } }
  *   }
  */
-export function buildPlan(match, history) {
+export function buildPlan(match, history = {}) {
   const fmt = match.format;
   const qSec = quarterSeconds(fmt);
   const fieldSlotsCount = fmt.onField - 1; // excluding keeper
@@ -123,20 +123,14 @@ export function buildPlan(match, history) {
   const planned = {};
   match.attendingPlayerIds.forEach((id) => (planned[id] = { fieldSec: 0, keeperSec: 0 }));
 
-  // For fairness, compute "deficit" from history: average minus this player's history.
-  // Lower history => higher priority.
-  const histTotal = (pid) => (history[pid]?.totalSeconds || 0);
-  const avgHist = match.attendingPlayerIds.reduce((s, p) => s + histTotal(p), 0) / match.attendingPlayerIds.length;
-
-  // Priority score (higher = wants more time): deficit + (-already planned this match).
-  const priority = (pid) => (avgHist - histTotal(pid)) - (planned[pid].fieldSec + planned[pid].keeperSec) * 1.0;
+  match.keeperPerQuarter.forEach((keeperId) => { planned[keeperId].keeperSec += qSec; });
+  const priority = (pid) => -(planned[pid].fieldSec + planned[pid].keeperSec);
 
   const quarters = [];
   let prevFieldSet = new Set();
 
   for (let q = 0; q < totalQuarters(fmt); q++) {
     const keeperId = match.keeperPerQuarter[q];
-    planned[keeperId].keeperSec += qSec;
 
     const fieldCandidates = match.attendingPlayerIds.filter((id) => id !== keeperId);
     const slots = [];
@@ -226,11 +220,162 @@ export function buildPlan(match, history) {
     };
   });
 
-  return { quarters, plannedSecondsPerPlayer, slotSec, slotsPerQuarter, qSec };
+  const plan = { quarters, plannedSecondsPerPlayer, slotSec, slotsPerQuarter, qSec };
+  balancePlan(plan, match, history);
+  return plan;
 }
 
 function pickTop(ids, n, scoreFn) {
   return [...ids].sort((a, b) => scoreFn(b) - scoreFn(a)).slice(0, n);
+}
+
+export function getAvailablePlayerIds(match, atSec = Infinity) {
+  const changes = match.availabilityChanges || [];
+  const current = changes.filter((change) => change.atSec <= atSec).at(-1);
+  return (current ? current.playerIds : match.attendingPlayerIds)
+    .filter((id) => !(match.injuredIds || []).includes(id));
+}
+
+function availabilityTargets(match) {
+  const targets = Object.fromEntries(match.attendingPlayerIds.map((id) => [id, 0]));
+  const changes = match.availabilityChanges || [];
+  for (let index = 0; index < changes.length; index++) {
+    const change = changes[index];
+    const endSec = changes[index + 1]?.atSec ?? matchSeconds(match.format);
+    const share = (endSec - change.atSec) * Math.min(1, match.format.onField / change.playerIds.length);
+    for (const id of change.playerIds) targets[id] += share;
+  }
+  return targets;
+}
+
+export function setPlayerAvailability(plan, match, atSec, playerId, available, history = {}) {
+  if (match.status === 'finished' || match.finishedAt || !Number.isFinite(atSec)
+    || atSec < 0 || atSec >= matchSeconds(match.format) || !playerId || typeof available !== 'boolean') return false;
+  if (atSec < (match.availabilityChanges?.at(-1)?.atSec || 0)) return false;
+  const active = getAvailablePlayerIds(match);
+  if (active.includes(playerId) === available || (match.injuredIds || []).includes(playerId)) return false;
+  const quarter = plan.quarters.find((item) => item.startSec <= atSec && atSec < item.endSec);
+  if (!quarter || (!available && (active.length <= 1 || (quarter.keeperId === playerId && quarter.startSec < atSec)))) return false;
+  const slot = quarter.slots.find((item) => item.startSec <= atSec && atSec < item.endSec);
+  if (!slot) return false;
+  const nextActive = available ? [...active, playerId] : active.filter((id) => id !== playerId);
+  match.availabilityChanges ||= [{ atSec: 0, playerIds: [...active] }];
+  if (match.availabilityChanges.at(-1).atSec === atSec) match.availabilityChanges.pop();
+  match.availabilityChanges.push({ atSec, playerIds: nextActive });
+  if (!match.attendingPlayerIds.includes(playerId)) match.attendingPlayerIds.push(playerId);
+
+  for (const futureQuarter of plan.quarters) {
+    if (futureQuarter.startSec >= atSec && !nextActive.includes(futureQuarter.keeperId)) {
+      futureQuarter.keeperId = pickReplacementKeeper(plan, match, nextActive, futureQuarter, atSec);
+    }
+  }
+  match.keeperPerQuarter = plan.quarters.map((item) => item.keeperId);
+  let currentSlot = slot;
+  if (slot.startSec < atSec) {
+    currentSlot = { startSec: atSec, endSec: slot.endSec, fieldIds: [...slot.fieldIds] };
+    slot.endSec = atSec;
+    quarter.slots.splice(quarter.slots.indexOf(slot) + 1, 0, currentSlot);
+  }
+  currentSlot.fieldIds = currentSlot.fieldIds.filter((id) => nextActive.includes(id) && id !== quarter.keeperId);
+  const played = Object.fromEntries(nextActive.map((id) => [id, 0]));
+  for (const item of plan.quarters) {
+    if (played[item.keeperId] !== undefined) played[item.keeperId] += Math.max(0, Math.min(atSec, item.endSec) - item.startSec);
+    for (const pastSlot of item.slots) {
+      const duration = Math.max(0, Math.min(atSec, pastSlot.endSec) - pastSlot.startSec);
+      for (const id of pastSlot.fieldIds) if (played[id] !== undefined) played[id] += duration;
+    }
+  }
+  const candidates = nextActive.filter((id) => id !== quarter.keeperId && !currentSlot.fieldIds.includes(id));
+  currentSlot.fieldIds.push(...pickTop(candidates, Math.max(0, match.format.onField - 1 - currentSlot.fieldIds.length), (id) => -played[id]));
+  rebuildFutureSlots(plan, match, currentSlot.endSec, history);
+  recomputePlanMeta(plan, match, atSec);
+  return true;
+}
+
+function balancePlan(plan, match, history = {}, fromSec = 0) {
+  const active = getAvailablePlayerIds(match);
+  const targets = availabilityTargets(match);
+  const effectiveHistory = match.ignoreHistory ? {} : history;
+  recomputePlanMeta(plan, match, fromSec);
+  const totals = Object.fromEntries(active.map((id) => [id, plan.plannedSecondsPerPlayer[id].totalSec]));
+  const spreadAndVariance = (values) => {
+    if (!values.length) return [0, 0];
+    const average = values.reduce((sum, value) => sum + value, 0) / values.length;
+    return [Math.max(...values) - Math.min(...values), values.reduce((sum, value) => sum + (value - average) ** 2, 0)];
+  };
+  const score = () => {
+    const matchScore = spreadAndVariance(active.map((id) => totals[id] - targets[id]));
+    const averages = active.map((id) => {
+      const past = effectiveHistory[id];
+      return ((past?.totalSeconds || 0) + totals[id]) / ((past?.games || 0) + 1);
+    });
+    return [...matchScore, ...spreadAndVariance(averages)];
+  };
+  const better = (candidate, current) => {
+    for (let index = 0; index < candidate.length; index++) {
+      if (Math.abs(candidate[index] - current[index]) > 0.000001) return candidate[index] < current[index];
+    }
+    return false;
+  };
+  const swapIds = (slots, firstId, secondId) => {
+    for (const slot of slots) {
+      slot.fieldIds = slot.fieldIds.map((id) => id === firstId ? secondId : id === secondId ? firstId : id);
+    }
+  };
+  const groups = plan.quarters.map((quarter) => {
+    const mutable = quarter.slots.filter((slot) => slot.startSec >= fromSec);
+    const segments = mutable.map((slot) => [slot]);
+    if (mutable.length > 1) segments.push(mutable);
+    const candidates = active.filter((id) => id !== quarter.keeperId);
+    const benchCount = Math.max(0, candidates.length - (match.format.onField - 1));
+    const maxSwaps = Math.min(match.subsPerRotation || benchCount, match.format.onField - 1, benchCount);
+    return { quarter, segments, candidates, maxSwaps };
+  });
+  const rotationsValid = ({ quarter, maxSwaps }, segment) => quarter.slots.every((slot, index) => {
+    if (!index || (!segment.includes(slot) && !segment.includes(quarter.slots[index - 1]))) return true;
+    const previous = quarter.slots[index - 1];
+    return previous.fieldIds.filter((id) => !slot.fieldIds.includes(id)).length === maxSwaps;
+  });
+
+  let currentScore = score();
+  for (let pass = 0; pass < Math.min(64, active.length * 4); pass++) {
+    let best = null;
+    let bestScore = currentScore;
+    for (const group of groups) {
+      for (const segment of group.segments) {
+        for (let first = 0; first < group.candidates.length; first++) {
+          for (let second = first + 1; second < group.candidates.length; second++) {
+            const firstId = group.candidates[first];
+            const secondId = group.candidates[second];
+            const delta = segment.reduce((sum, slot) => sum + (slot.endSec - slot.startSec)
+              * (Number(slot.fieldIds.includes(secondId)) - Number(slot.fieldIds.includes(firstId))), 0);
+            if (!delta) continue;
+            totals[firstId] += delta;
+            totals[secondId] -= delta;
+            const candidateScore = score();
+            if (better(candidateScore, bestScore)) {
+              swapIds(segment, firstId, secondId);
+              if (rotationsValid(group, segment)) {
+                best = { segment, firstId, secondId, delta };
+                bestScore = candidateScore;
+              }
+              swapIds(segment, firstId, secondId);
+            }
+            totals[firstId] -= delta;
+            totals[secondId] += delta;
+          }
+        }
+      }
+    }
+    if (!best) break;
+    swapIds(best.segment, best.firstId, best.secondId);
+    totals[best.firstId] += best.delta;
+    totals[best.secondId] -= best.delta;
+    currentScore = bestScore;
+  }
+  recomputePlanMeta(plan, match, fromSec);
+  plan.fairness = { spreadSec: currentScore[0], limitSec: 300, withinLimit: currentScore[0] <= 300.001 };
+  if (match.availabilityChanges?.length) plan.fairness.basis = 'availability';
 }
 
 /**
@@ -241,11 +386,10 @@ function pickTop(ids, n, scoreFn) {
  * mid-match change.
  */
 function rebuildFutureSlots(plan, match, fromSec, history = {}) {
-  const EPS = 0.5;
   const fmt = match.format;
   const fieldSlotsCount = fmt.onField - 1;
-  const injured = new Set(match.injuredIds || []);
-  const active = match.attendingPlayerIds.filter((id) => !injured.has(id));
+  const active = getAvailablePlayerIds(match);
+  const targets = availabilityTargets(match);
 
   const acc = Object.create(null);
   match.attendingPlayerIds.forEach((id) => (acc[id] = 0));
@@ -255,21 +399,19 @@ function rebuildFutureSlots(plan, match, fromSec, history = {}) {
   }
   for (const q of plan.quarters) {
     for (const s of q.slots) {
-      if (s.startSec >= fromSec - EPS) continue;
+      if (s.startSec >= fromSec) continue;
       for (const pid of s.fieldIds) if (acc[pid] !== undefined) acc[pid] += s.endSec - s.startSec;
     }
   }
 
-  const histTotal = (pid) => (history[pid]?.totalSeconds || 0);
-  const avgHist = active.length ? active.reduce((s, p) => s + histTotal(p), 0) / active.length : 0;
-  const priority = (pid) => (avgHist - histTotal(pid)) - acc[pid];
+  const priority = (pid) => targets[pid] - acc[pid];
 
   for (const q of plan.quarters) {
     const candidates = active.filter((id) => id !== q.keeperId);
     if (!candidates.length) continue;
     for (let si = 0; si < q.slots.length; si++) {
       const s = q.slots[si];
-      if (s.startSec < fromSec - EPS) continue;
+      if (s.startSec < fromSec) continue;
       const prev = si > 0 ? q.slots[si - 1].fieldIds : null;
       const restCount = candidates.length - fieldSlotsCount;
       let field;
@@ -292,7 +434,7 @@ function rebuildFutureSlots(plan, match, fromSec, history = {}) {
       field.forEach((id) => { acc[id] += dur; });
     }
   }
-  recomputePlanMeta(plan, match);
+  balancePlan(plan, match, history, fromSec);
 }
 
 /**
@@ -301,8 +443,10 @@ function rebuildFutureSlots(plan, match, fromSec, history = {}) {
  */
 export function setKeeperForQuarter(plan, match, quarterIndex, newKeeperId, atSec, history = {}) {
   const q = plan.quarters[quarterIndex];
+  if (atSec < (match.availabilityChanges?.at(-1)?.atSec || 0)) return false;
+  if (match.status === 'finished' || !Number.isFinite(atSec) || atSec < 0 || (q && q.startSec < atSec)) return false;
   if (!q || !newKeeperId || q.keeperId === newKeeperId) return false;
-  if (!match.attendingPlayerIds.includes(newKeeperId)) return false;
+  if (!getAvailablePlayerIds(match).includes(newKeeperId)) return false;
   if ((match.injuredIds || []).includes(newKeeperId)) return false;
   q.keeperId = newKeeperId;
   match.keeperPerQuarter = plan.quarters.map((qq) => qq.keeperId);
@@ -316,15 +460,17 @@ export function setKeeperForQuarter(plan, match, quarterIndex, newKeeperId, atSe
  * the rest of the match is re-planned to even out the totals again.
  */
 export function applyManualSwap(plan, match, atSec, outId, inId, history = {}) {
-  const q = plan.quarters.find((qq) => atSec < qq.endSec) || plan.quarters[plan.quarters.length - 1];
+  if (atSec < (match.availabilityChanges?.at(-1)?.atSec || 0)) return false;
+  if (match.status === 'finished' || !Number.isFinite(atSec) || atSec < 0 || (match.injuredIds || []).includes(inId)) return false;
+  const q = plan.quarters.find((qq) => atSec >= qq.startSec && atSec < qq.endSec);
+  if (!q) return false;
   const si = q.slots.findIndex((s) => atSec < s.endSec);
   const slot = q.slots[si === -1 ? q.slots.length - 1 : si];
   if (!slot || !slot.fieldIds.includes(outId) || slot.fieldIds.includes(inId)) return false;
-  if (inId === q.keeperId || !match.attendingPlayerIds.includes(inId)) return false;
+  if (inId === q.keeperId || !getAvailablePlayerIds(match).includes(inId)) return false;
   const lockUntil = slot.endSec;
-  const MIN_SPLIT = 5;
-  const at = Math.round(atSec);
-  if (at > slot.startSec + MIN_SPLIT && at < slot.endSec - MIN_SPLIT) {
+  const at = atSec;
+  if (at > slot.startSec) {
     const tail = { startSec: at, endSec: slot.endSec, fieldIds: slot.fieldIds.map((id) => (id === outId ? inId : id)) };
     slot.endSec = at;
     q.slots.splice(q.slots.indexOf(slot) + 1, 0, tail);
@@ -346,9 +492,10 @@ export function applyManualSwap(plan, match, atSec, outId, inId, history = {}) {
  * Past slots are left untouched (history is what it is).
  */
 export function applyInjury(plan, match, atSec, injuredId) {
+  if (atSec < (match.availabilityChanges?.at(-1)?.atSec || 0)) return false;
   const injured = new Set(match.injuredIds || []);
   injured.add(injuredId);
-  const activeIds = match.attendingPlayerIds.filter((id) => !injured.has(id));
+  const activeIds = getAvailablePlayerIds(match).filter((id) => !injured.has(id));
   if (!activeIds.length) return;
 
   // Replace keeper in any FUTURE quarter where the injured player keeps.
@@ -491,7 +638,9 @@ export function recomputePlanMeta(plan, match, fromSec = 0) {
         events.push({ atSec: cur.startSec, type: 'sub', quarter: qi, off, on, keeperId: q.keeperId });
       }
     }
-    q.subEvents = events;
+    q.subEvents = fromSec > 0
+      ? [...(q.subEvents || []).filter((event) => event.atSec < fromSec), ...events.filter((event) => event.atSec >= fromSec)]
+      : events;
   }
 
   // Recompute planned totals (whole match: past + future as planned in slots).
@@ -533,10 +682,12 @@ export function buildHistory(matches) {
     }
     if (src) {
       for (const [pid, v] of Object.entries(src)) {
+        const totalSeconds = v?.totalSec || ((v?.fieldSec || 0) + (v?.keeperSec || 0));
+        if (totalSeconds <= 0) continue;
         if (!h[pid]) h[pid] = { fieldSeconds: 0, keeperSeconds: 0, totalSeconds: 0, keeperGames: 0, games: 0, goals: 0 };
         h[pid].fieldSeconds += v.fieldSec || 0;
         h[pid].keeperSeconds += v.keeperSec || 0;
-        h[pid].totalSeconds += v.totalSec || ((v.fieldSec || 0) + (v.keeperSec || 0));
+        h[pid].totalSeconds += totalSeconds;
         h[pid].games += 1;
         if ((v.keeperSec || 0) > 0) h[pid].keeperGames += 1;
       }

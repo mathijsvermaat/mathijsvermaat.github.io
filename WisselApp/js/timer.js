@@ -68,17 +68,23 @@ export class MatchClock {
    * Re-arms previously-fired alarms when jumping back, so they fire again.
    */
   adjust(deltaSec) {
-    const s = this._state();
-    s.accumulatedSec = Math.max(0, s.accumulatedSec + deltaSec);
-    // Bound by total
-    if (s.runningSinceMs) {
-      // Reset reference moment so the running calc stays correct.
-      s.runningSinceMs = Date.now();
+    if (!Number.isFinite(deltaSec)) return;
+    const state = this._state();
+    const now = Date.now();
+    const elapsed = state.accumulatedSec + (state.runningSinceMs ? (now - state.runningSinceMs) / 1000 : 0);
+    const adjusted = Math.min(this.totalSec, Math.max(0, elapsed + deltaSec));
+    state.accumulatedSec = adjusted;
+    if (state.runningSinceMs) state.runningSinceMs = now;
+    if (deltaSec < 0) {
+      this.firedAlarms = new Set([...this.firedAlarms].filter((alarm) => alarm <= adjusted));
     }
-    // If jumping back, un-fire alarms that are now in the future
-    const newElapsed = s.accumulatedSec + (s.runningSinceMs ? 0 : 0);
-    this.firedAlarms = new Set([...this.firedAlarms].filter((a) => a <= newElapsed));
-    this._save(s);
+    this._save(state);
+    if (adjusted >= this.totalSec) {
+      state.runningSinceMs = null;
+      this._save(state);
+      this._stopLoop();
+      this._releaseWakeLock();
+    }
   }
 
   isRunning() { return !!this._state().runningSinceMs; }
@@ -136,8 +142,8 @@ export class MatchClock {
         this.pause();
       }
     };
-    tick();
     this._tickHandle = setInterval(tick, 250);
+    tick();
   }
   _stopLoop() {
     if (this._tickHandle) { clearInterval(this._tickHandle); this._tickHandle = null; }
