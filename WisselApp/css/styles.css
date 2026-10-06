@@ -156,6 +156,7 @@ button[disabled] { opacity: 0.4; }
 .pname.tappable:active { background: var(--bg2); }
 .pname.injured { color: var(--sub); text-decoration: line-through; }
 .card-action { width: 100%; margin-top: 10px; }
+#view > .card-action { display: block; margin: 0 0 10px; }
 .injured-card { border-color: #5a3a1a; background: #2a1f12; }
 .injured-card h3 { color: var(--warn); }
 
