@@ -100,7 +100,7 @@ button.big { padding: 16px 22px; font-size: 17px; }
 button[disabled] { opacity: 0.4; }
 
 .fab {
-  position: fixed; right: 18px; bottom: 78px;
+  position: fixed; right: 18px; bottom: calc(78px + env(safe-area-inset-bottom, 0px));
   width: 56px; height: 56px; border-radius: 50%;
   background: var(--accent); color: #08120a; border: 0; font-size: 28px; font-weight: 800;
   box-shadow: 0 4px 14px rgba(0,0,0,0.5);
