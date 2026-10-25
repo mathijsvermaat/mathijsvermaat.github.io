@@ -661,16 +661,15 @@ async function renderLive(players, id) {
   async function openAttendanceEditor(returningId = null) {
     if (match.status !== 'live' || match.finishedAt) return;
     if (returningId && !(match.injuredIds || []).includes(returningId)) return;
-    liveCtx.clock.pause();
-    const at = liveCtx.clock.elapsedSec();
-    paint();
-    if (at >= totalSec || !canChangeLineup(at)) return;
+    const context = liveCtx;
+    const openedAt = context.clock.elapsedSec();
+    if (openedAt >= totalSec || !canChangeLineup(openedAt)) return;
     const choice = returningId ? 'add' : await showActionSheet('Aanwezigheid aanpassen', [
       { id: 'add', label: '+ Speler toevoegen' },
       { id: 'remove', label: '&minus; Speler uit wedstrijd halen' },
       { id: 'cancel', label: 'Annuleren' },
     ]);
-    if (choice !== 'add' && choice !== 'remove') return;
+    if (liveCtx !== context || (choice !== 'add' && choice !== 'remove')) return;
     const available = choice === 'add';
     const active = getAvailablePlayerIds(match);
     const candidates = returningId ? [returningId] : available
@@ -687,6 +686,9 @@ async function renderLive(players, id) {
     actions.push({ id: 'cancel', label: 'Annuleren' });
     const selected = returningId ? `p:${returningId}` : await showActionSheet(available ? 'Wie komt erbij of terug?' : 'Wie verlaat de wedstrijd?', actions);
     if (!selected?.startsWith('p:')) return;
+    if (liveCtx !== context || match.status !== 'live' || match.finishedAt) return;
+    const at = context.clock.elapsedSec();
+    if (at >= totalSec || !canChangeLineup(at)) return;
     const playerId = selected.slice(2);
     const wasInjured = (match.injuredIds || []).includes(playerId);
     const before = currentLineup(at);
