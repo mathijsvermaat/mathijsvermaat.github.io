@@ -589,6 +589,9 @@ async function renderLive(players, id) {
       document.getElementById('edit-keepers')?.addEventListener('click', () => openKeeperEditor());
       document.getElementById('manual-swap')?.addEventListener('click', () => openManualSwap());
       document.getElementById('edit-attendance')?.addEventListener('click', () => openAttendanceEditor());
+      view.querySelectorAll('button[data-act="player-return"]').forEach((button) => {
+        button.addEventListener('click', () => openAttendanceEditor(button.dataset.pid));
+      });
       view.querySelectorAll('.tappable[data-pid]').forEach((el) => {
         el.addEventListener('click', () => onPlayerTap(el.dataset.pid, el.dataset.role));
       });
@@ -615,7 +618,7 @@ async function renderLive(players, id) {
     if (choice === 'swap-in') { await openManualSwap(null, pid); return; }
     if (choice !== 'injury') return;
     if (!canChangeLineup(at)) return;
-    if (!confirm(`${name} markeren als geblesseerd? Deze speler wordt uit de rest van de wedstrijd gehaald en het wisselschema wordt bijgewerkt.`)) return;
+    if (!confirm(`${name} markeren als geblesseerd? Deze speler wordt tijdelijk uit het schema gehaald en het wisselschema wordt bijgewerkt.`)) return;
     match.injuredIds = match.injuredIds || [];
     if (!match.injuredIds.includes(pid)) match.injuredIds.push(pid);
     applyInjury(plan, match, at, pid);
@@ -655,13 +658,14 @@ async function renderLive(players, id) {
     return true;
   }
 
-  async function openAttendanceEditor() {
+  async function openAttendanceEditor(returningId = null) {
     if (match.status !== 'live' || match.finishedAt) return;
+    if (returningId && !(match.injuredIds || []).includes(returningId)) return;
     liveCtx.clock.pause();
     const at = liveCtx.clock.elapsedSec();
     paint();
     if (at >= totalSec || !canChangeLineup(at)) return;
-    const choice = await showActionSheet('Aanwezigheid aanpassen', [
+    const choice = returningId ? 'add' : await showActionSheet('Aanwezigheid aanpassen', [
       { id: 'add', label: '+ Speler toevoegen' },
       { id: 'remove', label: '&minus; Speler uit wedstrijd halen' },
       { id: 'cancel', label: 'Annuleren' },
@@ -669,18 +673,22 @@ async function renderLive(players, id) {
     if (choice !== 'add' && choice !== 'remove') return;
     const available = choice === 'add';
     const active = getAvailablePlayerIds(match);
-    const candidates = available
-      ? players.filter((player) => player.active !== false && !active.includes(player.id) && !(match.injuredIds || []).includes(player.id)).map((player) => player.id)
+    const candidates = returningId ? [returningId] : available
+      ? players.filter((player) => player.active !== false && !active.includes(player.id)).map((player) => player.id)
       : active;
     if (!candidates.length) {
       showAlert('Geen spelers beschikbaar', 'Alle beschikbare teamspelers zijn al aanwezig.', { sound: false, vib: false });
       return;
     }
-    const actions = candidates.map((playerId) => ({ id: `p:${playerId}`, label: V.escapeHtml(V.nameOf(players, playerId)) }));
+    const actions = candidates.map((playerId) => ({
+      id: `p:${playerId}`,
+      label: `${V.escapeHtml(V.nameOf(players, playerId))}${(match.injuredIds || []).includes(playerId) ? ' <span class="sub">(geblesseerd)</span>' : ''}`,
+    }));
     actions.push({ id: 'cancel', label: 'Annuleren' });
-    const selected = await showActionSheet(available ? 'Wie is erbij gekomen?' : 'Wie verlaat de wedstrijd?', actions);
+    const selected = returningId ? `p:${returningId}` : await showActionSheet(available ? 'Wie komt erbij of terug?' : 'Wie verlaat de wedstrijd?', actions);
     if (!selected?.startsWith('p:')) return;
     const playerId = selected.slice(2);
+    const wasInjured = (match.injuredIds || []).includes(playerId);
     const before = currentLineup(at);
     const oldLineup = [before.q.keeperId, ...before.fieldIds];
     if (!available && before.q.keeperId === playerId && before.q.startSec < at) {
@@ -697,7 +705,7 @@ async function renderLive(players, id) {
     const on = newLineup.filter((playerId) => !oldLineup.includes(playerId));
     const names = (playerIds) => playerIds.map((playerId) => V.escapeHtml(V.nameOf(players, playerId))).join(', ');
     await persistPlanChange();
-    showAlert('Aanwezigheid bijgewerkt', `<div>${available ? 'Toegevoegd' : 'Vertrokken'}: <b>${V.escapeHtml(V.nameOf(players, playerId))}</b></div>
+    showAlert('Aanwezigheid bijgewerkt', `<div>${available ? (wasInjured ? 'Terug in wedstrijd' : 'Toegevoegd') : 'Vertrokken'}: <b>${V.escapeHtml(V.nameOf(players, playerId))}</b></div>
       ${off.length ? `<div><b>Nu eraf:</b> ${names(off)}</div>` : ''}
       ${on.length ? `<div><b>Nu erin:</b> ${names(on)}</div>` : ''}
       ${newLineup.length < match.format.onField ? `<div>Onderbezet: ${newLineup.length} van ${match.format.onField} spelers.</div>` : ''}

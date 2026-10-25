@@ -404,7 +404,10 @@ export function viewLive(match, players, plan, elapsedSec) {
     ${(match.injuredIds && match.injuredIds.length) ? `
     <div class="card injured-card">
       <h3>🩹 Geblesseerd / uit wedstrijd</h3>
-      ${match.injuredIds.map((id) => `<div class="pname injured">${escapeHtml(nameOf(players, id))}</div>`).join('')}
+      ${match.injuredIds.map((id) => `<div class="row between gap">
+        <span class="pname injured">${escapeHtml(nameOf(players, id))}</span>
+        ${match.status === 'live' && !match.finishedAt && elapsedSec < totalSec ? `<button class="link" data-act="player-return" data-pid="${id}" aria-label="${escapeHtml(nameOf(players, id))}: terug in wedstrijd">Terug in wedstrijd</button>` : ''}
+      </div>`).join('')}
     </div>` : ''}
 
     <div class="card">

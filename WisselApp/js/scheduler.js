@@ -253,11 +253,13 @@ export function setPlayerAvailability(plan, match, atSec, playerId, available, h
     || atSec < 0 || atSec >= matchSeconds(match.format) || !playerId || typeof available !== 'boolean') return false;
   if (atSec < (match.availabilityChanges?.at(-1)?.atSec || 0)) return false;
   const active = getAvailablePlayerIds(match);
-  if (active.includes(playerId) === available || (match.injuredIds || []).includes(playerId)) return false;
+  const isInjured = (match.injuredIds || []).includes(playerId);
+  if (active.includes(playerId) === available || (isInjured && !available)) return false;
   const quarter = plan.quarters.find((item) => item.startSec <= atSec && atSec < item.endSec);
   if (!quarter || (!available && (active.length <= 1 || (quarter.keeperId === playerId && quarter.startSec < atSec)))) return false;
   const slot = quarter.slots.find((item) => item.startSec <= atSec && atSec < item.endSec);
   if (!slot) return false;
+  if (isInjured) match.injuredIds = match.injuredIds.filter((id) => id !== playerId);
   const nextActive = available ? [...active, playerId] : active.filter((id) => id !== playerId);
   match.availabilityChanges ||= [{ atSec: 0, playerIds: [...active] }];
   if (match.availabilityChanges.at(-1).atSec === atSec) match.availabilityChanges.pop();
