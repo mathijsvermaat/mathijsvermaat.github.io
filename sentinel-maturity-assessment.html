@@ -3105,7 +3105,7 @@
             </div>
           </div>
           <div class="check-group">
-            <div class="check-group-title">Configuration</div>
+            <div class="check-group-title">Configuration&emsp;·&emsp;<a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/procedures/retention-insights.md" target="_blank" rel="noopener" onclick="event.stopPropagation()">Retention Insights&nbsp;↗</a>&emsp;<a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/procedures/sentinel-table-retention.md" target="_blank" rel="noopener" onclick="event.stopPropagation()">Sentinel Table Retention&nbsp;↗</a></div>
             <div class="check-item">
               <select class="status-select" id="gen-ws-c1" data-tier="general" data-connector="Workspace" data-item="Workspace default analytics retention configured" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
@@ -3222,6 +3222,12 @@
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
               <label for="gen-wb-ablr">Archiving, Basic Logs &amp; Retention workbook deployed<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/procedures/retention-insights.md" target="_blank" onclick="event.stopPropagation()">Guidance ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/ArchivingBasicLogsRetention.json" target="_blank" onclick="event.stopPropagation()">GitHub source ↗</a></div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="gen-wb-str" data-tier="general" data-connector="Workbooks" data-item="Sentinel Table Retention workbook deployed" onchange="onStatusChange(this)">
+                <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="gen-wb-str">Sentinel Table Retention workbook deployed<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/procedures/sentinel-table-retention.md" target="_blank" rel="noopener" onclick="event.stopPropagation()">Guidance ↗</a>&emsp;<a href="https://github.com/mathijsvermaat/Sentinel-Table-Retention-Workbook" target="_blank" rel="noopener" onclick="event.stopPropagation()">GitHub source ↗</a>&emsp;<a href="https://www.linkedin.com/pulse/beyond-one-table-time-managing-microsoft-sentinel-data-vermaat-gqgue/" target="_blank" rel="noopener" onclick="event.stopPropagation()">Blog ↗</a></div></label>
             </div>
             <div class="check-item">
               <select class="status-select" id="gen-wb-ama" data-tier="general" data-connector="Workbooks" data-item="Defender vs AMA coverage workbook deployed" onchange="onStatusChange(this)">
@@ -4116,7 +4122,11 @@
     <div class="tier-body">
       <div class="connector-section" id="lite-conn-retention" style="border-top:0;">
         <div class="connector-header" style="cursor:default;">
-          <h3>Workspace and table retention<div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/azure-monitor/logs/data-retention-configure" target="_blank" rel="noopener" onclick="event.stopPropagation()">Learn ↗</a>&emsp;<a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/procedures/retention-insights.md" target="_blank" rel="noopener" onclick="event.stopPropagation()">Workbook Guidance ↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/ArchivingBasicLogsRetention.json" target="_blank" rel="noopener" onclick="event.stopPropagation()">Workbook ↗</a></div></h3>
+          <h3>Workspace and table retention
+            <div class="check-detail"><a href="https://learn.microsoft.com/en-us/azure/azure-monitor/logs/data-retention-configure" target="_blank" rel="noopener" onclick="event.stopPropagation()">Learn ↗</a></div>
+            <div class="check-detail">Retention Insights: <a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/procedures/retention-insights.md" target="_blank" rel="noopener" onclick="event.stopPropagation()">Guidance&nbsp;↗</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/blob/master/Workbooks/ArchivingBasicLogsRetention.json" target="_blank" rel="noopener" onclick="event.stopPropagation()">Workbook&nbsp;↗</a></div>
+            <div class="check-detail">Sentinel Table Retention: <a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/procedures/sentinel-table-retention.md" target="_blank" rel="noopener" onclick="event.stopPropagation()">Guidance&nbsp;↗</a>&emsp;<a href="https://github.com/mathijsvermaat/Sentinel-Table-Retention-Workbook" target="_blank" rel="noopener" onclick="event.stopPropagation()">Workbook&nbsp;↗</a>&emsp;<a href="https://www.linkedin.com/pulse/beyond-one-table-time-managing-microsoft-sentinel-data-vermaat-gqgue/" target="_blank" rel="noopener" onclick="event.stopPropagation()">Blog&nbsp;↗</a></div>
+          </h3>
           <span class="cost-badge free">Workspace</span>
         </div>
         <div class="connector-body" style="display:block;">
@@ -11019,6 +11029,7 @@ const COLLECTOR_SOLUTION_MATCH = {
 const COLLECTOR_WORKBOOK_MATCH = {
   'gen-wb-aha': ['analytics health'],
   'gen-wb-ablr': ['archiving', 'retention insights', 'log retention'],
+  'gen-wb-str': ['sentinel table retention', 'sentinel data lake retention'],
   'gen-wb-ama': ['defender vs ama', 'ama coverage'],
   'gen-wb-gdpr': ['gdpr'],
   'gen-wb-cost': ['sentinel cost'],
