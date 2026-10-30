@@ -2434,6 +2434,13 @@
     .info-ico:hover::after, .info-ico:focus::after { opacity: 1; }
 
     /* ---------- Full-mode XDR table rows (match Lite visual) ---------- */
+    #conn-copilot .check-item:not(.xdr-tbl-item) > label,
+    #conn-a365 .check-item > label,
+    #conn-agentid .check-item > label {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
     .check-item.xdr-tbl-item {
       display: grid;
       grid-template-columns: minmax(220px, 1fr) auto auto auto;
@@ -4518,6 +4525,9 @@
           <span class="connector-chevron">▼</span>
         </div>
         <div class="connector-body">
+          <div class="connector-note">
+            <strong>Conditional:</strong> Scope by the AI applications and agents in use, not Microsoft 365 Copilot licensing alone. Purview auditing does not guarantee Sentinel collection of every AI event. Verify supported record types and source entitlements; Audit Standard does not make Sentinel ingestion free.
+          </div>
           <div class="check-group">
             <div class="check-group-title">Connector Setup</div>
             <div class="check-item">
@@ -4526,6 +4536,18 @@
               </select>
               <label for="copilot-c1">Connector enabled in Sentinel</label>
             </div>
+            <div class="check-item">
+              <select class="status-select" id="copilot-c2" data-tier="2" data-connector="Copilot / AI Governance" data-item="Source auditing and prerequisites verified" onchange="onStatusChange(this)">
+                <option value="">&mdash; Not assessed &mdash;</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="copilot-c2">Source auditing and prerequisites verified<div class="check-detail">Confirm auditing, permissions and applicable product entitlements. Some non-Microsoft AI scenarios require Purview pay-as-you-go auditing.<br><a href="https://learn.microsoft.com/en-us/purview/audit-copilot" target="_blank">Purview AI audit coverage &nearr;</a></div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="copilot-c3" data-tier="2" data-connector="Copilot / AI Governance" data-item="AI workload and audit event coverage verified" onchange="onStatusChange(this)">
+                <option value="">&mdash; Not assessed &mdash;</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="copilot-c3">AI workload and audit event coverage verified<div class="check-detail">Record the applications, hosts and interaction/administrative events in scope. Validate which CopilotInteraction, ConnectedAIAppInteraction or AIAppInteraction records the current connector supports; do not infer coverage from OfficeActivity or the Purview schema alone.</div></label>
+            </div>
           </div>
           <div class="check-group" data-tier-enabled>
             <div class="check-group-title">Target Table</div>
@@ -4533,7 +4555,7 @@
               <select class="status-select" id="copilot-tbl" data-tier="2" data-connector="Copilot / AI Governance" data-item="CopilotActivity table tier" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="copilot-tbl">CopilotActivity<div class="check-detail">M365 Copilot and Security Copilot activity (via Office Management API)</div></label>
+              <label for="copilot-tbl">CopilotActivity<div class="check-detail">Connector-supported AI audit records via the Office Management API; verify actual workloads, event types and received fields.</div></label>
             </div>
           </div>
           <div class="check-group">
@@ -4542,7 +4564,7 @@
               <select class="status-select" id="copilot-ch1" data-tier="2" data-connector="Copilot / AI Governance" data-item="Analytic rules deployed" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
               </select>
-              <label for="copilot-ch1">Analytic rules deployed</label>
+              <label for="copilot-ch1">Analytic rules deployed<div class="check-detail">Validate rules against the received event types and supported query tier. A safety indicator or prompt-keyword match alone does not establish successful abuse.</div></label>
             </div>
           </div>
           <div class="check-group retention-group" data-prefix="copilot" data-connector="Copilot / AI Governance">
@@ -4555,16 +4577,81 @@
               <select class="status-select" id="copilot-v1" data-tier="2" data-connector="Copilot / AI Governance" data-item="Ingestion (volumes) validated" onchange="onStatusChange(this)">
                 <option value="">— Not assessed —</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option>
               </select>
-              <label for="copilot-v1">Ingestion (volumes) validated<div class="check-detail">Checked with KQL or Workbook, for example Workspace Usage Workbook</div></label>
+              <label for="copilot-v1">Ingestion (volumes) validated<div class="check-detail">Check freshness and representative expected interaction and administrative events for each in-scope workload; unrelated rows or connector status alone do not prove coverage.</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="copilot-v2" data-tier="2" data-connector="Copilot / AI Governance" data-item="AI audit investigation context validated" onchange="onStatusChange(this)">
+                <option value="">&mdash; Not assessed &mdash;</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option><option value="N/A">N/A</option>
+              </select>
+              <label for="copilot-v2">AI audit investigation context validated<div class="check-detail">Inspect available AppIdentity, AppHost, agent/session identifiers and AccessedResources. Messages may contain IDs and flags, not prompt/response text. Record missing fields and protect sensitive evidence.</div></label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="copilot-v3" data-tier="2" data-connector="Copilot / AI Governance" data-item="Applicable AI safety and access signals correlated" onchange="onStatusChange(this)">
+                <option value="">&mdash; Not assessed &mdash;</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option><option value="N/A">N/A</option>
+              </select>
+              <label for="copilot-v3">Applicable AI safety and access signals correlated<div class="check-detail">Where emitted, validate jailbreak/XPIA indicators against agent activity and resource-side evidence using verified identifiers. Reuse existing Defender XDR (including CloudAppEvents) and Defender for Cloud collection paths. Missing fields are not negative verdicts; timing alone does not prove a causal chain.</div></label>
             </div>
           </div>
           <div class="section-comment">
             <label for="copilot-comment">Comments / Rationale — Copilot / AI Governance</label>
-            <textarea id="copilot-comment" data-connector="Copilot / AI Governance" placeholder="e.g. Not applicable — no Copilot licences deployed yet."></textarea>
+            <textarea id="copilot-comment" data-connector="Copilot / AI Governance" placeholder="Record AI workloads, supported audit events, tested identifiers and collection gaps. Justify N/A by workload scope, not licensing alone."></textarea>
           </div>
         </div>
       </div>
 
+      <div class="connector-section collapsed" id="conn-a365" data-lake-only="true">
+        <div class="connector-header" onclick="toggleConnector('conn-a365')">
+          <h3>Microsoft Agent 365 Observability (Preview)<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/agent-365-observability.md" target="_blank" onclick="event.stopPropagation()">Guidance &nearr;</a>&emsp;<a href="https://learn.microsoft.com/azure/sentinel/data-connectors-reference#agent-365" target="_blank" onclick="event.stopPropagation()">Learn &nearr;</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/Agent%20365" target="_blank" onclick="event.stopPropagation()">Solution &nearr;</a>&emsp;<a href="https://github.com/oshezaf/sentinelninja/blob/main/Solutions%20Docs/connectors/a365.md" target="_blank" onclick="event.stopPropagation()">Ninja &nearr;</a></div></h3>
+          <span class="cost-badge paid" title="Verify current entitlement and source-specific charges">Paid</span>
+          <span class="connector-progress" id="conn-a365-progress">0/0</span>
+          <span class="connector-chevron">&#9660;</span>
+        </div>
+        <div class="connector-body">
+          <div class="connector-note">
+            <strong>Preview / Lake only:</strong> Part of the Agent 365 solution. Retention values are assessment inputs; confirm the settings supported by the source.
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Connector Setup</div>
+            <div class="check-item">
+              <select class="status-select" id="a365-c1" data-tier="2" data-connector="Microsoft Agent 365 Observability" data-item="Connector enabled" onchange="onStatusChange(this)">
+                <option value="">&mdash; Not assessed &mdash;</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="a365-c1">Connector enabled in Sentinel<div class="check-detail">Agent 365 data connector; the connector definition lists Global Administrator permissions.</div></label>
+            </div>
+          </div>
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Tables</div>
+            <div class="check-item">
+              <select class="status-select" id="a365-t1" data-tier="2" data-connector="Microsoft Agent 365 Observability" data-item="UnifiedAgentObservability table enabled" onchange="onStatusChange(this)">
+                <option value="">&mdash; Not assessed &mdash;</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="a365-t1">UnifiedAgentObservability<div class="check-detail">Agent activity, tool usage and execution telemetry in Microsoft Sentinel Data Lake.</div></label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Content Hub</div>
+            <div class="check-item">
+              <select class="status-select" id="a365-ch2" data-tier="2" data-connector="Microsoft Agent 365 Observability" data-item="Agent 365 solution installed" onchange="onStatusChange(this)">
+                <option value="">&mdash; Not assessed &mdash;</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="a365-ch2">Agent 365 solution installed<div class="check-detail">Includes the Agent 365 and Microsoft Agent Identities connectors.</div></label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Validation</div>
+            <div class="check-item">
+              <select class="status-select" id="a365-v1" data-tier="2" data-connector="Microsoft Agent 365 Observability" data-item="Ingestion volumes validated" onchange="onStatusChange(this)">
+                <option value="">&mdash; Not assessed &mdash;</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option><option value="N/A">N/A</option>
+              </select>
+              <label for="a365-v1">Ingestion (volumes) validated<div class="check-detail">Check recent records and expected agent activity in the Data Lake query scope.</div></label>
+            </div>
+          </div>
+          <div class="section-comment">
+            <label for="a365-comment">Comments / Rationale &mdash; Agent 365 Observability</label>
+            <textarea id="a365-comment" data-connector="Microsoft Agent 365 Observability" placeholder="Record supported hosts, query scope, tested events, retention constraints and gaps."></textarea>
+          </div>
+        </div>
+      </div>
 
 
       <!-- ===== Microsoft Purview (Data Map / Discovery) ===== -->
@@ -4860,7 +4947,79 @@
 
       <!-- ~~~~~ SUBSECTION: Identity & Access (Extended) ~~~~~ -->
       <div class="subsection-header">Identity &amp; Access (Extended)</div>
-      <div class="subsection-description">Extends identity monitoring with third-party identity provider logs from non-Microsoft identity systems.</div>
+      <div class="subsection-description">Extends identity monitoring with agent identity context and third-party identity provider logs.</div>
+
+      <div class="connector-section collapsed" id="conn-agentid" data-lake-only="true">
+        <div class="connector-header" onclick="toggleConnector('conn-agentid')">
+          <h3>Microsoft Agent Identities (Preview)<div class="check-detail"><a href="https://github.com/mathijsvermaat/Sentinel-Maturity/blob/main/connectors/microsoft-agent-identities.md" target="_blank" onclick="event.stopPropagation()">Guidance &nearr;</a>&emsp;<a href="https://learn.microsoft.com/azure/sentinel/data-connectors-reference#microsoft-agent-identities" target="_blank" onclick="event.stopPropagation()">Learn &nearr;</a>&emsp;<a href="https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/Agent%20365" target="_blank" onclick="event.stopPropagation()">Solution &nearr;</a>&emsp;<a href="https://github.com/oshezaf/sentinelninja/blob/main/Solutions%20Docs/connectors/entranhiassets.md" target="_blank" onclick="event.stopPropagation()">Ninja &nearr;</a></div></h3>
+          <span class="cost-badge paid" title="Verify current entitlement and source-specific charges">Paid</span>
+          <span class="connector-progress" id="conn-agentid-progress">0/0</span>
+          <span class="connector-chevron">&#9660;</span>
+        </div>
+        <div class="connector-body">
+          <div class="connector-note">
+            <strong>Preview / Lake only:</strong> Part of the Agent 365 solution. This connector supplies identity inventory, not sign-in logs. Retention values are assessment inputs; confirm the settings supported by the source.
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Connector Setup</div>
+            <div class="check-item">
+              <select class="status-select" id="agentid-c1" data-tier="2" data-connector="Microsoft Agent Identities" data-item="Connector enabled" onchange="onStatusChange(this)">
+                <option value="">&mdash; Not assessed &mdash;</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="agentid-c1">Connector enabled in Sentinel<div class="check-detail">Microsoft Agent Identities data connector; the definition lists Global Administrator and Security Administrator tenant permissions.</div></label>
+            </div>
+          </div>
+          <div class="check-group" data-tier-enabled>
+            <div class="check-group-title">Tables</div>
+            <div class="check-item">
+              <select class="status-select" id="agentid-t-identities" data-tier="2" data-connector="Microsoft Agent Identities" data-item="EntraAgentIdentities table enabled" onchange="onStatusChange(this)">
+                <option value="">&mdash; Not assessed &mdash;</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="agentid-t-identities">EntraAgentIdentities</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="agentid-t-principals" data-tier="2" data-connector="Microsoft Agent Identities" data-item="EntraAgentIdentityBlueprintPrincipals table enabled" onchange="onStatusChange(this)">
+                <option value="">&mdash; Not assessed &mdash;</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="agentid-t-principals">EntraAgentIdentityBlueprintPrincipals</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="agentid-t-blueprints" data-tier="2" data-connector="Microsoft Agent Identities" data-item="EntraAgentIdentityBlueprints table enabled" onchange="onStatusChange(this)">
+                <option value="">&mdash; Not assessed &mdash;</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="agentid-t-blueprints">EntraAgentIdentityBlueprints</label>
+            </div>
+            <div class="check-item">
+              <select class="status-select" id="agentid-t-users" data-tier="2" data-connector="Microsoft Agent Identities" data-item="EntraAgentUsers table enabled" onchange="onStatusChange(this)">
+                <option value="">&mdash; Not assessed &mdash;</option><option value="Configured (Lake)">Configured (Lake)</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="agentid-t-users">EntraAgentUsers</label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Content Hub</div>
+            <div class="check-item">
+              <select class="status-select" id="agentid-ch1" data-tier="2" data-connector="Microsoft Agent Identities" data-item="Agent 365 solution installed" onchange="onStatusChange(this)">
+                <option value="">&mdash; Not assessed &mdash;</option><option value="Configured">Configured</option><option value="Not configured">Not configured</option><option value="N/A">N/A</option>
+              </select>
+              <label for="agentid-ch1">Agent 365 solution installed<div class="check-detail">Includes the Agent 365 and Microsoft Agent Identities connectors.</div></label>
+            </div>
+          </div>
+          <div class="check-group">
+            <div class="check-group-title">Validation</div>
+            <div class="check-item">
+              <select class="status-select" id="agentid-v1" data-tier="2" data-connector="Microsoft Agent Identities" data-item="Ingestion volumes validated" onchange="onStatusChange(this)">
+                <option value="">&mdash; Not assessed &mdash;</option><option value="Healthy">Healthy</option><option value="Unhealthy">Unhealthy</option><option value="N/A">N/A</option>
+              </select>
+              <label for="agentid-v1">Ingestion (volumes) validated<div class="check-detail">Check the expected agent identities and blueprints and their freshness in the Data Lake query scope.</div></label>
+            </div>
+          </div>
+          <div class="section-comment">
+            <label for="agentid-comment">Comments / Rationale &mdash; Microsoft Agent Identities</label>
+            <textarea id="agentid-comment" data-connector="Microsoft Agent Identities" placeholder="Record verified schema, identity types, known objects, freshness, history limitations and gaps."></textarea>
+          </div>
+        </div>
+      </div>
 
       <!-- ===== Third-Party Identity (dynamic) ===== -->
       <div class="connector-section collapsed" id="conn-thirdpartyid">
@@ -6276,7 +6435,9 @@ function initExpansionSections() {
 
     const planSel = document.createElement('select');
     planSel.id = prefix + '-expansion-plan';
-    planSel.innerHTML = '<option value="Analytics">Analytics</option><option value="Data Lake">Data Lake</option>';
+    planSel.innerHTML = isLakeOnly(section.id)
+      ? '<option value="Data Lake">Data Lake</option>'
+      : '<option value="Analytics">Analytics</option><option value="Data Lake">Data Lake</option>';
     planSel.onchange = function() { updateTodoSummary(); };
     gbdayWrap.appendChild(planSel);
 
@@ -6673,6 +6834,8 @@ function setAllConfigured(connectorBody) {
       sel.value = 'Healthy';
     } else if (sel.querySelector('option[value="Configured"]')) {
       sel.value = 'Configured';
+    } else if (sel.querySelector('option[value="Configured (Lake)"]')) {
+      sel.value = 'Configured (Lake)';
     } else {
       return; // Skip non-standard selects (e.g. DCR preset, retention)
     }
@@ -6702,7 +6865,7 @@ function resetConnector(connectorBody) {
     const gbInput = connectorBody.querySelector('[id$="-expansion-gbday"]');
     if (gbInput) gbInput.value = '';
     const planSel = connectorBody.querySelector('[id$="-expansion-plan"]');
-    if (planSel) planSel.value = 'Analytics';
+    if (planSel) planSel.value = planSel.options[0].value;
     updateTodoSummary();
   }
   // Reset current volume
@@ -6896,7 +7059,9 @@ function handleGbdayInput(sel) {
         plan.className = 'gbday-plan';
         plan.id = sel.id + '-plan';
         plan.title = 'Table plan';
-        plan.innerHTML = '<option value="Analytics">Analytics</option><option value="Data Lake">Data Lake</option>';
+        plan.innerHTML = isLakeOnly(sel.id)
+          ? '<option value="Data Lake">Data Lake</option>'
+          : '<option value="Analytics">Analytics</option><option value="Data Lake">Data Lake</option>';
         plan.addEventListener('change', () => updateTodoSummary());
         container.appendChild(plan);
       }
@@ -7060,8 +7225,8 @@ function updateProgress() {
     'conn-gen-workspace', 'conn-gen-solutions', 'conn-gen-workbooks',
     'conn-o365', 'conn-azactivity', 'conn-xdr', 'conn-entra', 'conn-winsec', 'conn-syslog', 'conn-health',
     'conn-dfc', 'conn-azfw', 'conn-waf', 'conn-vnet', 'conn-gsa', 'conn-dns', 'conn-thirdparty',
-    'conn-purview-dm', 'conn-purview-ip', 'conn-akv', 'conn-copilot', 'conn-intune', 'conn-ti', 'conn-thirdpartyti', 'conn-aws', 'conn-gcp',
-    'conn-thirdpartyid',
+    'conn-purview-dm', 'conn-purview-ip', 'conn-akv', 'conn-copilot', 'conn-a365', 'conn-intune', 'conn-ti', 'conn-thirdpartyti', 'conn-aws', 'conn-gcp',
+    'conn-agentid', 'conn-thirdpartyid',
     'conn-iis', 'conn-mdca', 'conn-sap', 'conn-sql', 'conn-thirdpartyapp',
     'conn-teams', 'conn-thirdpartycollab', 'conn-customapp',
     'conn-azdevops', 'conn-github', 'conn-thirdpartydevops',
@@ -8771,6 +8936,16 @@ const configWarningTexts = {
   'dfc-t1': 'SecurityAlert table not enabled — Defender for Cloud alerts not ingested into Sentinel.',
   'dfc-t2': 'SecurityRecommendation table not enabled — security posture recommendations not available in Sentinel.',
   'dfc-t3': 'SecurityRegulatoryCompliance table not enabled — compliance assessment results not ingested.',
+
+  'copilot-c2': 'AI source auditing or prerequisites are not verified; connector status alone cannot establish audit coverage.',
+  'copilot-c3': 'AI workload and event coverage is not verified; unsupported interaction or administrative records may be missing.',
+  'a365-t1': 'Agent runtime telemetry is not accessible in the verified query scope; tool and session investigations have an evidence gap.',
+  'a365-ch2': 'Agent 365 solution is not installed.',
+  'agentid-t-identities': 'EntraAgentIdentities is not ingested; agent identity context is missing.',
+  'agentid-t-principals': 'EntraAgentIdentityBlueprintPrincipals is not ingested; blueprint principal context is missing.',
+  'agentid-t-blueprints': 'EntraAgentIdentityBlueprints is not ingested; blueprint context is missing.',
+  'agentid-t-users': 'EntraAgentUsers is not ingested; agent user context is missing.',
+  'agentid-ch1': 'Agent 365 solution is not installed.',
 
   // AWS tables
   'aws-t1': 'AWSCloudTrail table not enabled — AWS API activity not captured.',
@@ -10859,7 +11034,7 @@ function applyState(state) {
   if (state.tablePlanValues) {
     for (const [id, value] of Object.entries(state.tablePlanValues)) {
       const el = document.getElementById(id);
-      if (el) el.value = value;
+      if (el) el.value = isLakeOnly(id) ? 'Data Lake' : value;
     }
   }
 
@@ -10899,7 +11074,7 @@ function applyState(state) {
         const gbInput = document.getElementById(prefix + '-expansion-gbday');
         if (gbInput) gbInput.value = data.gbday || '';
         const planSel = document.getElementById(prefix + '-expansion-plan');
-        if (planSel) planSel.value = data.plan || 'Analytics';
+        if (planSel) planSel.value = isLakeOnly(planSel.id) ? 'Data Lake' : (data.plan || 'Analytics');
       }
     }
   }
@@ -10919,7 +11094,7 @@ function applyState(state) {
     for (const [id, data] of Object.entries(state.xdrTierChange)) {
       if (!data) continue;
       // Drop entries for tables that don't (or no longer) support Lake-only ingestion.
-      if (!isLakeCapable(id)) continue;
+      if (!isLakeCapable(id) || isLakeOnly(id)) continue;
       xdrTierChangeState[id] = {
         tier: data.tier === 'Lake' ? 'Lake' : 'Analytics',
         gbday: data.gbday || ''
@@ -11749,7 +11924,13 @@ const TIER_CAPABILITY = {
   'gsa-tbl': { lakeCapable: true },       // NetworkAccessTraffic
   'azact-tbl': { lakeCapable: true },     // AzureActivity
 };
+function isLakeOnly(id) {
+  const element = document.getElementById(id);
+  return !!(element && element.closest('[data-lake-only="true"]'));
+}
+
 function isLakeCapable(id) {
+  if (isLakeOnly(id)) return true;
   if (TIER_CAPABILITY[id] && TIER_CAPABILITY[id].lakeCapable) return true;
   // Dynamic rows (e.g. third-party connectors) opt in via data-lake-capable="true"
   // on the <select> itself, so the capability registry doesn't need to track them.
@@ -11781,7 +11962,7 @@ function getXdrTierChange(id) { return xdrTierChangeState[id] || null; }
 
 function setXdrTierChangePlanned(id, planned) {
   // Guard: can't plan a tier change for a table that doesn't support Lake ingestion.
-  if (planned && !isLakeCapable(id)) return;
+  if (planned && (!isLakeCapable(id) || isLakeOnly(id))) return;
   if (planned) {
     if (!xdrTierChangeState[id]) {
       xdrTierChangeState[id] = { tier: 'Analytics', gbday: '' };
@@ -11796,6 +11977,7 @@ function setXdrTierChangePlanned(id, planned) {
 }
 
 function setXdrTierChangeTier(id, tier) {
+  if (isLakeOnly(id)) return;
   if (!xdrTierChangeState[id]) xdrTierChangeState[id] = { tier: 'Analytics', gbday: '' };
   xdrTierChangeState[id].tier = (tier === 'Lake') ? 'Lake' : 'Analytics';
   syncXdrTierChangeRow(id);
@@ -11805,6 +11987,7 @@ function setXdrTierChangeTier(id, tier) {
 }
 
 function setXdrTierChangeGbday(id, v) {
+  if (isLakeOnly(id)) return;
   if (!xdrTierChangeState[id]) xdrTierChangeState[id] = { tier: 'Analytics', gbday: '' };
   xdrTierChangeState[id].gbday = v;
   syncXdrTierChangeRow(id);
@@ -11946,6 +12129,7 @@ function applyLiteXdrSegState(id, v) {
 }
 
 function setLiteXdr(id, v) {
+  if (isLakeOnly(id) && v === 'analytics') return;
   const sel = document.getElementById(id);
   if (!sel) return;
   sel.value = fullValueFromLite(v);
@@ -12170,6 +12354,7 @@ function initXdrTierChangeControls() {
         }
       }
       const lakeOk = isLakeCapable(id);
+      const lakeOnly = isLakeOnly(id);
 
       item.classList.add('xdr-tbl-item');
       item.dataset.id = id;
@@ -12181,11 +12366,11 @@ function initXdrTierChangeControls() {
       seg.setAttribute('aria-label', labelText + ' current tier');
       seg.innerHTML = `
         <button type="button" data-v="off"       onclick="setLiteXdr('${id}','off')">Not ingested</button>
-        <button type="button" data-v="analytics" onclick="setLiteXdr('${id}','analytics')">Analytics</button>
+        ${lakeOnly ? '' : `<button type="button" data-v="analytics" onclick="setLiteXdr('${id}','analytics')">Analytics</button>`}
         <button type="button" data-v="lake"      onclick="setLiteXdr('${id}','lake')">Lake</button>`;
       item.appendChild(seg);
 
-      if (lakeOk) {
+      if (lakeOk && !lakeOnly) {
         // Switch toggle + change-tier details
         const wrap = document.createElement('div');
         wrap.className = 'xdr-tc-inline';
@@ -12219,9 +12404,10 @@ function initXdrTierChangeControls() {
         // Muted "Analytics only" indicator — occupies the same two grid columns
         const badge = document.createElement('span');
         badge.className = 'tc-analytics-only';
-        badge.title = notLakeTip;
-        badge.innerHTML = `Analytics only
-          <span class="info-ico" tabindex="0" data-tip="${notLakeTip}">i</span>`;
+        const capabilityTip = lakeOnly ? 'This connector ingests into Microsoft Sentinel Data Lake only.' : notLakeTip;
+        badge.title = capabilityTip;
+        badge.innerHTML = `${lakeOnly ? 'Lake only' : 'Analytics only'}
+          <span class="info-ico" tabindex="0" data-tip="${capabilityTip}">i</span>`;
         item.appendChild(badge);
         const spacer = document.createElement('span');
         item.appendChild(spacer);
