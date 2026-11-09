@@ -1,5 +1,5 @@
 // Service worker — offline cache only. Bumped via CACHE name.
-const CACHE = 'wisselapp-v25';
+const CACHE = 'wisselapp-v26';
 const ASSETS = [
   './',
   './index.html',

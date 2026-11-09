@@ -30,13 +30,18 @@ export function nameOf(players, id) {
 // ---------- Views ----------
 
 export function viewMatches(matches, players) {
+  const transfers = `<div class="row gap card">
+    <button id="export-matches" ${matches.length ? '' : 'disabled'}>Wedstrijden exporteren</button>
+    <button id="import-matches">Wedstrijden importeren</button>
+  </div>`;
   if (!matches.length) {
-    return `<div class="empty">
+    return `${transfers}<div class="empty">
       <p>Nog geen wedstrijden.</p>
       <button class="primary big" id="new-match">+ Nieuwe wedstrijd</button>
     </div>`;
   }
   return `
+    ${transfers}
     <div class="list">
       ${matches.map((m) => `
         <div class="swipe-wrap" data-id="${m.id}">
@@ -62,6 +67,48 @@ const statusLabel = (s) => ({
   live: 'Loopt',
   finished: 'Klaar',
 }[s] || 'Concept');
+
+export function viewMatchSelection(matches, { importing = false, existingIds = [] } = {}) {
+  const existing = new Set(existingIds);
+  return `
+    <div class="card">
+      <h3>${importing ? 'Kies wedstrijden om te importeren' : 'Kies wedstrijden om te exporteren'}</h3>
+      <p class="sub">${importing
+        ? 'Alleen de selectie wordt toegevoegd. Andere wedstrijden, bestaande spelers en instellingen blijven behouden.'
+        : 'De selectie wordt met de bijbehorende spelers, schema\u0027s, doelpunten en speeltijden in een JSON-bestand opgeslagen.'}</p>
+      ${importing ? `<label>Bestaande wedstrijden (herkend op ID)
+        <select id="match-duplicates">
+          <option value="skip">Overslaan</option>
+          <option value="replace">Vervangen</option>
+        </select>
+      </label>
+      <p class="sub">Ontbrekende spelers worden toegevoegd. Spelers met dezelfde ID behouden hun lokale naam. Gelijke namen met een andere ID blijven aparte spelers.</p>` : ''}
+      ${matches.length ? `<label class="chk inline"><input type="checkbox" id="select-all-matches" /> Alles selecteren</label>` : '<p>Geen wedstrijden in deze selectie.</p>'}
+      <div class="list">
+        ${matches.map((match) => `<label class="chk inline">
+          <input type="checkbox" data-match-id="${escapeHtml(match.id)}" />
+          <span>${escapeHtml(match.opponent || 'Wedstrijd')}
+            <span class="sub">${escapeHtml(match.date || '')} · ${escapeHtml(match.format?.label || '')} · ${statusLabel(match.status)}${existing.has(match.id) ? ' · Bestaat al op dit toestel' : ''}</span>
+          </span>
+        </label>`).join('')}
+      </div>
+      <p id="match-selection-count" class="sub" aria-live="polite">0 geselecteerd</p>
+      <div class="row gap">
+        <button class="primary" id="transfer-selected" disabled>${importing ? 'Selectie importeren' : 'Selectie exporteren'}</button>
+        <button id="cancel-transfer">Annuleren</button>
+      </div>
+    </div>`;
+}
+
+export function viewMatchImport() {
+  return `<div class="card">
+    <h3>Wedstrijden importeren</h3>
+    <p class="sub">Open een wedstrijdexport of volledige WisselApp-backup (.json). Kies daarna welke wedstrijden je wilt importeren.</p>
+    <label>JSON-bestand<input type="file" id="match-import-file" accept=".json,application/json" /></label>
+    <button id="cancel-import">Terug</button>
+  </div>
+  <div id="match-import-preview"></div>`;
+}
 
 export function viewRoster(players) {
   return `
@@ -126,12 +173,21 @@ export function viewSettings(teamName, prefs, tonePresets) {
       <p class="sub">Tip op iPhone: zet de telefoon NIET op stil — webapps gebruiken het mediavolume voor het signaal.</p>
     </div>
     <div class="card">
-      <h3>Backup</h3>
+      <h3>Wedstrijden delen</h3>
+      <p class="sub">Exporteer of importeer een of meerdere geselecteerde wedstrijden, zonder alle data te vervangen.</p>
+      <div class="row gap">
+        <button id="export-matches">Wedstrijden exporteren</button>
+        <button id="import-matches">Wedstrijden importeren</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Volledige backup</h3>
       <p class="sub">Alle data staat lokaal op dit toestel. Maak regelmatig een back-up.</p>
+      <p class="sub">Een volledige backup importeren vervangt alle lokale data. Gebruik "Wedstrijden importeren" om alleen wedstrijden toe te voegen.</p>
       <div class="row gap">
         <button id="export">Exporteren (.json)</button>
         <button id="import">Importeren</button>
-        <input type="file" id="import-file" accept="application/json" hidden />
+        <input type="file" id="import-file" accept=".json,application/json" hidden />
       </div>
     </div>
     <div class="card">

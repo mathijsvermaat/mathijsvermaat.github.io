@@ -61,15 +61,14 @@ function showUpdateBanner(reg) {
 // ------- Router -------
 function setRoute(name, params = {}) {
   route = { name, params };
-  // Show back button when inside a match
-  backBtn.hidden = !(name === 'matchSetup' || name === 'live');
+  backBtn.hidden = !['matchSetup', 'live', 'exportMatches', 'importMatches'].includes(name);
   document.querySelectorAll('#tabbar .tab').forEach((b) => b.classList.toggle('active', b.dataset.route === name));
   render();
 }
 
 backBtn.addEventListener('click', () => {
   if (liveCtx) { liveCtx.clock.pause(); persistLiveOnLeave(); liveCtx = null; }
-  setRoute('matches');
+  setRoute(route.params.returnTo || 'matches');
 });
 
 document.querySelectorAll('#tabbar .tab').forEach((b) => {
@@ -99,6 +98,8 @@ async function render() {
     case 'roster': return renderRoster(players);
     case 'stats':  return renderStats(players);
     case 'settings': return renderSettings();
+    case 'exportMatches': return renderMatchExport();
+    case 'importMatches': return renderMatchImport();
     case 'matchSetup': return renderMatchSetup(players, route.params.id);
     case 'live': return renderLive(players, route.params.id);
   }
@@ -109,6 +110,7 @@ async function renderMatches(players) {
   titleEl.textContent = 'Wedstrijden';
   const matches = await db.listMatches();
   view.innerHTML = V.viewMatches(matches, players);
+  wireMatchTransfers('matches');
   document.getElementById('new-match')?.addEventListener('click', async () => {
     const preset = V.FORMAT_PRESETS[0];
     const m = await db.saveMatch({
@@ -194,6 +196,115 @@ async function renderMatches(players) {
   });
 }
 
+// ------- Selected match transfer -------
+function downloadJson(data, prefix) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${prefix}-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+function wireMatchTransfers(returnTo) {
+  document.getElementById('export-matches').addEventListener('click', () => setRoute('exportMatches', { returnTo }));
+  document.getElementById('import-matches').addEventListener('click', () => setRoute('importMatches', { returnTo }));
+}
+
+function wireMatchSelection(container, onSubmit, returnTo) {
+  const boxes = [...container.querySelectorAll('input[data-match-id]')];
+  const all = container.querySelector('#select-all-matches');
+  const submit = container.querySelector('#transfer-selected');
+  const countLabel = container.querySelector('#match-selection-count');
+  const selectedIds = () => boxes.filter((box) => box.checked).map((box) => box.dataset.matchId);
+  const update = () => {
+    const count = selectedIds().length;
+    countLabel.textContent = `${count} geselecteerd`;
+    submit.disabled = count === 0;
+    if (all) {
+      all.checked = count === boxes.length;
+      all.indeterminate = count > 0 && count < boxes.length;
+    }
+  };
+  boxes.forEach((box) => box.addEventListener('change', update));
+  all?.addEventListener('change', () => {
+    boxes.forEach((box) => { box.checked = all.checked; });
+    update();
+  });
+  container.querySelector('#cancel-transfer').addEventListener('click', () => setRoute(returnTo));
+  submit.addEventListener('click', async () => {
+    const controls = [...container.querySelectorAll('input, select, button')];
+    controls.forEach((control) => { control.disabled = true; });
+    try {
+      await onSubmit(selectedIds());
+    } catch (err) {
+      showAlert('Fout', V.escapeHtml(err.message || err));
+    } finally {
+      controls.forEach((control) => { control.disabled = false; });
+      update();
+    }
+  });
+}
+
+async function renderMatchExport() {
+  titleEl.textContent = 'Wedstrijden exporteren';
+  const returnTo = route.params.returnTo || 'matches';
+  const matches = await db.listMatches();
+  view.innerHTML = V.viewMatchSelection(matches);
+  wireMatchSelection(view, async (ids) => {
+    downloadJson(await db.exportMatches(ids), 'wisselapp-wedstrijden');
+  }, returnTo);
+}
+
+function renderMatchImport() {
+  titleEl.textContent = 'Wedstrijden importeren';
+  const returnTo = route.params.returnTo || 'matches';
+  view.innerHTML = V.viewMatchImport();
+  const input = document.getElementById('match-import-file');
+  const preview = document.getElementById('match-import-preview');
+  document.getElementById('cancel-import').addEventListener('click', () => setRoute(returnTo));
+  input.addEventListener('change', async () => {
+    const file = input.files[0];
+    preview.innerHTML = '';
+    if (!file) return;
+    input.disabled = true;
+    try {
+      const data = db.validateMatchImport(JSON.parse(await file.text()));
+      const existing = await db.listMatches();
+      if (!input.isConnected) return;
+      preview.innerHTML = V.viewMatchSelection(data.matches, { importing: true, existingIds: existing.map((match) => match.id) });
+      wireMatchSelection(preview, async (ids) => {
+        input.disabled = true;
+        try {
+          const duplicates = preview.querySelector('#match-duplicates').value;
+          const current = await db.listMatches();
+          const replacing = current.filter((match) => ids.includes(match.id)).length;
+          if (duplicates === 'replace' && replacing
+            && !confirm(`${replacing} bestaande wedstrijd(en) vervangen door de gegevens uit dit bestand? Dit kan niet ongedaan worden gemaakt.`)) return;
+          const result = await db.importMatches(data, ids, duplicates);
+          let clockWarning = '';
+          try {
+            MatchClock.forgetMatches(result.importedIds);
+          } catch (err) {
+            console.error('Imported matches, but could not clear the saved clock', err);
+            clockWarning = '<p>Let op: de opgeslagen klok kon niet worden gewist. Controleer de tijd voordat je een wedstrijd hervat.</p>';
+          }
+          setRoute(returnTo);
+          showAlert('Import voltooid', `${result.added} toegevoegd, ${result.replaced} vervangen, ${result.skipped} overgeslagen. ${result.playersAdded} nieuwe speler(s).${clockWarning}`);
+        } finally {
+          input.disabled = false;
+        }
+      }, returnTo);
+    } catch (err) {
+      showAlert('Fout', V.escapeHtml(err.message || err));
+    } finally {
+      input.disabled = false;
+      input.value = '';
+    }
+  });
+}
+
 // ------- Roster -------
 async function renderRoster(players) {
   titleEl.textContent = 'Spelers';
@@ -253,6 +364,7 @@ async function renderSettings() {
   const teamName = await db.getSetting('teamName', '');
   const prefs = await getPrefs();
   view.innerHTML = V.viewSettings(teamName, prefs, TONE_PRESETS);
+  wireMatchTransfers('settings');
   document.getElementById('save-team').addEventListener('click', async () => {
     await db.setSetting('teamName', document.getElementById('team-name').value.trim());
     showAlert('Opgeslagen', '');
@@ -302,24 +414,26 @@ async function renderSettings() {
     if (p.vibrate) vibrate([400, 120, 400]);
   });
   document.getElementById('export').addEventListener('click', async () => {
-    const data = await db.exportAll();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `wisselapp-backup-${new Date().toISOString().slice(0,10)}.json`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    try {
+      downloadJson(await db.exportAll(), 'wisselapp-backup');
+    } catch (err) {
+      showAlert('Fout', V.escapeHtml(err.message || err));
+    }
   });
   document.getElementById('import').addEventListener('click', () => document.getElementById('import-file').click());
   document.getElementById('import-file').addEventListener('change', async (e) => {
     const f = e.target.files[0]; if (!f) return;
-    const txt = await f.text();
     try {
-      await db.importAll(JSON.parse(txt));
+      const data = JSON.parse(await f.text());
+      if (data.type === 'wisselapp-matches') throw new Error('Gebruik "Wedstrijden importeren" voor dit bestand.');
+      if (!confirm('Alle lokale data vervangen door deze volledige backup?')) return;
+      await db.importAll(data);
       showAlert('Geïmporteerd', 'Backup is geladen.');
       render();
     } catch (err) {
-      showAlert('Fout', String(err.message || err));
+      showAlert('Fout', V.escapeHtml(err.message || err));
+    } finally {
+      e.target.value = '';
     }
   });
   document.getElementById('wipe').addEventListener('click', async () => {
@@ -523,7 +637,7 @@ async function renderLive(players, id) {
     if (liveCtx) liveCtx.clock.pause();
     const prefs = await getPrefs();
     const history = buildHistory((await db.listMatches()).filter((m) => m.id !== id && m.status === 'finished'));
-    const clock = new MatchClock(id, totalSec, () => paint(), (atSec) => onAlarm(atSec));
+    const clock = new MatchClock(id, totalSec, () => paint(), (atSec) => onAlarm(atSec), match.elapsedSec);
     if (match.status === 'finished') clock.pause();
     liveCtx = { match, plan, players, clock, prefs, history, quarterBreaks: new Set(), lastPersistMs: 0 };
     if (match.status !== 'finished') rearmAlarms();

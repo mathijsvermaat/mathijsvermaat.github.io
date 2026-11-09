@@ -17,6 +17,25 @@ Een speeltijd- en wisselplanner voor jeugdvoetbal. Volledig **offline** PWA, dra
 - **Lock-screen-proof**: de klok werkt op timestamps, dus iPhone vergrendelen of de app op de achtergrond zetten reset de wedstrijd niet.
 - **Speeltijd-statistieken** over alle wedstrijden.
 - **Backup**: exporteer/importeer alle data als één JSON-bestand.
+- **Wedstrijden delen**: selecteer één of meerdere wedstrijden om te exporteren of te importeren, zonder andere wedstrijden of instellingen te wissen.
+
+## Wedstrijden exporteren en importeren
+
+1. Kies **Wedstrijden exporteren** bij **Wedstrijden** of **Instellingen**.
+2. Vink één of meerdere wedstrijden aan, of gebruik **Alles selecteren**, en kies **Selectie exporteren**.
+3. Op het andere toestel: kies **Wedstrijden importeren** en open het JSON-bestand. Ook een bestaande volledige WisselApp-backup wordt ondersteund.
+4. Vink de gewenste wedstrijden aan. Bestaande wedstrijden worden op ID herkend en gemarkeerd. Kies **Overslaan** (standaard) of **Vervangen**; vervangen vraagt om bevestiging.
+5. Kies **Selectie importeren**. Het resultaat toont hoeveel wedstrijden en spelers zijn toegevoegd, vervangen of overgeslagen.
+
+De export bevat alleen de gekozen wedstrijden en hun bijbehorende spelers, inclusief wisselschema's, aanwezigheid, blessures, doelpunten en speeltijden. Ontbrekende spelers worden toegevoegd; bestaande spelers met dezelfde ID behouden hun lokale naam en gegevens. Spelers met gelijke namen maar verschillende IDs worden niet automatisch samengevoegd. Spelers die eerder uit de spelersgroep zijn verwijderd, blijven onbekend (`?`) als hun gegevens niet meer beschikbaar zijn.
+
+De overige wedstrijden en instellingen blijven ongewijzigd. Geïmporteerde lopende wedstrijden met opgeslagen speeltijd hervatten vanaf die tijd via **Hervat**. Alleen de opgeslagen momentopname wordt overgedragen, niet een doorlopende klok van het andere toestel.
+
+**Volledige backup** blijft beschikbaar onder **Instellingen** en vervangt bij import alle lokale data na bevestiging. Een wedstrijdexport kan daar niet per ongeluk als volledige backup worden geladen.
+
+### Tests
+
+Serveer de app via een lokale HTTP-server en open `tests/match-transfer.html` in de browser. Deze tests gebruiken een tijdelijke, aparte IndexedDB-database en testen selectie, spelerskoppelingen, overslaan/vervangen, ongeldige bestanden, terugdraaien bij schrijffouten, volledige backups en klokherstel. Er zijn geen testafhankelijkheden nodig.
 
 ## Hosten op GitHub Pages
 

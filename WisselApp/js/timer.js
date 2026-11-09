@@ -15,11 +15,17 @@
 const KEY = 'wisselapp.activeMatchClock';
 
 export class MatchClock {
-  constructor(matchId, totalSec, onTick, onAlarm) {
+  static forgetMatches(ids) {
+    const raw = localStorage.getItem(KEY);
+    if (raw && ids.includes(JSON.parse(raw).matchId)) localStorage.removeItem(KEY);
+  }
+
+  constructor(matchId, totalSec, onTick, onAlarm, savedElapsedSec = 0) {
     this.matchId = matchId;
     this.totalSec = totalSec;
     this.onTick = onTick;
     this.onAlarm = onAlarm;
+    this.savedElapsedSec = Number.isFinite(savedElapsedSec) ? Math.min(totalSec, Math.max(0, savedElapsedSec)) : 0;
     this.alarmsAtSec = []; // sorted ascending
     this.firedAlarms = new Set();
     this._tickHandle = null;
@@ -115,7 +121,7 @@ export class MatchClock {
         }
       }
     } catch {}
-    this._cache = { matchId: this.matchId, accumulatedSec: 0, runningSinceMs: null, firedAlarms: [] };
+    this._cache = { matchId: this.matchId, accumulatedSec: this.savedElapsedSec, runningSinceMs: null, firedAlarms: [] };
     this._save(this._cache);
   }
   _save(s) {
