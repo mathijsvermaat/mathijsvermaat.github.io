@@ -11,6 +11,7 @@ Een speeltijd- en wisselplanner voor jeugdvoetbal. Volledig **offline** PWA, dra
 - **Wisselschema** dat:
   - eerlijk verdeelt binnen 1 wedstrijd,
   - rekening houdt met geschiedenis (wie minder speelde, krijgt voorrang),
+  - bankbeurten zo veel mogelijk op volgorde en verspreid over de wedstrijd plant,
   - de keeper een héél kwart laat keepen (niet tussentijds wisselen),
   - keepertijd over wedstrijden verdeelt.
 - **Live wedstrijdscherm** met grote klok, huidig veld/bank/keeper, countdown tot volgende wissel, **alarm** (geluid + trillen + grote banner) 30 sec vóór en op het moment van wisselen.
@@ -18,6 +19,14 @@ Een speeltijd- en wisselplanner voor jeugdvoetbal. Volledig **offline** PWA, dra
 - **Speeltijd-statistieken** over alle wedstrijden.
 - **Backup**: exporteer/importeer alle data als één JSON-bestand.
 - **Wedstrijden delen**: selecteer één of meerdere wedstrijden om te exporteren of te importeren, zonder andere wedstrijden of instellingen te wissen.
+
+## Verdeling van bankbeurten
+
+De planner verdeelt eerst de totale speeltijd en houdt daarbij rekening met de historische gemiddelde speeltijd. Daarna herschikt hij de bestaande speelblokken om lange bankperiodes, een tweede bankbeurt terwijl anderen nog geen beurt hadden, en lange ononderbroken speelperiodes zoveel mogelijk te voorkomen.
+
+Het ingestelde wisselinterval blijft behouden: er komen geen extra wisselmomenten of korte inhaalminuten bij. Bij een verschil in speeltijd blijft het doel maximaal één speelblok (normaal vijf minuten). De herschikking verandert de geplande minuten per speler niet; wie op basis van geschiedenis een extra blok krijgt, behoudt dat blok.
+
+Keepers blijven hun toegewezen kwart keepen en het ingestelde aantal wissels blijft gelijk. Daardoor is een perfecte verdeling niet altijd mogelijk, bijvoorbeeld bij een vaste keeper of weinig wissels per keer. Bij live wijzigingen worden alleen nog niet begonnen speelblokken herschikt; de huidige handmatige wissel en de gespeelde periodes blijven vastliggen. Een lopende of afgeronde wedstrijd wordt niet automatisch bij het openen herschreven: de verbetering geldt bij het maken of herberekenen van een schema en bij live aanpassingen.
 
 ## Wedstrijden exporteren en importeren
 
@@ -35,7 +44,12 @@ De overige wedstrijden en instellingen blijven ongewijzigd. Geïmporteerde lopen
 
 ### Tests
 
-Serveer de app via een lokale HTTP-server en open `tests/match-transfer.html` in de browser. Deze tests gebruiken een tijdelijke, aparte IndexedDB-database en testen selectie, spelerskoppelingen, overslaan/vervangen, ongeldige bestanden, terugdraaien bij schrijffouten, volledige backups en klokherstel. Er zijn geen testafhankelijkheden nodig.
+Serveer de app via een lokale HTTP-server:
+
+- Open `tests/scheduler.html` voor bankvolgorde, spreiding, vaste wisselintervallen, geschiedenis, keepers en live aanpassingen. Deze tests gebruiken alleen fictieve wedstrijden.
+- Open `tests/match-transfer.html` voor selectie, spelerskoppelingen, overslaan/vervangen, ongeldige bestanden, terugdraaien bij schrijffouten, volledige backups en klokherstel. Deze tests gebruiken een tijdelijke, aparte IndexedDB-database.
+
+Er zijn geen testafhankelijkheden nodig.
 
 ## Hosten op GitHub Pages
 

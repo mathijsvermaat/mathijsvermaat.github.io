@@ -42,11 +42,17 @@ export function recommendSubInterval(match, history) {
   const lo = Math.min(MIN_SEC, qSec);
   const hi = Math.min(MAX_SEC, qSec);
   const candidates = [];
+  const plans = new Map();
 
   for (let s = lo; s <= hi; s += STEP_SEC) {
     const trial = { ...match, subIntervalMin: s / 60 };
-    let plan;
-    try { plan = buildPlan(trial, history); } catch { continue; }
+    // Several proposed intervals round to the same actual slots per quarter.
+    const slotCount = Math.max(1, Math.round(qSec / s));
+    let plan = plans.get(slotCount);
+    if (!plan) {
+      try { plan = buildPlan(trial, history); } catch { continue; }
+      plans.set(slotCount, plan);
+    }
     const totals = match.attendingPlayerIds.map((id) => plan.plannedSecondsPerPlayer[id].totalSec);
     const max = Math.max(...totals);
     const min = Math.min(...totals);
@@ -136,15 +142,7 @@ export function buildPlan(match, history = {}) {
     const slots = [];
     const subEvents = [];
 
-    // First slot of the quarter: select fieldSlotsCount players with highest priority.
-    // Subsequent slots: rotate by swapping out players who have played the most consecutively
-    // for those who have rested the most, while respecting priority.
-
-    // Track consecutive seconds on field within this quarter for stability.
-    const consecOn = {};
-    const consecOff = {};
-    fieldCandidates.forEach((id) => { consecOn[id] = 0; consecOff[id] = 0; });
-
+    // Balance minutes first; spreadBenchTurns refines the rotation order later.
     let currentField = pickTop(fieldCandidates, fieldSlotsCount, priority);
     // Sub event at quarter start: who comes off (everyone from previous quarter not in new field, except old keeper which always changes), who comes on.
     const startOff = [...prevFieldSet].filter((id) => !currentField.includes(id));
@@ -172,9 +170,7 @@ export function buildPlan(match, history = {}) {
       const dur = endSec - startSec;
 
       slots.push({ startSec, endSec, fieldIds: [...currentField] });
-      currentField.forEach((id) => { planned[id].fieldSec += dur; consecOn[id] += dur; consecOff[id] = 0; });
-      fieldCandidates.filter((id) => !currentField.includes(id))
-        .forEach((id) => { consecOff[id] += dur; consecOn[id] = 0; });
+      currentField.forEach((id) => { planned[id].fieldSec += dur; });
 
       // Plan rotation for next slot
       if (s < slotsPerQuarter - 1) {
@@ -227,6 +223,13 @@ export function buildPlan(match, history = {}) {
 
 function pickTop(ids, n, scoreFn) {
   return [...ids].sort((a, b) => scoreFn(b) - scoreFn(a)).slice(0, n);
+}
+
+function betterScore(candidate, current) {
+  for (let index = 0; index < candidate.length; index++) {
+    if (Math.abs(candidate[index] - current[index]) > 0.000001) return candidate[index] < current[index];
+  }
+  return false;
 }
 
 export function getAvailablePlayerIds(match, atSec = Infinity) {
@@ -313,12 +316,6 @@ function balancePlan(plan, match, history = {}, fromSec = 0) {
     });
     return [...matchScore, ...spreadAndVariance(averages)];
   };
-  const better = (candidate, current) => {
-    for (let index = 0; index < candidate.length; index++) {
-      if (Math.abs(candidate[index] - current[index]) > 0.000001) return candidate[index] < current[index];
-    }
-    return false;
-  };
   const swapIds = (slots, firstId, secondId) => {
     for (const slot of slots) {
       slot.fieldIds = slot.fieldIds.map((id) => id === firstId ? secondId : id === secondId ? firstId : id);
@@ -355,7 +352,7 @@ function balancePlan(plan, match, history = {}, fromSec = 0) {
             totals[firstId] += delta;
             totals[secondId] -= delta;
             const candidateScore = score();
-            if (better(candidateScore, bestScore)) {
+            if (betterScore(candidateScore, bestScore)) {
               swapIds(segment, firstId, secondId);
               if (rotationsValid(group, segment)) {
                 best = { segment, firstId, secondId, delta };
@@ -375,9 +372,107 @@ function balancePlan(plan, match, history = {}, fromSec = 0) {
     totals[best.secondId] -= best.delta;
     currentScore = bestScore;
   }
+  spreadBenchTurns(plan, match, fromSec);
   recomputePlanMeta(plan, match, fromSec);
-  plan.fairness = { spreadSec: currentScore[0], limitSec: 300, withinLimit: currentScore[0] <= 300.001 };
+  plan.fairness = { spreadSec: currentScore[0], limitSec: plan.slotSec, withinLimit: currentScore[0] <= plan.slotSec + 0.001 };
   if (match.availabilityChanges?.length) plan.fairness.basis = 'availability';
+}
+
+// Move existing playing blocks, not minutes: historical compensation, keeper
+// assignments, rotation sizes and already-played periods must stay intact.
+function spreadBenchTurns(plan, match, fromSec = 0, active = getAvailablePlayerIds(match)) {
+  if (active.length <= match.format.onField) return;
+  const entries = plan.quarters.flatMap((quarter) => quarter.slots.map((slot) => ({
+    quarter, slot, duration: slot.endSec - slot.startSec,
+    available: new Set(getAvailablePlayerIds(match, slot.startSec).filter((id) => active.includes(id))),
+  })));
+  const mutable = entries.filter(({ slot }) => slot.startSec >= fromSec);
+  const transitions = plan.quarters.flatMap((quarter) => quarter.slots.slice(1).map((slot, index) => {
+    const previous = quarter.slots[index];
+    return { previous, slot, count: previous.fieldIds.filter((id) => !slot.fieldIds.includes(id)).length };
+  }));
+  const rotationsValid = () => transitions.every(({ previous, slot, count }) =>
+    previous.fieldIds.filter((id) => !slot.fieldIds.includes(id)).length === count);
+  const score = () => {
+    const state = Object.fromEntries(active.map((id) => [id, { turns: 0, expected: 0, rest: 0, play: 0 }]));
+    let longestRest = 0, worstTurnGap = 0, repeatedTurns = 0, longestPlay = 0, streaks = 0;
+    for (const { quarter, slot, duration, available } of entries) {
+      const expected = available.size ? Math.max(0, available.size - match.format.onField)
+        / available.size * duration / plan.slotSec : 0;
+      const turns = [];
+      for (const id of active) {
+        const player = state[id];
+        if (!available.has(id)) {
+          player.rest = 0;
+          player.play = 0;
+          continue;
+        }
+        player.expected += expected;
+        const resting = id !== quarter.keeperId && !slot.fieldIds.includes(id);
+        if (resting && !player.rest) player.turns++;
+        player.rest = resting ? player.rest + duration : 0;
+        player.play = resting ? 0 : player.play + duration;
+        if (slot.endSec <= fromSec) continue;
+        // A late arrival has no bench-turn debt from time they were absent.
+        if (id !== quarter.keeperId) turns.push(player.turns - player.expected);
+        longestRest = Math.max(longestRest, player.rest);
+        longestPlay = Math.max(longestPlay, player.play);
+        streaks += (player.rest ** 2 + player.play ** 2) * duration;
+      }
+      if (turns.length) {
+        const gap = Math.max(0, Math.max(...turns) - Math.min(...turns) - 1);
+        worstTurnGap = Math.max(worstTurnGap, gap);
+        repeatedTurns += gap * gap * duration;
+      }
+    }
+    return [longestRest, worstTurnGap, repeatedTurns, longestPlay, streaks];
+  };
+  const swap = (segment, first, second) => {
+    for (const { slot } of segment) {
+      slot.fieldIds = slot.fieldIds.map((id) => id === first ? second : id === second ? first : id);
+    }
+  };
+  let current = score();
+  for (let pass = 0; pass < Math.min(64, active.length * 4); pass++) {
+    let best = null;
+    let bestScore = current;
+    for (let a = 0; a < active.length; a++) {
+      for (let b = a + 1; b < active.length; b++) {
+        const first = active[a], second = active[b];
+        const eligible = mutable.filter(({ quarter, slot, available }) =>
+          quarter.keeperId !== first && quarter.keeperId !== second
+          && available.has(first) && available.has(second)
+          && slot.fieldIds.includes(first) !== slot.fieldIds.includes(second));
+        const trySegment = (segment) => {
+          if (segment.length < 2) return;
+          const delta = segment.reduce((sum, { slot, duration }) => sum
+            + duration * (Number(slot.fieldIds.includes(second)) - Number(slot.fieldIds.includes(first))), 0);
+          if (Math.abs(delta) > 0.000001) return;
+          swap(segment, first, second);
+          if (rotationsValid()) {
+            const candidate = score();
+            if (betterScore(candidate, bestScore)) {
+              best = { segment, first, second };
+              bestScore = candidate;
+            }
+          }
+          swap(segment, first, second);
+        };
+        trySegment(eligible);
+        for (const quarter of plan.quarters) {
+          trySegment(eligible.filter((entry) => entry.quarter === quarter));
+        }
+        for (let i = 0; i < eligible.length; i++) {
+          for (let j = i + 1; j < eligible.length; j++) {
+            if (eligible[i].duration === eligible[j].duration) trySegment([eligible[i], eligible[j]]);
+          }
+        }
+      }
+    }
+    if (!best) break;
+    swap(best.segment, best.first, best.second);
+    current = bestScore;
+  }
 }
 
 /**
@@ -536,6 +631,7 @@ export function applyInjury(plan, match, atSec, injuredId) {
     }
   }
 
+  spreadBenchTurns(plan, match, atSec, activeIds);
   recomputePlanMeta(plan, match, atSec);
 }
 
